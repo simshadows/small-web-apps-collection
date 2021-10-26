@@ -473,7 +473,81 @@ I could manually open up the port using the VirtualBox tools directly, but perha
 
 ### Having a look at the VirtualBox VM
 
+When we open up the VirtualBox GUI, we can clearly see minikube running:
+
 ![VirtualBox main screen.](development-diary-assets/screenshot1-virtualbox-main-screen.png?raw=true "VirtualBox main screen.")
 
-*(TODO: Continue!)*
+And having a look at the port forwarding screen, we see something exposed:
+
+![VirtualBox port forwarding screen.](development-diary-assets/screenshot2-virtualbox-port-forward-screen.png?raw=true "VirtualBox port forwarding screen.")
+
+*(Side-note: Is this forwarded port in the screenshot for the minikube tool to manage the VM?)*
+
+Let's have a look at it again later after exposing the application.
+
+### Setting up minikube to access the service
+
+I attempted to use this command, which is meant to fetch the minikube IP address and service port:
+```
+PS C:\Users\simshadows\Downloads> .\minikube-windows-amd64.exe service --url my-service
+* service default/my-service has no node port
+```
+
+But clearly, I still need to define a `NodePort`.
+
+Let's try changing `my-service` into a `NodePort`, and let's see what happens. New `my-service`:
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
+
+Adding it to the cluster:
+```
+simshadows@kraft kubernetes-helloworld-no-helm$ kubectl apply -f nginx-deployment.yaml
+deployment.apps/nginx-deployment unchanged
+service/my-service configured
+simshadows@kraft kubernetes-helloworld-no-helm$ kubectl get pods -A && kubectl get deployments -A && kubectl get services -A
+NAMESPACE     NAME                                READY   STATUS    RESTARTS      AGE
+default       nginx-deployment-66b6c48dd5-2v56w   1/1     Running   0             4h36m
+default       nginx-deployment-66b6c48dd5-76s7w   1/1     Running   0             4h36m
+default       nginx-deployment-66b6c48dd5-7c2jm   1/1     Running   0             4h36m
+kube-system   coredns-78fcd69978-xbbzr            1/1     Running   0             14h
+kube-system   etcd-minikube                       1/1     Running   0             14h
+kube-system   kube-apiserver-minikube             1/1     Running   0             14h
+kube-system   kube-controller-manager-minikube    1/1     Running   0             14h
+kube-system   kube-proxy-tcvfl                    1/1     Running   0             14h
+kube-system   kube-scheduler-minikube             1/1     Running   0             14h
+kube-system   storage-provisioner                 1/1     Running   1 (14h ago)   14h
+NAMESPACE     NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+default       nginx-deployment   3/3     3            3           4h36m
+kube-system   coredns            1/1     1            1           14h
+NAMESPACE     NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+default       kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP                  14h
+default       my-service   NodePort    10.108.114.121   <none>        80:31142/TCP             86m
+kube-system   kube-dns     ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP,9153/TCP   14h
+```
+
+Grabbing the URL off minikube:
+```
+PS C:\Users\simshadows\Downloads> .\minikube-windows-amd64.exe service --url my-service
+http://192.168.99.100:31142
+```
+
+Opening it on the web browser:
+
+![Opening the URL in the browser](development-diary-assets/screenshot3-browser-nginx-parking-page.png?raw=true "Opening the URL in the browser")
+
+It works!
+
+Interestingly, I went back to the VirtualBox GUI to look at the NAT port forwarding rules and I don't see any new entries. It must be some other mechanism, but I'm not interested in investigating that quite yet.
 

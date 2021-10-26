@@ -1,0 +1,1 @@
+main(h,v,i)int**v;{h=atoi(v[1]);char*s=malloc(h);memset(s,35,h*2);s[h*2-1]=0;for(i=h-1;i>=0;--i)printf("%*s\n",h*2-i-1,s+i*2+1);}

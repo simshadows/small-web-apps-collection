@@ -1,0 +1,4 @@
+#include <stdio.h>
+#include <stdlib.h>
+int r,c,h;
+int main(int X,char **a){h=atoi(a[1]);for(r=1;r<=h;++r){for(c=1;c<=h;++c)printf(r+c>h?"#":" ");printf("\n");}}

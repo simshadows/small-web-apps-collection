@@ -428,6 +428,52 @@ subsets:
 
 Let's try this:
 ```yaml
-(TODO)
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
 ```
+
+I added it to my manifests file, deployed, and inspected the cluster:
+```
+simshadows@kraft kubernetes-helloworld-no-helm$ kubectl apply -f nginx-deployment.yaml
+deployment.apps/nginx-deployment unchanged
+service/my-service created
+simshadows@kraft kubernetes-helloworld-no-helm$ kubectl get pods -A && kubectl get deployments -A && kubectl get services -A
+NAMESPACE     NAME                                READY   STATUS    RESTARTS      AGE
+default       nginx-deployment-66b6c48dd5-2v56w   1/1     Running   0             3h11m
+default       nginx-deployment-66b6c48dd5-76s7w   1/1     Running   0             3h11m
+default       nginx-deployment-66b6c48dd5-7c2jm   1/1     Running   0             3h11m
+kube-system   coredns-78fcd69978-xbbzr            1/1     Running   0             13h
+kube-system   etcd-minikube                       1/1     Running   0             13h
+kube-system   kube-apiserver-minikube             1/1     Running   0             13h
+kube-system   kube-controller-manager-minikube    1/1     Running   0             13h
+kube-system   kube-proxy-tcvfl                    1/1     Running   0             13h
+kube-system   kube-scheduler-minikube             1/1     Running   0             13h
+kube-system   storage-provisioner                 1/1     Running   1 (13h ago)   13h
+NAMESPACE     NAME               READY   UP-TO-DATE   AVAILABLE   AGE
+default       nginx-deployment   3/3     3            3           3h11m
+kube-system   coredns            1/1     1            1           13h
+NAMESPACE     NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                  AGE
+default       kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP                  13h
+default       my-service   ClusterIP   10.108.114.121   <none>        80/TCP                   46s
+kube-system   kube-dns     ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP,9153/TCP   13h
+```
+
+Now, we have a bit of a problem: How do we actually access the port on minikube?
+
+I could manually open up the port using the VirtualBox tools directly, but perhaps there's a better way?
+
+### Having a look at the VirtualBox VM
+
+![VirtualBox main screen.](development-diary-assets/screenshot1-virtualbox-main-screen.png?raw=true "VirtualBox main screen.")
+
+*(TODO: Continue!)*
 

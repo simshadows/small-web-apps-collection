@@ -551,3 +551,59 @@ It works!
 
 Interestingly, I went back to the VirtualBox GUI to look at the NAT port forwarding rules and I don't see any new entries. It must be some other mechanism, but I'm not interested in investigating that quite yet.
 
+## How do we build a container image?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## How do we get a custom image in there?
+
+For this, I found these resources:
+
+- <https://kubernetes.io/docs/concepts/containers/images/>
+- <https://minikube.sigs.k8s.io/docs/handbook/pushing/>
+
+Based on this reading, it seems that there are two main parts involved in handling container images:
+
+1) container registries (either public or private/authenticated) to host the images, and
+2) the kubelets (node agents) that run on each node, responsible for pulling and storing images for use within the node.
+
+From this, you can provide images in either of two ways:
+
+1) by providing the image on a container registry, or
+2) by providing pre-pulled images directly to the kublet.
+
+For our simple example, let's use the pre-pull method.
+
+From the minikube documentation above, we will follow the method titled *Pushing directly to in-cluster CRI-O. (podman-env)*.
+
+First, we run `minikube podman-env` in Windows Powershell:
+```
+PS C:\Users\simshadows\Downloads> .\minikube-windows-amd64.exe podman-env
+$Env:CONTAINER_HOST = "ssh://docker@127.0.0.1:63077/run/podman/podman.sock"
+$Env:CONTAINER_SSHKEY = "C:\Users\simshadows\.minikube\machines\minikube\id_rsa"
+$Env:MINIKUBE_ACTIVE_PODMAN = "minikube"
+# To point your shell to minikube's podman service, run:
+# & minikube -p minikube podman-env | Invoke-Expression
+```
+
+Let's also have a look at the node to see what container runtime is being used:
+```
+
+simshadows@kraft kubernetes-helloworld-no-helm$ kubectl get nodes -o wide
+NAME       STATUS   ROLES                  AGE    VERSION   INTERNAL-IP      EXTERNAL-IP   OS-IMAGE              KERNEL-VERSION   CONTAINER-RUNTIME
+minikube   Ready    control-plane,master   6d1h   v1.22.2   192.168.99.100   <none>        Buildroot 2021.02.4   4.19.202         docker://20.10.8
+```
+
+So clearly, we're using Docker. I don't know 
+

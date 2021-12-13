@@ -18,8 +18,7 @@ function roundDecPl(n, p) {
 }
 
 function parseCurrStr(v) {
-    if (v == "" || v == "-") return 0;
-    return parseFloat(v);
+    return (v == "" || v == "-") ? 0 : parseFloat(v);
 }
 
 function toDisplayablePrev(v) {
@@ -45,6 +44,16 @@ function updateUI() {
             default: "Unknown error.";
         }
     })();
+}
+
+function highlightButton(inputCode) {
+    document.querySelector("#button-" + inputCode).classList.add("pressed-button");
+}
+
+function resetButtonHighlighting() {
+    buttons.forEach(elem => {
+        elem.classList.remove("pressed-button");
+    });
 }
 
 // The exercise also required add/subtract/multiply/divide to be their own functions, but
@@ -92,8 +101,9 @@ function doInput(v) {
             state.op = v;
             state.mode = "show-prev";
             break;
-        case ".":
+        case "decimal":
             if (state.mode == "show-curr" && state.curr.includes(".")) break;
+            v = ".";
         default: // Assume to be a digit
             if (state.mode == "show-curr" && state.curr.length == 13) break;
             if (v == "0" && (state.curr == "0" || state.curr == "-")) break;
@@ -107,32 +117,42 @@ function doInput(v) {
     updateUI();
 }
 
+function keyMap(keyCode, withCtrl) {
+    if (keyCode.match(/^[0-9]$/)) return keyCode;
+    switch (keyCode) {
+        case ",":
+        case ".": return "decimal";
+        case "+": return "add";
+        case "-": return "subtract";
+        case "*":
+        case "x": return "multiply";
+        case "/":
+        case "\\": return "divide";
+        case "=":
+        case "Enter": return "equals";
+        case "Escape": return "clear";
+        case "z": if (!withCtrl) return null; // Conditional fallthrough
+        case "Backspace": return "delete";
+        default: return null;
+    }
+}
+
 buttons.forEach(elem => {
     elem.addEventListener("click", e => {
-        doInput(e.target.dataset.value);
+        doInput(e.target.id.slice(7));
     })
 });
 
 document.addEventListener("keydown", e => {
-    const code = (()=>{
-        if (e.key.match(/^[0-9]$/)) return e.key;
-        switch (e.key) {
-            case ".": return ".";
-            case "+": return "add";
-            case "-": return "subtract";
-            case "*":
-            case "x": return "multiply";
-            case "/":
-            case "\\": return "divide";
-            case "=":
-            case "Enter": return "equals";
-            case "Escape": return "clear";
-            case "z": if (!e.ctrlKey) return null;
-            case "Backspace": return "delete";
-            default: return null;
-        }
-    })();
-    if (code != null) doInput(code);
+    const code = keyMap(e.key, e.ctrlKey);
+    if (code != null) {
+        resetButtonHighlighting();
+        highlightButton(code);
+        doInput(code);
+    }
+});
+document.addEventListener("keyup", e => {
+    resetButtonHighlighting();
 });
 
 resetState();

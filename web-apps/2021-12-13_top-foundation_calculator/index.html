@@ -9,43 +9,43 @@
 
 <body>
 
+<div id="app">
+    <div class="box" id="display">0</div>
+    <div class="box button" id="button-clear">AC</div>
+    <div class="box button" id="button-delete">&larr;</div>
+    <div class="box button" id="button-7">7</div>
+    <div class="box button" id="button-8">8</div>
+    <div class="box button" id="button-9">9</div>
+    <div class="box button" id="button-divide">&#247;</div>
+    <div class="box button" id="button-4">4</div>
+    <div class="box button" id="button-5">5</div>
+    <div class="box button" id="button-6">6</div>
+    <div class="box button" id="button-multiply">&#215;</div>
+    <div class="box button" id="button-1">1</div>
+    <div class="box button" id="button-2">2</div>
+    <div class="box button" id="button-3">3</div>
+    <div class="box button" id="button-subtract">-</div>
+    <div class="box button" id="button-0">0</div>
+    <div class="box button" id="button-decimal">.</div>
+    <div class="box button" id="button-equals">=</div>
+    <div class="box button" id="button-add">+</div>
+</div>
+
 <p>
     This web app follows <a href="https://www.theodinproject.com/paths/foundations/courses/foundations/lessons/calculator">Project: Calculator</a> from <a href="https://www.theodinproject.com/">The Odin Project</a>, including all extension criteria (except making it look nice, but maybe I'll do that later!).
 </p>
-
-<div id="app">
-    <div class="box" id="display">0</div>
-    <div class="box button" data-value="clear">AC</div>
-    <div class="box button" data-value="delete">&larr;</div>
-    <div class="box button" data-value="7" id="button-7">7</div>
-    <div class="box button" data-value="8">8</div>
-    <div class="box button" data-value="9">9</div>
-    <div class="box button" data-value="divide">&#247;</div>
-    <div class="box button" data-value="4">4</div>
-    <div class="box button" data-value="5">5</div>
-    <div class="box button" data-value="6">6</div>
-    <div class="box button" data-value="multiply">&#215;</div>
-    <div class="box button" data-value="1">1</div>
-    <div class="box button" data-value="2">2</div>
-    <div class="box button" data-value="3">3</div>
-    <div class="box button" data-value="subtract">-</div>
-    <div class="box button" data-value="0">0</div>
-    <div class="box button" data-value=".">.</div>
-    <div class="box button" data-value="equals">=</div>
-    <div class="box button" data-value="add">+</div>
-</div>
-
 <p>
     All core features from assignment specification:
     <ul>
         <li>Operations are strung together, evaluating from left to right. E.g. <tt>12 + 7 - 5 * 3 =</tt> eventually evaluates to <tt>42</tt>.</li>
         <li>Numbers are rounded to fit on screen. User cannot input more than the screen size. Very large/small numbers are represented using scientific notation. The negative sign is also taken into account.</li>
-        <li>Pressing the <tt>=</tt> button before a number is entered does nothing.</li>
+        <li>Pressing the <tt>=</tt> button twice in a row does nothing.</li>
         <li><tt>NaN</tt> output (such as dividing by zero) puts the calculator into an error state that can be cleared using the <tt>AC</tt> button.</li>
         <li>The decimal point button can only be used once per number.</li>
         <li>
             Keybinds implemented:
             <tt>0-9</tt>,
+            <tt>,</tt>,
             <tt>.</tt>,
             <tt>+</tt>,
             <tt>-</tt>,
@@ -64,6 +64,7 @@
     <ul>
         <li>Pressing <tt>-</tt> before a number is entered will make the number negative.</li>
         <li>Pressing +, &#215;, or &#247; before a number is entered will reuse the existing "current number". (This behaviour may be a bit confusing to use though since there's a delay in seeing the number.)</li>
+        <li>Keyboard presses will also highlight the key pressed in the UI.</li>
     </ul>
     Issues with this implementation:
     <ul>

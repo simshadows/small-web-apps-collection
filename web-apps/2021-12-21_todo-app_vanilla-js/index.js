@@ -67,9 +67,14 @@ class DummyDB {
         });
         ++collectionData.lastUnusedTodoID;
     }
-    updateTodo(collectionID, todoID, done) {
+    updateTodo(collectionID, todoID, done, title) {
         const todoData = this._data.get(collectionID).todos.get(todoID);
-        todoData.done = done;
+        if (done !== null) {
+            todoData.done = done;
+        }
+        if (title !== null) {
+            todoData.title = title;
+        }
     }
     deleteTodo(collectionID, todoID) {
         this._data.get(collectionID).todos.delete(todoID);
@@ -125,20 +130,26 @@ function editButtonElement(onClickHandler) {
 // Collection Detail
 
 class TodoBoxComponent {
-    constructor(todoID, todoData, onTodoChange, onDeleteCollectionHandler) {
+    constructor(todoID, todoData, onDeleteTodoHandler, onEditTodoHandler) {
         this._root = e("div", {class: ["todo-box"]});
 
         this._checkbox = this._root.appendChild(e("input", {}));
         this._checkbox.setAttribute("type", "checkbox");
         this._checkbox.checked = todoData.done;
         this._checkbox.addEventListener("change", (event) => {
-            onTodoChange(todoID, event.target.checked);
+            onEditTodoHandler(todoID, event.target.checked, null);
         });
 
         this._title = this._root.appendChild(e("span", {class: ["todo-title"]}));
         this._title.appendChild(txt(todoData.title));
 
-        this._root.appendChild(deleteButtonElement(() => onDeleteCollectionHandler(todoID)));
+        this._root.appendChild(editButtonElement(() => {
+            const result = window.prompt("Please enter a new title.", todoData.title);
+            if (result !== null && result != "") {
+                onEditTodoHandler(todoID, null, result);
+            }
+        }));
+        this._root.appendChild(deleteButtonElement(() => onDeleteTodoHandler(todoID)));
     }
     get root() {
         return this._root;
@@ -148,20 +159,19 @@ class TodoBoxComponent {
 class CollectionDetailBodyComponent {
     constructor(
         collectionData,
-        onTodoChange,
         onNewTodoHandler,
         onDeleteTodoHandler,
+        onEditTodoHandler,
     ) {
         this._root = e("div", {id: "app-body", class: ["collection-detail-body"]});
         this._todoBoxes = [];
-        this._onTodoChangeHandler = (...x) => onTodoChange(collectionData.id, ...x);
 
         for (const [todoID, todoData] of collectionData.todos.entries()) {
             const component = new TodoBoxComponent(
                 todoID,
                 todoData,
-                (...x) => onTodoChange(collectionData.id, ...x),
                 (...x) => onDeleteTodoHandler(collectionData.id, ...x),
+                (...x) => onEditTodoHandler(collectionData.id, ...x),
             );
             this._todoBoxes.push(component);
             this._root.appendChild(component.root);
@@ -252,15 +262,18 @@ class RootComponent {
     // TODO: A lot of these methods inefficiently redraws the entire collection detail UI.
 
     onNewTodo(collectionID) {
+        console.log("new");
         this._db.newTodo(collectionID);
         this.collectionDetailView(collectionID);
     }
-    onTodoChange(collectionID, todoID, done) {
-        this._db.updateTodo(collectionID, todoID, done);
+    onDeleteTodo(collectionID, todoID) {
+        console.log("delete");
+        this._db.deleteTodo(collectionID, todoID);
         this.collectionDetailView(collectionID);
     }
-    onDeleteTodo(collectionID, todoID) {
-        this._db.deleteTodo(collectionID, todoID);
+    onEditTodo(collectionID, todoID, done, title) {
+        console.log("edit");
+        this._db.updateTodo(collectionID, todoID, done, title);
         this.collectionDetailView(collectionID);
     }
 
@@ -309,9 +322,9 @@ class RootComponent {
 
         this._children.body = new CollectionDetailBodyComponent(
             collectionData,
-            (...x) => this.onTodoChange(...x),
             (...x) => this.onNewTodo(...x),
             (...x) => this.onDeleteTodo(...x),
+            (...x) => this.onEditTodo(...x),
         );
         this._root.appendChild(this._children.body.root);
     }

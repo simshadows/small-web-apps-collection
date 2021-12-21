@@ -26,7 +26,7 @@ class DummyDB {
                         title: "Baz",
                     }],
                 ]),
-                lastUnusedTodoID: 2,
+                lastUnusedTodoID: 3,
             }],
             [1, {
                 name: "Empty List",
@@ -59,6 +59,19 @@ class DummyDB {
         }
     }
 
+    newTodo(collectionID) {
+        const collectionData = this._data.get(collectionID)
+        collectionData.todos.set(collectionData.lastUnusedTodoID, {
+            done: false,
+            title: "New Item",
+        });
+        ++collectionData.lastUnusedTodoID;
+    }
+    updateTodo(collectionID, todoID, done) {
+        const todoData = this._data.get(collectionID).todos.get(todoID);
+        todoData.done = done;
+    }
+
     newCollection() {
         this._data.set(this._nextUnusedID, {
             name: "New List",
@@ -73,11 +86,6 @@ class DummyDB {
     editCollection(collectionID, newTitle) {
         const collectionData = this._data.get(collectionID);
         collectionData.name = newTitle;
-    }
-
-    updateTodo(collectionID, todoID, done) {
-        const todoData = this._data.get(collectionID).todos.get(todoID);
-        todoData.done = done;
     }
 }
 
@@ -132,7 +140,11 @@ class TodoBoxComponent {
 }
 
 class CollectionDetailBodyComponent {
-    constructor(collectionData, onTodoChange) {
+    constructor(
+        collectionData,
+        onTodoChange,
+        onNewTodoHandler,
+    ) {
         this._root = e("div", {id: "app-body", class: ["collection-detail-body"]});
         this._todoBoxes = [];
         this._onTodoChangeHandler = (...x) => onTodoChange(collectionData.id, ...x);
@@ -142,6 +154,8 @@ class CollectionDetailBodyComponent {
             this._todoBoxes.push(component);
             this._root.appendChild(component.root);
         }
+
+        this._root.appendChild(addButtonElement(() => onNewTodoHandler(collectionData.id)));
     }
     get root() {
         return this._root;
@@ -223,11 +237,17 @@ class RootComponent {
         this.renderCollectionsOverview();
     }
 
+    // TODO: A lot of these methods inefficiently redraws the entire collection detail UI.
+
+    onNewTodo(collectionID) {
+        this._db.newTodo(collectionID);
+        this.collectionDetailView(collectionID);
+    }
     onTodoChange(collectionID, todoID, done) {
-        // TODO: This inefficiently redraws the entire collection detail UI.
         this._db.updateTodo(collectionID, todoID, done);
         this.collectionDetailView(collectionID);
     }
+
     onOpenCollection(collectionID) {
         this.collectionDetailView(collectionID);
     }
@@ -274,6 +294,7 @@ class RootComponent {
         this._children.body = new CollectionDetailBodyComponent(
             collectionData,
             (...x) => this.onTodoChange(...x),
+            (...x) => this.onNewTodo(...x),
         );
         this._root.appendChild(this._children.body.root);
     }

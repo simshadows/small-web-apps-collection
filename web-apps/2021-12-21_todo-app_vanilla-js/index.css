@@ -78,6 +78,20 @@ div.add-button:hover {
     background: #ddf;
 }
 
+div.delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: solid 1px;
+    background: #faa;
+    height: 1em;
+    width: 1em;
+}
+div.delete-button:hover {
+    background: #f88;
+}
+
 div.collection-summary-box {
     border: solid 1px;
     background: #fff;

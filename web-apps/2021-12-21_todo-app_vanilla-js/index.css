@@ -89,7 +89,21 @@ div.delete-button {
     width: 1em;
 }
 div.delete-button:hover {
-    background: #f88;
+    background: #f33;
+}
+
+div.edit-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: solid 1px;
+    background: #cfc;
+    height: 1em;
+    width: 1em;
+}
+div.edit-button:hover {
+    background: #0f0;
 }
 
 div.collection-summary-box {

@@ -70,6 +70,10 @@ class DummyDB {
     deleteCollection(collectionID) {
         this._data.delete(collectionID);
     }
+    editCollection(collectionID, newTitle) {
+        const collectionData = this._data.get(collectionID);
+        collectionData.name = newTitle;
+    }
 
     updateTodo(collectionID, todoID, done) {
         const todoData = this._data.get(collectionID).todos.get(todoID);
@@ -94,6 +98,16 @@ function deleteButtonElement(onClickHandler) {
         onClickHandler();
     });
     root.appendChild(txt("X"));
+    return root;
+}
+
+function editButtonElement(onClickHandler) {
+    const root = e("div", {class: ["edit-button"]});
+    root.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        onClickHandler();
+    });
+    root.appendChild(txt("E"));
     return root;
 }
 
@@ -139,7 +153,12 @@ class CollectionDetailBodyComponent {
 //
 
 class CollectionSummaryComponent {
-    constructor(collectionSummaryData, onOpenCollectionHandler, onDeleteCollectionHandler) {
+    constructor(
+        collectionSummaryData,
+        onOpenCollectionHandler,
+        onDeleteCollectionHandler,
+        onEditCollectionHandler,
+    ) {
         this._root = e("div", {class: ["collection-summary-box"]})
         this._root.addEventListener("click", (ev) => onOpenCollectionHandler(collectionSummaryData.id));
 
@@ -147,6 +166,12 @@ class CollectionSummaryComponent {
         nameElem.appendChild(txt(collectionSummaryData.name));
 
         this._root.appendChild(deleteButtonElement(() => onDeleteCollectionHandler(collectionSummaryData.id)));
+        this._root.appendChild(editButtonElement(() => {
+            const result = window.prompt("Please enter a new title.", collectionSummaryData.name);
+            if (result !== null && result != "") {
+                onEditCollectionHandler(collectionSummaryData.id, result);
+            }
+        }));
     }
     get root() {
         return this._root;
@@ -159,6 +184,7 @@ class CollectionsOverviewComponent {
         onOpenCollectionHandler,
         onNewCollectionHandler,
         onDeleteCollectionHandler,
+        onEditCollectionHandler,
     ) {
         this._root = e("div", {id: "app-body", class: ["collections-overview-body"]});
         this._onOpenCollection = onOpenCollectionHandler;
@@ -170,6 +196,7 @@ class CollectionsOverviewComponent {
                 data,
                 onOpenCollectionHandler,
                 onDeleteCollectionHandler,
+                onEditCollectionHandler,
             );
             this._summaries.push(summaryComponent);
             this._root.appendChild(summaryComponent.root);
@@ -212,6 +239,10 @@ class RootComponent {
         this._db.deleteCollection(collectionID);
         this.collectionsOverviewView();
     }
+    onEditCollection(collectionID, newTitle) {
+        this._db.editCollection(collectionID, newTitle);
+        this.collectionsOverviewView();
+    }
 
     resetUI() {
         this._root.innerHTML = ""; // TODO: Better way to clear this?
@@ -223,6 +254,7 @@ class RootComponent {
             (...x) => this.onOpenCollection(...x),
             () => this.onNewCollection(),
             (...x) => this.onDeleteCollection(...x),
+            (...x) => this.onEditCollection(...x),
         );
         this._root.appendChild(this._children.body.root);
     }

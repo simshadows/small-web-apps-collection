@@ -62,6 +62,22 @@ div.head-button:hover {
     background: #ddf;
 }
 
+div.add-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: solid 1px;
+    background: #fff;
+    height: 1em;
+    width: 1em;
+    cursor: pointer;
+    font-size: 2em;
+}
+div.add-button:hover {
+    background: #ddf;
+}
+
 div.collection-summary-box {
     border: solid 1px;
     background: #fff;

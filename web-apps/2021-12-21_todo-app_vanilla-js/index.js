@@ -59,11 +59,34 @@ class DummyDB {
         }
     }
 
+    newCollection() {
+        this._data.set(this._nextUnusedID, {
+            name: "New List",
+            todos: new Map(),
+            lastUnusedTodoID: 0,
+        });
+        ++this._nextUnusedID;
+    }
+
     updateTodo(collectionID, todoID, done) {
         const todoData = this._data.get(collectionID).todos.get(todoID);
         todoData.done = done;
     }
 }
+
+class AddButtonComponent {
+    constructor(onClickHandler) {
+        this._root = e("div", {class: ["add-button"]});
+        this._root.addEventListener("click", (ev) => onClickHandler());
+
+        this._root.appendChild(txt("+"));
+    }
+    get root() {
+        return this._root;
+    }
+}
+
+// Collection Detail
 
 class TodoBoxComponent {
     constructor(todoID, todoData, onTodoChange) {
@@ -100,6 +123,48 @@ class CollectionDetailBodyComponent {
     }
 }
 
+//
+// Collections Overview
+//
+
+class CollectionSummaryComponent {
+    constructor(collectionSummaryData, onOpenCollectionHandler) {
+        this._root = e("div", {class: ["collection-summary-box"]})
+        this._root.addEventListener("click", (ev) => onOpenCollectionHandler(collectionSummaryData.id));
+
+        const nameElem = this._root.appendChild(e("span", {class: ["collection-summary-name"]}));
+        nameElem.appendChild(txt(collectionSummaryData.name));
+    }
+    get root() {
+        return this._root;
+    }
+}
+
+class CollectionsOverviewComponent {
+    constructor(collectionsData, onOpenCollectionHandler, onNewCollectionHandler) {
+        this._root = e("div", {id: "app-body", class: ["collections-overview-body"]});
+        this._onOpenCollection = onOpenCollectionHandler;
+        this._onNewCollection = onNewCollectionHandler;
+        this._summaries = [];
+
+        for (const data of collectionsData) {
+            const summaryComponent = new CollectionSummaryComponent(data, onOpenCollectionHandler);
+            this._summaries.push(summaryComponent);
+            this._root.appendChild(summaryComponent.root);
+        }
+
+        this._addButton = new AddButtonComponent(onNewCollectionHandler);
+        this._root.appendChild(this._addButton.root);
+    }
+    get root() {
+        return this._root;
+    }
+}
+
+//
+// Root
+//
+
 class RootComponent {
     constructor(rootSelector) {
         this._db = new DummyDB();
@@ -115,23 +180,26 @@ class RootComponent {
         this._db.updateTodo(collectionID, todoID, done);
         this.collectionDetailView(collectionID);
     }
+    onOpenCollection(collectionID) {
+        this.collectionDetailView(collectionID);
+    }
+    onNewCollection() {
+        this._db.newCollection();
+        this.collectionsOverviewView();
+    }
 
-    // "collections_overview"
+    resetUI() {
+        this._root.innerHTML = ""; // TODO: Better way to clear this?
+        this._children = {};
+    }
     renderCollectionsOverview() {
-        this._children.body = this._root.appendChild(e("div", {id: "app-body", class: ["collections-overview-body"]}));
-        for (const data of this._db.getAllTodoCollections()) {
-            this.newCollectionSummaryElement(data.id, data.name);
-        }
+        this._children.body = new CollectionsOverviewComponent(
+            this._db.getAllTodoCollections(),
+            (...x) => this.onOpenCollection(...x),
+            () => this.onNewCollection(),
+        );
+        this._root.appendChild(this._children.body.root);
     }
-    newCollectionSummaryElement(collectionID, collectionName) {
-        const elem = this._children.body.appendChild(e("div", {class: ["collection-summary-box"]}));
-        elem.addEventListener("click", (ev) => this.collectionDetailView(collectionID));
-
-        const nameElem = elem.appendChild(e("span", {class: ["collection-summary-name"]}));
-        nameElem.appendChild(txt(collectionName));
-    }
-
-    // "collection_detail"
     renderCollectionDetail(collectionID) {
         const collectionData = this._db.getTodoCollection(collectionID);
 
@@ -142,7 +210,8 @@ class RootComponent {
         backButton.appendChild(txt("Back"));
         backButton.addEventListener("click", (ev) => this.collectionsOverviewView());
 
-        title.appendChild(txt(collectionData.name));
+        const titleText = title.appendChild(e("b", {}));
+        titleText.appendChild(txt(collectionData.name));
 
         this._children.body = new CollectionDetailBodyComponent(
             collectionData,
@@ -151,12 +220,7 @@ class RootComponent {
         this._root.appendChild(this._children.body.root);
     }
 
-    resetUI() {
-        this._root.innerHTML = ""; // TODO: Better way to clear this?
-        this._children = {};
-    }
-
-    // State Transitions
+    // Shortcuts to change view
     collectionsOverviewView() {
         this.resetUI();
         this.renderCollectionsOverview();
@@ -165,7 +229,6 @@ class RootComponent {
         this.resetUI();
         this.renderCollectionDetail(collectionID);
     }
-
 }
 
 let root = new RootComponent("#app");

@@ -71,6 +71,9 @@ class DummyDB {
         const todoData = this._data.get(collectionID).todos.get(todoID);
         todoData.done = done;
     }
+    deleteTodo(collectionID, todoID) {
+        this._data.get(collectionID).todos.delete(todoID);
+    }
 
     newCollection() {
         this._data.set(this._nextUnusedID, {
@@ -122,7 +125,7 @@ function editButtonElement(onClickHandler) {
 // Collection Detail
 
 class TodoBoxComponent {
-    constructor(todoID, todoData, onTodoChange) {
+    constructor(todoID, todoData, onTodoChange, onDeleteCollectionHandler) {
         this._root = e("div", {class: ["todo-box"]});
 
         this._checkbox = this._root.appendChild(e("input", {}));
@@ -132,7 +135,10 @@ class TodoBoxComponent {
             onTodoChange(todoID, event.target.checked);
         });
 
-        this._title = this._root.appendChild(txt(todoData.title));
+        this._title = this._root.appendChild(e("span", {class: ["todo-title"]}));
+        this._title.appendChild(txt(todoData.title));
+
+        this._root.appendChild(deleteButtonElement(() => onDeleteCollectionHandler(todoID)));
     }
     get root() {
         return this._root;
@@ -144,13 +150,19 @@ class CollectionDetailBodyComponent {
         collectionData,
         onTodoChange,
         onNewTodoHandler,
+        onDeleteTodoHandler,
     ) {
         this._root = e("div", {id: "app-body", class: ["collection-detail-body"]});
         this._todoBoxes = [];
         this._onTodoChangeHandler = (...x) => onTodoChange(collectionData.id, ...x);
 
         for (const [todoID, todoData] of collectionData.todos.entries()) {
-            const component = new TodoBoxComponent(todoID, todoData, this._onTodoChangeHandler);
+            const component = new TodoBoxComponent(
+                todoID,
+                todoData,
+                (...x) => onTodoChange(collectionData.id, ...x),
+                (...x) => onDeleteTodoHandler(collectionData.id, ...x),
+            );
             this._todoBoxes.push(component);
             this._root.appendChild(component.root);
         }
@@ -247,6 +259,10 @@ class RootComponent {
         this._db.updateTodo(collectionID, todoID, done);
         this.collectionDetailView(collectionID);
     }
+    onDeleteTodo(collectionID, todoID) {
+        this._db.deleteTodo(collectionID, todoID);
+        this.collectionDetailView(collectionID);
+    }
 
     onOpenCollection(collectionID) {
         this.collectionDetailView(collectionID);
@@ -295,6 +311,7 @@ class RootComponent {
             collectionData,
             (...x) => this.onTodoChange(...x),
             (...x) => this.onNewTodo(...x),
+            (...x) => this.onDeleteTodo(...x),
         );
         this._root.appendChild(this._children.body.root);
     }

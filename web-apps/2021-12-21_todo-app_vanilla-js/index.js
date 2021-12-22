@@ -129,14 +129,15 @@ function editButtonElement(onClickHandler) {
 
 // Collection Detail
 
-function todoBoxElement(todoID, todoData, onDeleteTodoHandler, onEditTodoHandler) {
+function todoBoxElement(collectionID, todoID, todoData) {
     const elem = e("div", {class: ["todo-box"]});
 
     const checkbox = elem.appendChild(e("input", {}));
     checkbox.setAttribute("type", "checkbox");
     checkbox.checked = todoData.done;
     checkbox.addEventListener("change", (event) => {
-        onEditTodoHandler(todoID, event.target.checked, null);
+        editTodo(collectionID, todoID, event.target.checked, null);
+        render();
     });
 
     const title = elem.appendChild(e("span", {class: ["todo-title"]}));
@@ -145,30 +146,31 @@ function todoBoxElement(todoID, todoData, onDeleteTodoHandler, onEditTodoHandler
     elem.appendChild(editButtonElement(() => {
         const result = window.prompt("Please enter a new title.", todoData.title);
         if (result !== null && result != "") {
-            onEditTodoHandler(todoID, null, result);
+            editTodo(collectionID, todoID, null, result);
+            render();
         }
     }));
-    elem.appendChild(deleteButtonElement(() => onDeleteTodoHandler(todoID)));
+    elem.appendChild(deleteButtonElement(() => {
+        deleteTodo(collectionID, todoID);
+        render();
+    }));
 
     return elem;
 }
 
-function collectionDetailBodyElement(
-    collectionData,
-    onNewTodoHandler,
-    onDeleteTodoHandler,
-    onEditTodoHandler,
-) {
+function collectionDetailBodyElement(collectionData) {
     elem = e("div", {id: "app-body", class: ["collection-detail-body"]});
     for (const [todoID, todoData] of collectionData.todos.entries()) {
         elem.appendChild(todoBoxElement(
+            collectionData.id,
             todoID,
             todoData,
-            (...x) => onDeleteTodoHandler(collectionData.id, ...x),
-            (...x) => onEditTodoHandler(collectionData.id, ...x),
         ));
     }
-    elem.appendChild(addButtonElement(() => onNewTodoHandler(collectionData.id)));
+    elem.appendChild(addButtonElement(() => {
+        newTodo(collectionData.id);
+        render();
+    }));
     return elem;
 }
 
@@ -176,136 +178,121 @@ function collectionDetailBodyElement(
 // Collections Overview
 //
 
-function collectionSummaryElement(
-    collectionSummaryData,
-    onOpenCollectionHandler,
-    onDeleteCollectionHandler,
-    onEditCollectionHandler,
-) {
+function collectionSummaryElement(collectionSummaryData) {
     const elem = e("div", {class: ["collection-summary-box"]})
-    elem.addEventListener("click", (ev) => onOpenCollectionHandler(collectionSummaryData.id));
+    elem.addEventListener("click", (ev) => {
+        openCollection(collectionSummaryData.id);
+        render();
+    });
 
     const nameElem = elem.appendChild(e("span", {class: ["collection-summary-name"]}));
     nameElem.appendChild(txt(collectionSummaryData.name));
 
-    elem.appendChild(deleteButtonElement(() => onDeleteCollectionHandler(collectionSummaryData.id)));
+    elem.appendChild(deleteButtonElement(() => {
+        deleteCollection(collectionSummaryData.id);
+        render();
+    }));
     elem.appendChild(editButtonElement(() => {
         const result = window.prompt("Please enter a new title.", collectionSummaryData.name);
         if (result !== null && result != "") {
-            onEditCollectionHandler(collectionSummaryData.id, result);
+            editCollection(collectionSummaryData.id, result);
+            render();
         }
     }));
 
     return elem;
 }
 
-function collectionsOverviewElement(
-    collectionsData,
-    onOpenCollectionHandler,
-    onNewCollectionHandler,
-    onDeleteCollectionHandler,
-    onEditCollectionHandler,
-) {
+function collectionsOverviewElement(collectionsData) {
     const elem = e("div", {id: "app-body", class: ["collections-overview-body"]});
     for (const data of collectionsData) {
         elem.appendChild(collectionSummaryElement(
             data,
-            onOpenCollectionHandler,
-            onDeleteCollectionHandler,
-            onEditCollectionHandler,
         ));
     }
-    elem.appendChild(addButtonElement(onNewCollectionHandler));
+    elem.appendChild(addButtonElement(() => {
+        newCollection();
+        render();
+    }));
     return elem;
 }
 
-//
-// Root
-//
+function renderCollectionsOverview() {
+    rootElement.appendChild(collectionsOverviewElement(
+        db.getAllTodoCollections(),
+    ));
+}
 
-class RootComponent {
-    constructor(rootSelector) {
-        this._db = new DummyDB();
-        this._view = "collections_overview"; // "collections_overview" | "collection_detail"
-        this._root = document.querySelector(rootSelector);
+function renderCollectionDetail() {
+    const collectionData = db.getTodoCollection(state.openCollectionID);
 
-        this.renderCollectionsOverview();
-    }
+    const head = rootElement.appendChild(e("div", {id: "app-head"}));
+    const backButton = head.appendChild(e("div", {id: "head-button-left", class: ["head-button"]}));
+    const title = head.appendChild(e("span", {id: "head-title"}));
 
-    // TODO: A lot of these methods inefficiently redraws the entire collection detail UI.
+    backButton.appendChild(txt("Back"));
+    backButton.addEventListener("click", (ev) => {
+        openOverview();
+        render();
+    });
 
-    onNewTodo(collectionID) {
-        this._db.newTodo(collectionID);
-        this.collectionDetailView(collectionID);
-    }
-    onDeleteTodo(collectionID, todoID) {
-        this._db.deleteTodo(collectionID, todoID);
-        this.collectionDetailView(collectionID);
-    }
-    onEditTodo(collectionID, todoID, done, title) {
-        this._db.updateTodo(collectionID, todoID, done, title);
-        this.collectionDetailView(collectionID);
-    }
+    const titleText = title.appendChild(e("b", {}));
+    titleText.appendChild(txt(collectionData.name));
 
-    onOpenCollection(collectionID) {
-        this.collectionDetailView(collectionID);
-    }
-    onNewCollection() {
-        this._db.newCollection();
-        this.collectionsOverviewView();
-    }
-    onDeleteCollection(collectionID) {
-        this._db.deleteCollection(collectionID);
-        this.collectionsOverviewView();
-    }
-    onEditCollection(collectionID, newTitle) {
-        this._db.editCollection(collectionID, newTitle);
-        this.collectionsOverviewView();
-    }
+    rootElement.appendChild(collectionDetailBodyElement(collectionData));
+}
 
-    resetUI() {
-        this._root.innerHTML = ""; // TODO: Better way to clear this?
-    }
-    renderCollectionsOverview() {
-        this._root.appendChild(collectionsOverviewElement(
-            this._db.getAllTodoCollections(),
-            (...x) => this.onOpenCollection(...x),
-            () => this.onNewCollection(),
-            (...x) => this.onDeleteCollection(...x),
-            (...x) => this.onEditCollection(...x),
-        ));
-    }
-    renderCollectionDetail(collectionID) {
-        const collectionData = this._db.getTodoCollection(collectionID);
-
-        const head = this._root.appendChild(e("div", {id: "app-head"}));
-        const backButton = head.appendChild(e("div", {id: "head-button-left", class: ["head-button"]}));
-        const title = head.appendChild(e("span", {id: "head-title"}));
-
-        backButton.appendChild(txt("Back"));
-        backButton.addEventListener("click", (ev) => this.collectionsOverviewView());
-
-        const titleText = title.appendChild(e("b", {}));
-        titleText.appendChild(txt(collectionData.name));
-
-        this._root.appendChild(collectionDetailBodyElement(
-            collectionData,
-            (...x) => this.onNewTodo(...x),
-            (...x) => this.onDeleteTodo(...x),
-            (...x) => this.onEditTodo(...x),
-        ));
-    }
-
-    // Shortcuts to change view
-    collectionsOverviewView() {
-        this.resetUI();
-        this.renderCollectionsOverview();
-    }
-    collectionDetailView(collectionID) {
-        this.resetUI();
-        this.renderCollectionDetail(collectionID);
+function render() {
+    rootElement.innerHTML = "";
+    switch (state.view) {
+        case "collections_overview":
+            return renderCollectionsOverview();
+        case "collection_detail":
+            return renderCollectionDetail();
+        default:
+            throw "Invalid State";
     }
 }
 
-let root = new RootComponent("#app");
+/*** State Mutators ***/
+
+function openCollection(collectionID) {
+    state.view = "collection_detail";
+    state.openCollectionID = collectionID;
+}
+function openOverview() {
+    state.view = "collections_overview";
+}
+
+function newCollection() {
+    db.newCollection();
+}
+function deleteCollection(collectionID) {
+    db.deleteCollection(collectionID);
+}
+function editCollection(collectionID, newTitle) {
+    db.editCollection(collectionID, newTitle);
+}
+
+function newTodo(collectionID) {
+    db.newTodo(collectionID);
+}
+function deleteTodo(collectionID, todoID) {
+    db.deleteTodo(collectionID, todoID);
+}
+function editTodo(collectionID, todoID, done, title) {
+    db.updateTodo(collectionID, todoID, done, title);
+}
+
+/*** Globals ***/
+
+const rootElement = document.querySelector("#app");
+
+const db = new DummyDB();
+const state = {
+    view: "collections_overview", // "collections_overview" | "collection_detail"
+    openCollectionID: null,
+};
+
+render();
 

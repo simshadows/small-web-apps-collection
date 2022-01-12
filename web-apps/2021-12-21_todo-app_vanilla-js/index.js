@@ -7,9 +7,33 @@ function e(tagName, attributes) {
     return elem;
 }
 
-class DummyDB {
+function deepcopy(obj) {
+    if (obj === null) return null;
+    switch (typeof obj) {
+        case "undefined":
+        case "boolean":
+        case "number":
+        case "bigint":
+        case "string":
+            return obj;
+        case "object":
+            // Hyperspecific type checking to avoid unintended behaviour.
+            if (obj.constructor === Map) {
+                return new Map(obj);
+            } else if (obj.constructor === Array) {
+                return [...obj];
+            } else if (obj.constructor === Object) {
+                return Object.assign({}, obj); // Only copies enumerable own properties.
+            }
+            throw "Unsupported prototype.";
+        default:
+            throw "Unsupported typeof value.";
+    }
+}
+
+class DummyPersistentStore {
     constructor() {
-        this._data = new Map([
+        this._collections = new Map([
             [0, {
                 name: "My awesome list!",
                 todos: new Map([
@@ -36,64 +60,18 @@ class DummyDB {
         ]);
         this._nextUnusedID = 3;
     }
-    getAllTodoCollections() {
-        const ret = [];
-        for (const [id, data] of this._data.entries()) {
-            ret.push({
-                id: id,
-                name: data.name,
-            });
-        }
-        return ret;
+    
+    read() {
+        console.log("dummy store read");
+        return {
+            collections: deepcopy(this._collections),
+            nextUnusedID: this._nextUnusedID,
+        };
     }
-    getTodoCollection(collectionID) {
-        const result = this._data.get(collectionID);
-        if (result) {
-            return {
-                id: collectionID,
-                name: result.name,
-                todos: result.todos, // This must not be modified by the function user
-            };
-        } else {
-            return undefined;
-        }
-    }
-
-    newTodo(collectionID) {
-        const collectionData = this._data.get(collectionID)
-        collectionData.todos.set(collectionData.lastUnusedTodoID, {
-            done: false,
-            title: "New Item",
-        });
-        ++collectionData.lastUnusedTodoID;
-    }
-    updateTodo(collectionID, todoID, done, title) {
-        const todoData = this._data.get(collectionID).todos.get(todoID);
-        if (done !== null) {
-            todoData.done = done;
-        }
-        if (title !== null) {
-            todoData.title = title;
-        }
-    }
-    deleteTodo(collectionID, todoID) {
-        this._data.get(collectionID).todos.delete(todoID);
-    }
-
-    newCollection() {
-        this._data.set(this._nextUnusedID, {
-            name: "New List",
-            todos: new Map(),
-            lastUnusedTodoID: 0,
-        });
-        ++this._nextUnusedID;
-    }
-    deleteCollection(collectionID) {
-        this._data.delete(collectionID);
-    }
-    editCollection(collectionID, newTitle) {
-        const collectionData = this._data.get(collectionID);
-        collectionData.name = newTitle;
+    write(obj) {
+        console.log("dummy store write");
+        this._collections = deepcopy(obj.collections);
+        this._nextUnusedID = obj.nextUnusedID;
     }
 }
 
@@ -137,7 +115,7 @@ function todoBoxElement(collectionID, todoID, todoData) {
     checkbox.checked = todoData.done;
     checkbox.addEventListener("change", (event) => {
         editTodo(collectionID, todoID, event.target.checked, null);
-        render();
+        saveAndRender();
     });
 
     const title = elem.appendChild(e("span", {class: ["todo-title"]}));
@@ -147,12 +125,12 @@ function todoBoxElement(collectionID, todoID, todoData) {
         const result = window.prompt("Please enter a new title.", todoData.title);
         if (result !== null && result != "") {
             editTodo(collectionID, todoID, null, result);
-            render();
+            saveAndRender();
         }
     }));
     elem.appendChild(deleteButtonElement(() => {
         deleteTodo(collectionID, todoID);
-        render();
+        saveAndRender();
     }));
 
     return elem;
@@ -169,7 +147,7 @@ function collectionDetailBodyElement(collectionData) {
     }
     elem.appendChild(addButtonElement(() => {
         newTodo(collectionData.id);
-        render();
+        saveAndRender();
     }));
     return elem;
 }
@@ -182,7 +160,7 @@ function collectionSummaryElement(collectionSummaryData) {
     const elem = e("div", {class: ["collection-summary-box"]})
     elem.addEventListener("click", (ev) => {
         openCollection(collectionSummaryData.id);
-        render();
+        saveAndRender();
     });
 
     const nameElem = elem.appendChild(e("span", {class: ["collection-summary-name"]}));
@@ -190,13 +168,13 @@ function collectionSummaryElement(collectionSummaryData) {
 
     elem.appendChild(deleteButtonElement(() => {
         deleteCollection(collectionSummaryData.id);
-        render();
+        saveAndRender();
     }));
     elem.appendChild(editButtonElement(() => {
         const result = window.prompt("Please enter a new title.", collectionSummaryData.name);
         if (result !== null && result != "") {
             editCollection(collectionSummaryData.id, result);
-            render();
+            saveAndRender();
         }
     }));
 
@@ -212,19 +190,19 @@ function collectionsOverviewElement(collectionsData) {
     }
     elem.appendChild(addButtonElement(() => {
         newCollection();
-        render();
+        saveAndRender();
     }));
     return elem;
 }
 
 function renderCollectionsOverview() {
     rootElement.appendChild(collectionsOverviewElement(
-        db.getAllTodoCollections(),
+        getAllTodoCollections(),
     ));
 }
 
 function renderCollectionDetail() {
-    const collectionData = db.getTodoCollection(state.openCollectionID);
+    const collectionData = getTodoCollection(state.openCollectionID);
 
     const head = rootElement.appendChild(e("div", {id: "app-head"}));
     const backButton = head.appendChild(e("div", {id: "head-button-left", class: ["head-button"]}));
@@ -233,7 +211,7 @@ function renderCollectionDetail() {
     backButton.appendChild(txt("Back"));
     backButton.addEventListener("click", (ev) => {
         openOverview();
-        render();
+        saveAndRender();
     });
 
     const titleText = title.appendChild(e("b", {}));
@@ -254,7 +232,12 @@ function render() {
     }
 }
 
-/*** State Mutators ***/
+function saveAndRender() {
+    render();
+    persistentStore.write(data);
+}
+
+/*** Data/State Mutators ***/
 
 function openCollection(collectionID) {
     state.view = "collection_detail";
@@ -265,34 +248,73 @@ function openOverview() {
 }
 
 function newCollection() {
-    db.newCollection();
+    data.collections.set(this._nextUnusedID, {
+        name: "New List",
+        todos: new Map(),
+        lastUnusedTodoID: 0,
+    });
+    ++data.nextUnusedID;
 }
 function deleteCollection(collectionID) {
-    db.deleteCollection(collectionID);
+    data.collections.delete(collectionID);
 }
 function editCollection(collectionID, newTitle) {
-    db.editCollection(collectionID, newTitle);
+    const collectionData = data.collections.get(collectionID);
+    collectionData.name = newTitle;
 }
 
 function newTodo(collectionID) {
-    db.newTodo(collectionID);
+    const collectionData = data.collections.get(collectionID)
+    collectionData.todos.set(collectionData.lastUnusedTodoID, {
+        done: false,
+        title: "New Item",
+    });
+    ++collectionData.lastUnusedTodoID;
 }
 function deleteTodo(collectionID, todoID) {
-    db.deleteTodo(collectionID, todoID);
+    data.collections.get(collectionID).todos.delete(todoID);
 }
 function editTodo(collectionID, todoID, done, title) {
-    db.updateTodo(collectionID, todoID, done, title);
+    const todoData = data.collections.get(collectionID).todos.get(todoID);
+    if (done !== null) todoData.done = done;
+    if (title !== null) todoData.title = title;
+}
+
+/*** Data Read ***/
+
+function getAllTodoCollections() {
+    const ret = [];
+    for (const [id, collectionData] of data.collections.entries()) {
+        ret.push({
+            id: id,
+            name: collectionData.name,
+        });
+    }
+    return ret;
+}
+
+function getTodoCollection(collectionID) {
+    const result = data.collections.get(collectionID);
+    if (result) {
+        return {
+            id: collectionID,
+            name: result.name,
+            todos: result.todos, // This must not be modified by the function user
+        };
+    }
+    return undefined;
 }
 
 /*** Globals ***/
 
 const rootElement = document.querySelector("#app");
 
-const db = new DummyDB();
+const persistentStore = new DummyPersistentStore();
 const state = {
     view: "collections_overview", // "collections_overview" | "collection_detail"
     openCollectionID: null,
 };
+let data = persistentStore.read(); // {collections, nextUnusedID}
 
 render();
 

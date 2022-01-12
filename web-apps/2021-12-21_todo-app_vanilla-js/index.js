@@ -30,34 +30,23 @@ function e(tagName, attributes) {
     return elem;
 }
 
+function simpleButtonElement(htmlClass, text, onClickHandler) {
+    const root = e("div", {class: [htmlClass]});
+    root.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        onClickHandler();
+    });
+    root.appendChild(txt(text));
+    return root;
+}
 function addButtonElement(onClickHandler) {
-    const root = e("div", {class: ["add-button"]});
-    root.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        onClickHandler();
-    });
-    root.appendChild(txt("+"));
-    return root;
+    return simpleButtonElement("add-button", "+", onClickHandler);
 }
-
 function deleteButtonElement(onClickHandler) {
-    const root = e("div", {class: ["delete-button"]});
-    root.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        onClickHandler();
-    });
-    root.appendChild(txt("X"));
-    return root;
+    return simpleButtonElement("delete-button", "X", onClickHandler);
 }
-
 function editButtonElement(onClickHandler) {
-    const root = e("div", {class: ["edit-button"]});
-    root.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        onClickHandler();
-    });
-    root.appendChild(txt("E"));
-    return root;
+    return simpleButtonElement("edit-button", "E", onClickHandler);
 }
 
 // Collection Detail

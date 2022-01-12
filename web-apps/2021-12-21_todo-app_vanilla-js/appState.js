@@ -9,13 +9,22 @@ function deepcopy(obj) {
             return obj;
         case "object":
             // Hyperspecific type checking to avoid unintended behaviour.
-            // As such, this function should not support user-defined classes.
+            // This function should not support user-defined classes.
             if (obj.constructor === Map) {
-                return new Map(obj);
+                const newMap = new Map();
+                for (const [k, v] of obj.entries()) {
+                    newMap.set(deepcopy(k), deepcopy(v));
+                }
+                return newMap;
             } else if (obj.constructor === Array) {
-                return [...obj];
+                return obj.map(deepcopy);
             } else if (obj.constructor === Object) {
-                return Object.assign({}, obj); // Only copies enumerable own properties.
+                const newObj = {};
+                // Only copies enumerable own properties.
+                for (const [k, v] of Object.entries(obj)) {
+                    newObj[deepcopy(k)] = deepcopy(v); // Doesn't handle symbol keys yet
+                }
+                return newObj;
             }
             throw "Unsupported prototype.";
         default:

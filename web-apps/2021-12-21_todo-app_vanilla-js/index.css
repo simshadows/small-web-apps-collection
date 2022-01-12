@@ -140,3 +140,11 @@ span.todo-title {
     flex: 1;
 }
 
+span.todo-time-due {
+    font-size: 85%;
+    color: #999;
+}
+span.todo-time-due-overdue {
+    color: #f00;
+}
+

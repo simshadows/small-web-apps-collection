@@ -1,25 +1,19 @@
 import {
-    // State Mutators
-
-    openCollection,
-    openOverview,
-
+    // Data Mutators
     newCollection,
     deleteCollection,
     editCollection,
-
     newTodo,
     deleteTodo,
     editTodo,
 
-    // State Read
-
-    getView,
-    getOpenCollectionID,
+    // Data Read
     getAllTodoCollections,
     getTodoCollection,
-
-} from "./appState.js";
+} from "./data.js";
+import {
+    decomposeNumericTimeDelta,
+} from "./utils.js";
 
 const txt = document.createTextNode.bind(document);
 
@@ -49,6 +43,32 @@ function editButtonElement(onClickHandler) {
     return simpleButtonElement("edit-button", "E", onClickHandler);
 }
 
+function timeDueElement(numericTimeDue, numericTimeNow) {
+    const decomposed = decomposeNumericTimeDelta(numericTimeDue - numericTimeNow);
+    const overdue = (decomposed.sign < 0);
+
+    const tooltipText = "Due on " + (new Date(numericTimeDue)).toString();
+    const elementText = (()=>{
+        return (overdue ? "Overdue " : "Due in ") + (()=>{
+            if (decomposed.days > 0) {
+                return decomposed.days.toString() + " days";
+            } else if (decomposed.hours > 0) {
+                return decomposed.hours.toString() + " hours";
+            } else if (decomposed.minutes > 0) {
+                return decomposed.minutes.toString() + " minutes";
+            } else {
+                return decomposed.seconds.toString() + " seconds";
+            }
+        })();
+    })();
+
+    const elem = e("span", {class: ["todo-time-due"]});
+    if (overdue) elem.classList.add("todo-time-due-overdue");
+    elem.setAttribute("title", tooltipText);
+    elem.appendChild(txt(elementText));
+    return elem;
+}
+
 // Collection Detail
 
 function todoBoxElement(collectionID, todoID, todoData) {
@@ -64,6 +84,8 @@ function todoBoxElement(collectionID, todoID, todoData) {
 
     const title = elem.appendChild(e("span", {class: ["todo-title"]}));
     title.appendChild(txt(todoData.title));
+
+    elem.appendChild(timeDueElement(todoData.timeDue, Date.now()));
 
     elem.appendChild(editButtonElement(() => {
         const result = window.prompt("Please enter a new title.", todoData.title);
@@ -146,7 +168,7 @@ function renderCollectionsOverview() {
 }
 
 function renderCollectionDetail() {
-    const collectionData = getTodoCollection(getOpenCollectionID());
+    const collectionData = getTodoCollection(state.openCollectionID);
 
     const head = rootElement.appendChild(e("div", {id: "app-head"}));
     const backButton = head.appendChild(e("div", {id: "head-button-left", class: ["head-button"]}));
@@ -166,7 +188,7 @@ function renderCollectionDetail() {
 
 function render() {
     rootElement.innerHTML = "";
-    switch (getView()) {
+    switch (state.view) {
         case "collections_overview":
             return renderCollectionsOverview();
         case "collection_detail":
@@ -176,7 +198,22 @@ function render() {
     }
 }
 
+/*** State Mutators ***/
+
+export function openCollection(collectionID) {
+    state.view = "collection_detail";
+    state.openCollectionID = collectionID;
+}
+export function openOverview() {
+    state.view = "collections_overview";
+}
+
 /*** Globals ***/
+
+const state = {
+    view: "collections_overview", // "collections_overview" | "collection_detail"
+    openCollectionID: null,
+};
 
 const rootElement = document.querySelector("#app");
 

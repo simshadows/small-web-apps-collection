@@ -1,4 +1,25 @@
-import {DummyPersistentStore} from "./persistentStore.js";
+import {
+    // State Mutators
+
+    openCollection,
+    openOverview,
+
+    newCollection,
+    deleteCollection,
+    editCollection,
+
+    newTodo,
+    deleteTodo,
+    editTodo,
+
+    // State Read
+
+    getView,
+    getOpenCollectionID,
+    getAllTodoCollections,
+    getTodoCollection,
+
+} from "./appState.js";
 
 const txt = document.createTextNode.bind(document);
 
@@ -49,7 +70,7 @@ function todoBoxElement(collectionID, todoID, todoData) {
     checkbox.checked = todoData.done;
     checkbox.addEventListener("change", (event) => {
         editTodo(collectionID, todoID, event.target.checked, null);
-        saveAndRender();
+        render();
     });
 
     const title = elem.appendChild(e("span", {class: ["todo-title"]}));
@@ -59,12 +80,12 @@ function todoBoxElement(collectionID, todoID, todoData) {
         const result = window.prompt("Please enter a new title.", todoData.title);
         if (result !== null && result != "") {
             editTodo(collectionID, todoID, null, result);
-            saveAndRender();
+            render();
         }
     }));
     elem.appendChild(deleteButtonElement(() => {
         deleteTodo(collectionID, todoID);
-        saveAndRender();
+        render();
     }));
 
     return elem;
@@ -81,7 +102,7 @@ function collectionDetailBodyElement(collectionData) {
     }
     elem.appendChild(addButtonElement(() => {
         newTodo(collectionData.id);
-        saveAndRender();
+        render();
     }));
     return elem;
 }
@@ -94,7 +115,7 @@ function collectionSummaryElement(collectionSummaryData) {
     const elem = e("div", {class: ["collection-summary-box"]})
     elem.addEventListener("click", (ev) => {
         openCollection(collectionSummaryData.id);
-        saveAndRender();
+        render();
     });
 
     const nameElem = elem.appendChild(e("span", {class: ["collection-summary-name"]}));
@@ -102,13 +123,13 @@ function collectionSummaryElement(collectionSummaryData) {
 
     elem.appendChild(deleteButtonElement(() => {
         deleteCollection(collectionSummaryData.id);
-        saveAndRender();
+        render();
     }));
     elem.appendChild(editButtonElement(() => {
         const result = window.prompt("Please enter a new title.", collectionSummaryData.name);
         if (result !== null && result != "") {
             editCollection(collectionSummaryData.id, result);
-            saveAndRender();
+            render();
         }
     }));
 
@@ -124,7 +145,7 @@ function collectionsOverviewElement(collectionsData) {
     }
     elem.appendChild(addButtonElement(() => {
         newCollection();
-        saveAndRender();
+        render();
     }));
     return elem;
 }
@@ -136,7 +157,7 @@ function renderCollectionsOverview() {
 }
 
 function renderCollectionDetail() {
-    const collectionData = getTodoCollection(state.openCollectionID);
+    const collectionData = getTodoCollection(getOpenCollectionID());
 
     const head = rootElement.appendChild(e("div", {id: "app-head"}));
     const backButton = head.appendChild(e("div", {id: "head-button-left", class: ["head-button"]}));
@@ -145,7 +166,7 @@ function renderCollectionDetail() {
     backButton.appendChild(txt("Back"));
     backButton.addEventListener("click", (ev) => {
         openOverview();
-        saveAndRender();
+        render();
     });
 
     const titleText = title.appendChild(e("b", {}));
@@ -156,7 +177,7 @@ function renderCollectionDetail() {
 
 function render() {
     rootElement.innerHTML = "";
-    switch (state.view) {
+    switch (getView()) {
         case "collections_overview":
             return renderCollectionsOverview();
         case "collection_detail":
@@ -166,91 +187,9 @@ function render() {
     }
 }
 
-function saveAndRender() {
-    render();
-    persistentStore.write(data);
-}
-
-/*** Data/State Mutators ***/
-
-function openCollection(collectionID) {
-    state.view = "collection_detail";
-    state.openCollectionID = collectionID;
-}
-function openOverview() {
-    state.view = "collections_overview";
-}
-
-function newCollection() {
-    data.collections.set(this._nextUnusedID, {
-        name: "New List",
-        todos: new Map(),
-        lastUnusedTodoID: 0,
-    });
-    ++data.nextUnusedID;
-}
-function deleteCollection(collectionID) {
-    data.collections.delete(collectionID);
-}
-function editCollection(collectionID, newTitle) {
-    const collectionData = data.collections.get(collectionID);
-    collectionData.name = newTitle;
-}
-
-function newTodo(collectionID) {
-    const collectionData = data.collections.get(collectionID)
-    collectionData.todos.set(collectionData.lastUnusedTodoID, {
-        done: false,
-        title: "New Item",
-    });
-    ++collectionData.lastUnusedTodoID;
-}
-function deleteTodo(collectionID, todoID) {
-    data.collections.get(collectionID).todos.delete(todoID);
-}
-function editTodo(collectionID, todoID, done, title) {
-    const todoData = data.collections.get(collectionID).todos.get(todoID);
-    if (done !== null) todoData.done = done;
-    if (title !== null) todoData.title = title;
-}
-
-/*** Data Read ***/
-
-function getAllTodoCollections() {
-    const ret = [];
-    for (const [id, collectionData] of data.collections.entries()) {
-        ret.push({
-            id: id,
-            name: collectionData.name,
-        });
-    }
-    return ret;
-}
-
-function getTodoCollection(collectionID) {
-    const result = data.collections.get(collectionID);
-    if (result) {
-        return {
-            id: collectionID,
-            name: result.name,
-            todos: result.todos, // This must not be modified by the function user
-        };
-    }
-    return undefined;
-}
-
 /*** Globals ***/
 
 const rootElement = document.querySelector("#app");
-
-const persistentStore = new DummyPersistentStore();
-const state = {
-    view: "collections_overview", // "collections_overview" | "collection_detail"
-    openCollectionID: null,
-};
-
-let data = persistentStore.read(); // {collections, nextUnusedID}
-                                   // SEE persistentStore.js for an example of this data structure.
 
 render();
 

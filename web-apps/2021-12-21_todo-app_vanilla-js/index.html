@@ -12,7 +12,7 @@
 
 <div id="app"></div>
 
-<p>(This project is currently in progress!)</p>
+<button id="app-reset-button" type="button">Reset App Data</button>
 
 <p>This is my third web app project, aimed at giving me experience using vanilla Javascript. At minimum, this project follows <a href="https://www.theodinproject.com/paths/full-stack-javascript/courses/javascript/lessons/todo-list">Project: TODO List</a> from <a href="https://www.theodinproject.com/">The Odin Project</a>.</p>
 
@@ -20,6 +20,9 @@
 
 <p>My preferred way of writing web UIs will likely continue to be with front-end frameworks such as React, though I expect vanilla Javascript may be preferable at times when a front-end framework is an unnecessarily heavy dependency.</p>
 
+<p>The Odin Project asked for title, description, due date, and priority to be implemented. This current implementation of this app has everything except the priority feature. I might implement that later, as well as a way to automatically sort by priority.</p>
+
+<p>To extend further, I might also investigate how to allow the user to manually change sort order, as well as update the "time remaining" indicator every second. The current implementation is locked to sorting by undefined order (it just happens to be in creation order), and the "time remaining" indicator only updates when you interact with the app to force a UI rerender. (No guarantee I'll get around to this though, considering this is meant to be a small practice app lol)</p>
 
 <script src="./index.js" type="module"></script>
 

@@ -1,5 +1,6 @@
 import {
     // Data Mutators
+    resetAppData,
     newCollection,
     deleteCollection,
     editCollection,
@@ -351,6 +352,13 @@ const state = {
 };
 
 const rootElement = document.querySelector("#app");
+
+document.querySelector("#app-reset-button").addEventListener("click", (ev) => {
+    if (window.confirm("Are you sure you want to wipe all user data?")) {
+        resetAppData();
+        render();
+    }
+});
 
 render();
 

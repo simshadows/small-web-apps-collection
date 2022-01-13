@@ -5,91 +5,78 @@ import {
     storageAvailable,
 } from "./utils.js";
 
-const sampleCollections = (()=>{
-    const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-    const loremIpsumShorter = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
-    const now = Date.now();
-    return new Map([
-        [0, {
-            name: "My awesome list!",
-            todos: new Map([
-                [0, {
-                    done: false,
-                    title: "Foo",
-                    timeDue: now + millisecondsInADay,
-                    notes: loremIpsum,
-                }],
-                [1, {
-                    done: true,
-                    title: loremIpsumShorter,
-                    timeDue: now + (42 * millisecondsInADay),
-                    notes: "", // Intentionally empty
-                }],
-                [2, {
-                    done: true,
-                    title: "<b>testing for xss</b>",
-                    timeDue: null,
-                    notes: "<b>The quick brown fox jumped over the lazy dog.</b>",
-                }],
-                [3, {
-                    done: false,
-                    title: "<script>alert(1)</script>",
-                    timeDue: now - (2 * millisecondsInADay),
-                    notes: "<script>alert(1)</script>",
-                }],
-            ]),
-            lastUnusedTodoID: 3,
-        }],
-        [1, {
-            name: "Empty List",
-            todos: new Map(), // Empty
-            lastUnusedTodoID: 0,
-        }],
-    ]);
-})();
+const sampleData = {
+    collections: (()=>{
+        const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+        const loremIpsumShorter = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+        const now = Date.now();
 
-const sampleNextUnusedID = 3;
+        return new Map([
+            [0, {
+                name: "My awesome list!",
+                todos: new Map([
+                    [0, {
+                        done: false,
+                        title: "Foo",
+                        timeDue: now + millisecondsInADay,
+                        notes: loremIpsum,
+                    }],
+                    [1, {
+                        done: true,
+                        title: loremIpsumShorter,
+                        timeDue: now + (42 * millisecondsInADay),
+                        notes: "", // Intentionally empty
+                    }],
+                    [2, {
+                        done: true,
+                        title: "<b>testing for xss</b>",
+                        timeDue: null,
+                        notes: "<b>The quick brown fox jumped over the lazy dog.</b>",
+                    }],
+                    [3, {
+                        done: false,
+                        title: "<script>alert(1)</script>",
+                        timeDue: now - (2 * millisecondsInADay),
+                        notes: "<script>alert(1)</script>",
+                    }],
+                ]),
+                lastUnusedTodoID: 4,
+            }],
+            [1, {
+                name: "Empty List",
+                todos: new Map(), // Empty
+                lastUnusedTodoID: 0,
+            }],
+        ]);
+    })(),
+    nextUnusedID: 2,
+};
+
 
 class DummyPersistentStore {
     constructor() {
-        this._collections = deepcopy(sampleCollections);
-        this._nextUnusedID = sampleNextUnusedID;
+        this._data = deepcopy(sampleData);
     }
     
     read() {
         console.log("dummy store read");
-        return {
-            collections: deepcopy(this._collections),
-            nextUnusedID: this._nextUnusedID,
-        };
+        return deepcopy(this._data);
     }
     write(obj) {
         console.log("dummy store write");
-        this._collections = deepcopy(obj.collections);
-        this._nextUnusedID = obj.nextUnusedID;
+        this._data = deepcopy(obj);
     }
 }
 
 class LocalStoragePersistentStore {
-    _getInitial() {
-        this.write({
-            collections: deepcopy(sampleCollections),
-            nextUnusedID: sampleNextUnusedID,
-        });
-    }
-
     _serialize(obj) {
-        return JSON.stringify(
-            obj,
-            (k, v) => {
-                if (typeof v === "object" && v !== null && v.constructor === Map) return Object.fromEntries(v);
-                return v;
-            }
-        );
+        return JSON.stringify(obj, (k, v) => {
+            if (typeof v === "object" && v !== null && v.constructor === Map) return Object.fromEntries(v);
+            return v;
+        });
     }
     _deserialize(s) {
         const obj = JSON.parse(s);
-
         const collectionsMap = new Map(Object.entries(obj.collections));
         for (const [k, v] of collectionsMap.entries()) {
             v.todos = new Map(Object.entries(v.todos));
@@ -101,7 +88,7 @@ class LocalStoragePersistentStore {
     read() {
         console.log("localStorage store read");
         let dat = localStorage["todo-app"];
-        if (!dat) dat = this._serialize(this._getInitial());
+        if (!dat) dat = this._serialize(sampleData);
         return this._deserialize(dat);
     }
 
@@ -112,6 +99,11 @@ class LocalStoragePersistentStore {
 }
 
 /*** Data Mutators ***/
+
+export function resetAppData() {
+    persistentStore.write(sampleData);
+    data = persistentStore.read();
+}
 
 export function newCollection() {
     data.collections.set(data.nextUnusedID, {
@@ -202,9 +194,9 @@ export function getTodoCollection(collectionID) {
 
 /*** Globals ***/
 
-const persistentStore = (storageAvailable("localStorage"))
-                        ? new LocalStoragePersistentStore()
-                        : new DummyPersistentStore();
+let persistentStore = (storageAvailable("localStorage"))
+                      ? new LocalStoragePersistentStore()
+                      : new DummyPersistentStore();
 let data = persistentStore.read(); // {collections, nextUnusedID}
                                    // SEE persistentStore.js for an example of this data structure.
 

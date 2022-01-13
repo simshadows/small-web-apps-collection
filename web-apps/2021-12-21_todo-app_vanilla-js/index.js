@@ -133,16 +133,12 @@ function todoBoxInnerUpperElement(collectionID, todoID, todoData) {
 
     elem.appendChild(timeDueElement(todoData.timeDue, Date.now()));
 
-    elem.appendChild(deleteButtonElement(() => {
-        deleteTodo(collectionID, todoID);
+    elem.appendChild(editButtonElement(() => {
+        state.expandedTodoID = (state.expandedTodoID === todoID) ? null : todoID;
         render();
     }));
-    elem.appendChild(editButtonElement(() => {
-        if (state.expandedTodoID == todoID) {
-            state.expandedTodoID = null;
-        } else {
-            state.expandedTodoID = todoID;
-        }
+    elem.appendChild(deleteButtonElement(() => {
+        deleteTodo(collectionID, todoID);
         render();
     }));
 
@@ -177,6 +173,15 @@ function todoBoxElement(collectionID, todoID, todoData) {
     elem.appendChild(todoBoxInnerUpperElement(collectionID, todoID, todoData));
     if (state.expandedTodoID == todoID) {
         elem.appendChild(todoBoxInnerLowerElement(collectionID, todoID, todoData));
+        elem.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+        });
+    } else {
+        elem.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            state.expandedTodoID = (state.expandedTodoID === todoID) ? null : todoID;
+            render();
+        });
     }
     return elem;
 }
@@ -191,9 +196,13 @@ function collectionDetailBodyElement(collectionData) {
         ));
     }
     elem.appendChild(addButtonElement(() => {
-        newTodo(collectionData.id);
+        state.expandedTodoID = newTodo(collectionData.id);
         render();
     }));
+    elem.addEventListener("click", (ev) => {
+        state.expandedTodoID = null;
+        render();
+    });
     return elem;
 }
 

@@ -5,6 +5,7 @@ import {
 } from "./utils.js";
 
 const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+const loremIpsumShorter = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
 class DummyPersistentStore {
     constructor() {
@@ -22,13 +23,13 @@ class DummyPersistentStore {
                     }],
                     [1, {
                         done: true,
-                        title: "Bar",
+                        title: loremIpsumShorter,
                         timeDue: now + (42 * millisecondsInADay),
                         notes: "", // Intentionally empty
                     }],
                     [2, {
                         done: true,
-                        title: "Baz",
+                        title: "Bar",
                         timeDue: null,
                         notes: "The quick brown fox jumped over the lazy dog.",
                     }],
@@ -67,7 +68,7 @@ class DummyPersistentStore {
 /*** Data Mutators ***/
 
 export function newCollection() {
-    data.collections.set(this._nextUnusedID, {
+    data.collections.set(data.nextUnusedID, {
         name: "New List",
         todos: new Map(),
         lastUnusedTodoID: 0,

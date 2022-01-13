@@ -2,6 +2,7 @@ import {
     millisecondsInADay,
     deepcopy,
     decomposeNumericTimeDelta,
+    storageAvailable,
 } from "./utils.js";
 
 const sampleCollections = (()=>{
@@ -66,6 +67,47 @@ class DummyPersistentStore {
         console.log("dummy store write");
         this._collections = deepcopy(obj.collections);
         this._nextUnusedID = obj.nextUnusedID;
+    }
+}
+
+class LocalStoragePersistentStore {
+    _getInitial() {
+        this.write({
+            collections: deepcopy(sampleCollections),
+            nextUnusedID: sampleNextUnusedID,
+        });
+    }
+
+    _serialize(obj) {
+        return JSON.stringify(
+            obj,
+            (k, v) => {
+                if (typeof v === "object" && v !== null && v.constructor === Map) return Object.fromEntries(v);
+                return v;
+            }
+        );
+    }
+    _deserialize(s) {
+        const obj = JSON.parse(s);
+
+        const collectionsMap = new Map(Object.entries(obj.collections));
+        for (const [k, v] of collectionsMap.entries()) {
+            v.todos = new Map(Object.entries(v.todos));
+        }
+        obj.collections = collectionsMap;
+        return obj;
+    }
+
+    read() {
+        console.log("localStorage store read");
+        let dat = localStorage["todo-app"];
+        if (!dat) dat = this._serialize(this._getInitial());
+        return this._deserialize(dat);
+    }
+
+    write(obj) {
+        console.log("localStorage store write");
+        localStorage["todo-app"] = this._serialize(obj);
     }
 }
 
@@ -160,7 +202,9 @@ export function getTodoCollection(collectionID) {
 
 /*** Globals ***/
 
-const persistentStore = new DummyPersistentStore();
+const persistentStore = (storageAvailable("localStorage"))
+                        ? new LocalStoragePersistentStore()
+                        : new DummyPersistentStore();
 let data = persistentStore.read(); // {collections, nextUnusedID}
                                    // SEE persistentStore.js for an example of this data structure.
 

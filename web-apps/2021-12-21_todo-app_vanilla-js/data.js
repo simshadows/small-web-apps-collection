@@ -1,6 +1,7 @@
 import {
     millisecondsInADay,
     deepcopy,
+    decomposeNumericTimeDelta,
 } from "./utils.js";
 
 const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
@@ -95,10 +96,15 @@ export function deleteTodo(collectionID, todoID) {
     data.collections.get(collectionID).todos.delete(todoID);
     persistentStore.write(data);
 }
-export function editTodo(collectionID, todoID, done, title, notes) {
+export function editTodo(collectionID, todoID, done, title, numericalDueDate, notes) {
     const todoData = data.collections.get(collectionID).todos.get(todoID);
     if (done !== null) todoData.done = done;
     if (title !== null) todoData.title = title;
+    if (numericalDueDate !== null) {
+        //const delta = decomposeNumericTimeDelta(numericalDueDate - Date.now());
+        //if (delta.days > 999999999) throw "???"; // TODO: Handle unexpectedly huge deltas?
+        todoData.timeDue = numericalDueDate;
+    }
     if (notes !== null) todoData.notes = notes;
     persistentStore.write(data);
 }

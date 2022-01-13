@@ -150,7 +150,7 @@ div.todo-box-inner-lower {
     flex-direction: column;
 
     width: 100%;
-    padding: 0.8em 0.4em 0.8em 0.4em;
+    padding: 0 0.4em 0.8em 0.4em;
     column-gap: 0.4em;
 }
 
@@ -168,6 +168,10 @@ span.todo-time-due {
 }
 span.todo-time-due-overdue {
     color: #f00;
+}
+
+span.todo-header {
+    margin: 1em 0 0.2em 0;
 }
 
 textarea.todo-notes {

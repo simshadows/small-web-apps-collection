@@ -83,7 +83,7 @@ function todoBoxTitleElement(collectionID, todoID, titleText) {
         textbox.addEventListener("change", (ev) => {
             const newTitle = ev.target.value;
             console.assert(typeof newTitle === "string");
-            editTodo(collectionID, todoID, null, newTitle, null);
+            editTodo(collectionID, todoID, null, newTitle, null, null);
             render();
         });
     } else {
@@ -99,7 +99,7 @@ function todoBoxInnerUpperElement(collectionID, todoID, todoData) {
     checkbox.setAttribute("type", "checkbox");
     checkbox.checked = todoData.done;
     checkbox.addEventListener("change", (ev) => {
-        editTodo(collectionID, todoID, ev.target.checked, null, null);
+        editTodo(collectionID, todoID, ev.target.checked, null, null, null);
         render();
     });
 
@@ -125,14 +125,34 @@ function todoBoxInnerUpperElement(collectionID, todoID, todoData) {
 
 function todoBoxInnerLowerElement(collectionID, todoID, todoData) {
     const elem = e("div", {class: ["todo-box-inner-lower"]});
-    elem.appendChild(txt("Notes"));
+
+    const notesHeader = elem.appendChild(e("span", {class: ["todo-header"]}));
+    notesHeader.appendChild(txt("Notes:"));
 
     const notesBox = elem.appendChild(e("textarea", {class: ["todo-notes"]}));
     notesBox.appendChild(txt(todoData.notes));
     notesBox.addEventListener("change", (ev) => {
         const newText = ev.target.value;
         console.assert(typeof newText === "string");
-        editTodo(collectionID, todoID, null, null, newText);
+        editTodo(collectionID, todoID, null, null, null, newText);
+        render();
+    });
+
+    const dueDateInputHeader = elem.appendChild(e("span", {class: ["todo-header"]}));
+    dueDateInputHeader.appendChild(txt("Due Date:"));
+
+    const dueDateInput = elem.appendChild(e("input", {}));
+    dueDateInput.setAttribute("type", "datetime-local");
+    dueDateInput.value = (new Date(todoData.timeDue)).toISOString().slice(0, 16);
+    dueDateInput.addEventListener("change", (ev) => {
+        const value = ev.target.value;
+        console.assert(typeof value === "string");
+        if (value === "") {
+            console.log("TODO: handle date clearing");
+        } else {
+            const newDueDate = (new Date(value)).getTime();
+            editTodo(collectionID, todoID, null, null, newDueDate, null);
+        }
         render();
     });
 

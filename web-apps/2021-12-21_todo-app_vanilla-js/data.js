@@ -75,13 +75,15 @@ export function editCollection(collectionID, newTitle) {
 
 export function newTodo(collectionID) {
     const collectionData = data.collections.get(collectionID)
-    collectionData.todos.set(collectionData.lastUnusedTodoID, {
+    const todoID = collectionData.lastUnusedTodoID;
+    collectionData.todos.set(todoID, {
         done: false,
         title: "New Item",
         timeDue: Date.now() + millisecondsInADay,
     });
     ++collectionData.lastUnusedTodoID;
     persistentStore.write(data);
+    return todoID;
 }
 export function deleteTodo(collectionID, todoID) {
     data.collections.get(collectionID).todos.delete(todoID);

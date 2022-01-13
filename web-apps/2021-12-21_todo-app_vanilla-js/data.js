@@ -23,10 +23,16 @@ class DummyPersistentStore {
                     [1, {
                         done: true,
                         title: "Bar",
-                        timeDue: now + (2 * millisecondsInADay),
+                        timeDue: now + (42 * millisecondsInADay),
                         notes: "", // Intentionally empty
                     }],
                     [2, {
+                        done: true,
+                        title: "Baz",
+                        timeDue: null,
+                        notes: "The quick brown fox jumped over the lazy dog.",
+                    }],
+                    [3, {
                         done: false,
                         title: "<script>alert(1)</script>",
                         timeDue: now - (2 * millisecondsInADay),
@@ -98,14 +104,15 @@ export function deleteTodo(collectionID, todoID) {
 }
 export function editTodo(collectionID, todoID, done, title, numericalDueDate, notes) {
     const todoData = data.collections.get(collectionID).todos.get(todoID);
-    if (done !== null) todoData.done = done;
-    if (title !== null) todoData.title = title;
-    if (numericalDueDate !== null) {
+    if (done !== undefined) todoData.done = done;
+    if (title !== undefined) todoData.title = title;
+    if (numericalDueDate !== undefined) {
+        console.assert(numericalDueDate === null || typeof numericalDueDate === "number");
         //const delta = decomposeNumericTimeDelta(numericalDueDate - Date.now());
         //if (delta.days > 999999999) throw "???"; // TODO: Handle unexpectedly huge deltas?
         todoData.timeDue = numericalDueDate;
     }
-    if (notes !== null) todoData.notes = notes;
+    if (notes !== undefined) todoData.notes = notes;
     persistentStore.write(data);
 }
 

@@ -27,6 +27,14 @@ function e(tagName, attributes) {
     return elem;
 }
 
+// Basically used as a cheat so functions that are expected to return an element
+// can return some form of "null".
+function nullElement() {
+    const elem = e("div", {});
+    elem.style.display = "none";
+    return elem;
+}
+
 function simpleButtonElement(htmlClass, text, onClickHandler) {
     const root = e("div", {class: [htmlClass]});
     root.addEventListener("click", (ev) => {
@@ -47,6 +55,8 @@ function editButtonElement(onClickHandler) {
 }
 
 function timeDueElement(numericTimeDue, numericTimeNow) {
+    if (numericTimeDue === null) return nullElement();
+
     const decomposed = decomposeNumericTimeDelta(numericTimeDue - numericTimeNow);
     const overdue = (decomposed.sign < 0);
 
@@ -83,12 +93,28 @@ function todoBoxTitleElement(collectionID, todoID, titleText) {
         textbox.addEventListener("change", (ev) => {
             const newTitle = ev.target.value;
             console.assert(typeof newTitle === "string");
-            editTodo(collectionID, todoID, null, newTitle, null, null);
+            editTodo(collectionID, todoID, undefined, newTitle, undefined, undefined);
             render();
         });
     } else {
         elem.appendChild(txt(titleText));
     }
+    return elem;
+}
+
+function todoBoxDueDateInputElement(collectionID, todoID, numericalDueDate) {
+    const isoStringDueDate = (numericalDueDate === null) ? "" : (new Date(numericalDueDate)).toISOString().slice(0, 16);
+
+    const elem = e("input", {});
+    elem.setAttribute("type", "datetime-local");
+    elem.value = isoStringDueDate;
+    elem.addEventListener("change", (ev) => {
+        const value = ev.target.value;
+        console.assert(typeof value === "string");
+        const newDueDate = (value === "") ? null : (new Date(value)).getTime();
+        editTodo(collectionID, todoID, undefined, undefined, newDueDate, undefined);
+        render();
+    });
     return elem;
 }
 
@@ -99,7 +125,7 @@ function todoBoxInnerUpperElement(collectionID, todoID, todoData) {
     checkbox.setAttribute("type", "checkbox");
     checkbox.checked = todoData.done;
     checkbox.addEventListener("change", (ev) => {
-        editTodo(collectionID, todoID, ev.target.checked, null, null, null);
+        editTodo(collectionID, todoID, ev.target.checked, undefined, undefined, undefined);
         render();
     });
 
@@ -134,27 +160,14 @@ function todoBoxInnerLowerElement(collectionID, todoID, todoData) {
     notesBox.addEventListener("change", (ev) => {
         const newText = ev.target.value;
         console.assert(typeof newText === "string");
-        editTodo(collectionID, todoID, null, null, null, newText);
+        editTodo(collectionID, todoID, undefined, undefined, undefined, newText);
         render();
     });
 
     const dueDateInputHeader = elem.appendChild(e("span", {class: ["todo-header"]}));
     dueDateInputHeader.appendChild(txt("Due Date:"));
 
-    const dueDateInput = elem.appendChild(e("input", {}));
-    dueDateInput.setAttribute("type", "datetime-local");
-    dueDateInput.value = (new Date(todoData.timeDue)).toISOString().slice(0, 16);
-    dueDateInput.addEventListener("change", (ev) => {
-        const value = ev.target.value;
-        console.assert(typeof value === "string");
-        if (value === "") {
-            console.log("TODO: handle date clearing");
-        } else {
-            const newDueDate = (new Date(value)).getTime();
-            editTodo(collectionID, todoID, null, null, newDueDate, null);
-        }
-        render();
-    });
+    elem.appendChild(todoBoxDueDateInputElement(collectionID, todoID, todoData.timeDue));
 
     return elem;
 }

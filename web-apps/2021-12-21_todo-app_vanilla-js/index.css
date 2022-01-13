@@ -109,10 +109,15 @@ div.edit-button:hover {
 }
 
 div.collection-summary-box {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+
     border: solid 1px;
     background: #fff;
 
-    height: 5em;
+    min-height: 5em;
     width: 24em;
     padding: 0.5em;
 
@@ -122,6 +127,26 @@ div.collection-summary-box:hover {
     background: #ddf;
 }
 span.collection-summary-name {
+    flex: 1;
+}
+
+div.collection-summary-box-inner-upper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    width: 100%;
+    column-gap: 0.4em;
+}
+div.collection-summary-box-inner-lower {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    padding: 0.8em 0 0 0;
+    width: 100%;
+    font-size: 0.8em;
 }
 
 div.todo-box {

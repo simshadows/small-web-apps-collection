@@ -58,3 +58,24 @@ export function decomposeNumericTimeDelta(numericTimeDelta) {
     return ret;
 }
 
+// Usage example:
+//      const s = toShortFormString(decomposeNumericTimeDelta(x));
+const ddtssFormats = {
+    short: {d: "d", h: "h", m: "m", s: "s"},
+    long: {d: " days", h: " hours", m: " minutes", s: " seconds"},
+};
+export function decomposedDeltaToString(decomposedTimeDelta, format="short") {
+    const f = ddtssFormats[format];
+    return ((decomposedTimeDelta.sign < 0) ? "-" : "") + (()=>{
+        if (decomposedTimeDelta.days > 0) {
+            return decomposedTimeDelta.days.toString() + f["d"];
+        } else if (decomposedTimeDelta.hours > 0) {
+            return decomposedTimeDelta.hours.toString() + f["h"];
+        } else if (decomposedTimeDelta.minutes > 0) {
+            return decomposedTimeDelta.minutes.toString() + f["m"];
+        } else {
+            return decomposedTimeDelta.seconds.toString() + f["s"];
+        }
+    })();
+}
+

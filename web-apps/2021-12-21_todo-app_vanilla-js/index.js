@@ -13,6 +13,7 @@ import {
 } from "./data.js";
 import {
     decomposeNumericTimeDelta,
+    decomposedDeltaToString,
 } from "./utils.js";
 
 const txt = document.createTextNode.bind(document);
@@ -61,19 +62,7 @@ function timeDueElement(numericTimeDue, numericTimeNow) {
     const overdue = (decomposed.sign < 0);
 
     const tooltipText = "Due on " + (new Date(numericTimeDue)).toString();
-    const elementText = (()=>{
-        return (overdue ? "-" : "") + (()=>{
-            if (decomposed.days > 0) {
-                return decomposed.days.toString() + "d";
-            } else if (decomposed.hours > 0) {
-                return decomposed.hours.toString() + "h";
-            } else if (decomposed.minutes > 0) {
-                return decomposed.minutes.toString() + "m";
-            } else {
-                return decomposed.seconds.toString() + "s";
-            }
-        })();
-    })();
+    const elementText = decomposedDeltaToString(decomposed);
 
     const elem = e("span", {class: ["todo-time-due"]});
     if (overdue) elem.classList.add("todo-time-due-overdue");
@@ -134,7 +123,7 @@ function todoBoxInnerUpperElement(collectionID, todoID, todoData) {
     elem.appendChild(timeDueElement(todoData.timeDue, Date.now()));
 
     elem.appendChild(editButtonElement(() => {
-        state.expandedTodoID = (state.expandedTodoID === todoID) ? null : todoID;
+        toggleExpandedTodo(todoID);
         render();
     }));
     elem.appendChild(deleteButtonElement(() => {
@@ -179,7 +168,7 @@ function todoBoxElement(collectionID, todoID, todoData) {
     } else {
         elem.addEventListener("click", (ev) => {
             ev.stopPropagation();
-            state.expandedTodoID = (state.expandedTodoID === todoID) ? null : todoID;
+            toggleExpandedTodo(todoID);
             render();
         });
     }
@@ -196,11 +185,11 @@ function collectionDetailBodyElement(collectionData) {
         ));
     }
     elem.appendChild(addButtonElement(() => {
-        state.expandedTodoID = newTodo(collectionData.id);
+        toggleExpandedTodo(newTodo(collectionData.id));
         render();
     }));
     elem.addEventListener("click", (ev) => {
-        state.expandedTodoID = null;
+        toggleExpandedTodo(null);
         render();
     });
     return elem;
@@ -210,20 +199,12 @@ function collectionDetailBodyElement(collectionData) {
 // Collections Overview
 //
 
-function collectionSummaryElement(collectionSummaryData) {
-    const elem = e("div", {class: ["collection-summary-box"]})
-    elem.addEventListener("click", (ev) => {
-        openCollection(collectionSummaryData.id);
-        render();
-    });
+function collectionSummaryInnerUpperElement(collectionSummaryData) {
+    const elem = e("div", {class: ["collection-summary-box-inner-upper"]});
 
     const nameElem = elem.appendChild(e("span", {class: ["collection-summary-name"]}));
     nameElem.appendChild(txt(collectionSummaryData.name));
 
-    elem.appendChild(deleteButtonElement(() => {
-        deleteCollection(collectionSummaryData.id);
-        render();
-    }));
     elem.appendChild(editButtonElement(() => {
         const result = window.prompt("Please enter a new title.", collectionSummaryData.name);
         if (result !== null && result != "") {
@@ -231,7 +212,52 @@ function collectionSummaryElement(collectionSummaryData) {
             render();
         }
     }));
+    elem.appendChild(deleteButtonElement(() => {
+        deleteCollection(collectionSummaryData.id);
+        render();
+    }));
+    return elem;
+}
 
+function collectionSummaryInnerLowerElement(collectionSummaryData) {
+    const elem = e("div", {class: ["collection-summary-box-inner-lower"]});
+
+    const doneStats = elem.appendChild(e("span", {}));
+
+    const doneStatsText = (collectionSummaryData.totalNotYetDone == 0)
+                          ? "All tasks done!"
+                          : collectionSummaryData.totalNotYetDone.toString() + " more tasks to do.";
+    doneStats.appendChild(txt(doneStatsText));
+
+    if (collectionSummaryData.totalNotYetDone != 0) {
+        const soonestDueDateStat = elem.appendChild(e("span", {}));
+        const soonestDueDateStatText = (()=>{
+            if (collectionSummaryData.soonestDueDate === undefined) return "No tasks due.";
+
+            const now = Date.now();
+            const delta = decomposeNumericTimeDelta(collectionSummaryData.soonestDueDate - now);
+            if (delta.sign < 0) {
+                delta.sign = 1; // Overwrite
+                return "Next task is overdue by " + decomposedDeltaToString(delta, "long") + ".";
+            } else {
+                return "Next task is due in " + decomposedDeltaToString(delta, "long") + ".";
+            }
+        })();
+        soonestDueDateStat.appendChild(txt(soonestDueDateStatText));
+    }
+
+    return elem;
+}
+
+function collectionSummaryElement(collectionSummaryData) {
+    const elem = e("div", {class: ["collection-summary-box"]});
+    elem.addEventListener("click", (ev) => {
+        openCollection(collectionSummaryData.id);
+        render();
+    });
+
+    elem.appendChild(collectionSummaryInnerUpperElement(collectionSummaryData));
+    elem.appendChild(collectionSummaryInnerLowerElement(collectionSummaryData));
     return elem;
 }
 
@@ -288,12 +314,17 @@ function render() {
 
 /*** State Mutators ***/
 
-export function openCollection(collectionID) {
+function openCollection(collectionID) {
     state.view = "collection_detail";
     state.openCollectionID = collectionID;
+    state.expandedTodoID = null;
 }
-export function openOverview() {
+function openOverview() {
     state.view = "collections_overview";
+}
+
+function toggleExpandedTodo(todoID) {
+    state.expandedTodoID = (state.expandedTodoID === todoID) ? null : todoID;
 }
 
 /*** Globals ***/

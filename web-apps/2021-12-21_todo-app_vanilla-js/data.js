@@ -122,9 +122,23 @@ export function editTodo(collectionID, todoID, done, title, numericalDueDate, no
 export function getAllTodoCollections() {
     const ret = [];
     for (const [id, collectionData] of data.collections.entries()) {
+        let notYetDone = 0;
+        let soonestDueDate = undefined;
+        for (const [id, todoData] of collectionData.todos.entries()) {
+            if (!todoData.done) ++notYetDone;
+            const updateDueDate = (todoData.timeDue !== null)
+                                  && (!todoData.done)
+                                  && ((soonestDueDate === undefined) || (soonestDueDate > todoData.timeDue))
+            if (updateDueDate) soonestDueDate = todoData.timeDue;
+        }
+
         ret.push({
             id: id,
             name: collectionData.name,
+
+            totalTodos: collectionData.todos.size,
+            totalNotYetDone: notYetDone,
+            soonestDueDate: soonestDueDate,
         });
     }
     return ret;

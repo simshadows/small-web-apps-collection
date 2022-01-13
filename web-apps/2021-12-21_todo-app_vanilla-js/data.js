@@ -3,6 +3,8 @@ import {
     deepcopy,
 } from "./utils.js";
 
+const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+
 class DummyPersistentStore {
     constructor() {
         const now = Date.now();
@@ -15,16 +17,19 @@ class DummyPersistentStore {
                         done: false,
                         title: "Foo",
                         timeDue: now + millisecondsInADay,
+                        notes: loremIpsum,
                     }],
                     [1, {
                         done: true,
                         title: "Bar",
                         timeDue: now + (2 * millisecondsInADay),
+                        notes: "", // Intentionally empty
                     }],
                     [2, {
                         done: false,
-                        title: "Baz",
+                        title: "<script>alert(1)</script>",
                         timeDue: now - (2 * millisecondsInADay),
+                        notes: "<script>alert(1)</script>",
                     }],
                 ]),
                 lastUnusedTodoID: 3,
@@ -79,7 +84,8 @@ export function newTodo(collectionID) {
     collectionData.todos.set(todoID, {
         done: false,
         title: "New Item",
-        timeDue: Date.now() + millisecondsInADay,
+        timeDue: Date.now() + millisecondsInADay, // Set it so it's due on midnight local time?
+        notes: "",
     });
     ++collectionData.lastUnusedTodoID;
     persistentStore.write(data);
@@ -89,10 +95,11 @@ export function deleteTodo(collectionID, todoID) {
     data.collections.get(collectionID).todos.delete(todoID);
     persistentStore.write(data);
 }
-export function editTodo(collectionID, todoID, done, title) {
+export function editTodo(collectionID, todoID, done, title, notes) {
     const todoData = data.collections.get(collectionID).todos.get(todoID);
     if (done !== null) todoData.done = done;
     if (title !== null) todoData.title = title;
+    if (notes !== null) todoData.notes = notes;
     persistentStore.write(data);
 }
 

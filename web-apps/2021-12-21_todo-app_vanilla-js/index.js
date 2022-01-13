@@ -83,7 +83,7 @@ function todoBoxTitleElement(collectionID, todoID, titleText) {
         textbox.addEventListener("change", (ev) => {
             const newTitle = ev.target.value;
             console.assert(typeof newTitle === "string");
-            editTodo(collectionID, todoID, null, newTitle);
+            editTodo(collectionID, todoID, null, newTitle, null);
             render();
         });
     } else {
@@ -99,7 +99,7 @@ function todoBoxInnerUpperElement(collectionID, todoID, todoData) {
     checkbox.setAttribute("type", "checkbox");
     checkbox.checked = todoData.done;
     checkbox.addEventListener("change", (ev) => {
-        editTodo(collectionID, todoID, ev.target.checked, null);
+        editTodo(collectionID, todoID, ev.target.checked, null, null);
         render();
     });
 
@@ -128,7 +128,13 @@ function todoBoxInnerLowerElement(collectionID, todoID, todoData) {
     elem.appendChild(txt("Notes"));
 
     const notesBox = elem.appendChild(e("textarea", {class: ["todo-notes"]}));
-    notesBox.appendChild(txt("This textbox doesn't do anything yet."));
+    notesBox.appendChild(txt(todoData.notes));
+    notesBox.addEventListener("change", (ev) => {
+        const newText = ev.target.value;
+        console.assert(typeof newText === "string");
+        editTodo(collectionID, todoID, null, null, newText);
+        render();
+    });
 
     return elem;
 }

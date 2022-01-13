@@ -205,13 +205,7 @@ function collectionSummaryInnerUpperElement(collectionSummaryData) {
     const nameElem = elem.appendChild(e("span", {class: ["collection-summary-name"]}));
     nameElem.appendChild(txt(collectionSummaryData.name));
 
-    elem.appendChild(editButtonElement(() => {
-        const result = window.prompt("Please enter a new title.", collectionSummaryData.name);
-        if (result !== null && result != "") {
-            editCollection(collectionSummaryData.id, result);
-            render();
-        }
-    }));
+    elem.appendChild(editButtonElement(() => handleEditTitleEvent(collectionSummaryData.id, collectionSummaryData.name)));
     elem.appendChild(deleteButtonElement(() => {
         deleteCollection(collectionSummaryData.id);
         render();
@@ -285,8 +279,9 @@ function renderCollectionDetail() {
     const collectionData = getTodoCollection(state.openCollectionID);
 
     const head = rootElement.appendChild(e("div", {id: "app-head"}));
-    const backButton = head.appendChild(e("div", {id: "head-button-left", class: ["head-button"]}));
+    const backButton = head.appendChild(e("div", {class: ["head-button"]}));
     const title = head.appendChild(e("span", {id: "head-title"}));
+    const editButton = head.appendChild(e("div", {class: ["head-button"]}));
 
     backButton.appendChild(txt("Back"));
     backButton.addEventListener("click", (ev) => {
@@ -296,6 +291,12 @@ function renderCollectionDetail() {
 
     const titleText = title.appendChild(e("b", {}));
     titleText.appendChild(txt(collectionData.name));
+
+    editButton.appendChild(txt("Edit Title"));
+    editButton.addEventListener("click", (ev) => {
+        handleEditTitleEvent(collectionData.id, collectionData.name);
+        render();
+    });
 
     rootElement.appendChild(collectionDetailBodyElement(collectionData));
 }
@@ -325,6 +326,16 @@ function openOverview() {
 
 function toggleExpandedTodo(todoID) {
     state.expandedTodoID = (state.expandedTodoID === todoID) ? null : todoID;
+}
+
+/*** Other ***/
+
+function handleEditTitleEvent(collectionID, oldCollectionName) {
+    const result = window.prompt("Please enter a new title.", oldCollectionName);
+    if (result !== null && result != "") {
+        editCollection(collectionID, result);
+        render();
+    }
 }
 
 /*** Globals ***/

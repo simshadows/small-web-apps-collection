@@ -4,51 +4,55 @@ import {
     decomposeNumericTimeDelta,
 } from "./utils.js";
 
-const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-const loremIpsumShorter = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+const sampleCollections = (()=>{
+    const loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    const loremIpsumShorter = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+    const now = Date.now();
+    return new Map([
+        [0, {
+            name: "My awesome list!",
+            todos: new Map([
+                [0, {
+                    done: false,
+                    title: "Foo",
+                    timeDue: now + millisecondsInADay,
+                    notes: loremIpsum,
+                }],
+                [1, {
+                    done: true,
+                    title: loremIpsumShorter,
+                    timeDue: now + (42 * millisecondsInADay),
+                    notes: "", // Intentionally empty
+                }],
+                [2, {
+                    done: true,
+                    title: "<b>testing for xss</b>",
+                    timeDue: null,
+                    notes: "<b>The quick brown fox jumped over the lazy dog.</b>",
+                }],
+                [3, {
+                    done: false,
+                    title: "<script>alert(1)</script>",
+                    timeDue: now - (2 * millisecondsInADay),
+                    notes: "<script>alert(1)</script>",
+                }],
+            ]),
+            lastUnusedTodoID: 3,
+        }],
+        [1, {
+            name: "Empty List",
+            todos: new Map(), // Empty
+            lastUnusedTodoID: 0,
+        }],
+    ]);
+})();
+
+const sampleNextUnusedID = 3;
 
 class DummyPersistentStore {
     constructor() {
-        const now = Date.now();
-
-        this._collections = new Map([
-            [0, {
-                name: "My awesome list!",
-                todos: new Map([
-                    [0, {
-                        done: false,
-                        title: "Foo",
-                        timeDue: now + millisecondsInADay,
-                        notes: loremIpsum,
-                    }],
-                    [1, {
-                        done: true,
-                        title: loremIpsumShorter,
-                        timeDue: now + (42 * millisecondsInADay),
-                        notes: "", // Intentionally empty
-                    }],
-                    [2, {
-                        done: true,
-                        title: "Bar",
-                        timeDue: null,
-                        notes: "The quick brown fox jumped over the lazy dog.",
-                    }],
-                    [3, {
-                        done: false,
-                        title: "<script>alert(1)</script>",
-                        timeDue: now - (2 * millisecondsInADay),
-                        notes: "<script>alert(1)</script>",
-                    }],
-                ]),
-                lastUnusedTodoID: 3,
-            }],
-            [1, {
-                name: "Empty List",
-                todos: new Map(), // Empty
-                lastUnusedTodoID: 0,
-            }],
-        ]);
-        this._nextUnusedID = 3;
+        this._collections = deepcopy(sampleCollections);
+        this._nextUnusedID = sampleNextUnusedID;
     }
     
     read() {

@@ -7,9 +7,15 @@
     overflow-y: auto;
 
     margin: 0.8em;
-    height: calc(90vh);
+    height: 90vh;
     min-height: 18em;
     min-width: 1em;
+}
+@media (max-width: 29em) {
+    body, html, #app {
+        padding: 0;
+        margin: 0;
+    }
 }
 
 #app-head {
@@ -180,6 +186,10 @@ div.todo-box-inner-lower {
 span.todo-title {
     flex: 1;
     padding: 0.4em 0 0.4em 0;
+}
+span.todo-title-done {
+    text-decoration: line-through;
+    color: #bbb;
 }
 input.todo-title-textbox {
     width: 100%;

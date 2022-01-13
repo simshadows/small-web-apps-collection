@@ -71,9 +71,9 @@ function timeDueElement(numericTimeDue, numericTimeNow) {
     return elem;
 }
 
-// Collection Detail
+/*** Render Collection Detail ***/
 
-function todoBoxTitleElement(collectionID, todoID, titleText) {
+function todoBoxTitleElement(collectionID, todoID, done, titleText) {
     const elem = e("span", {class: ["todo-title"]});
     if (state.expandedTodoID === todoID) {
         const textbox = elem.appendChild(e("input", {class: ["todo-title-textbox"]}));
@@ -87,6 +87,7 @@ function todoBoxTitleElement(collectionID, todoID, titleText) {
         });
     } else {
         elem.appendChild(txt(titleText));
+        if (done) elem.classList.add("todo-title-done");
     }
     return elem;
 }
@@ -117,8 +118,11 @@ function todoBoxInnerUpperElement(collectionID, todoID, todoData) {
         editTodo(collectionID, todoID, ev.target.checked, undefined, undefined, undefined);
         render();
     });
+    checkbox.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+    });
 
-    elem.appendChild(todoBoxTitleElement(collectionID, todoID, todoData.title));
+    elem.appendChild(todoBoxTitleElement(collectionID, todoID, todoData.done, todoData.title));
 
     elem.appendChild(timeDueElement(todoData.timeDue, Date.now()));
 
@@ -195,9 +199,33 @@ function collectionDetailBodyElement(collectionData) {
     return elem;
 }
 
-//
-// Collections Overview
-//
+function renderCollectionDetail() {
+    const collectionData = getTodoCollection(state.openCollectionID);
+
+    const head = rootElement.appendChild(e("div", {id: "app-head"}));
+    const backButton = head.appendChild(e("div", {class: ["head-button"]}));
+    const title = head.appendChild(e("span", {id: "head-title"}));
+    const editButton = head.appendChild(e("div", {class: ["head-button"]}));
+
+    backButton.appendChild(txt("Back"));
+    backButton.addEventListener("click", (ev) => {
+        openOverview();
+        render();
+    });
+
+    const titleText = title.appendChild(e("b", {}));
+    titleText.appendChild(txt(collectionData.name));
+
+    editButton.appendChild(txt("Edit Title"));
+    editButton.addEventListener("click", (ev) => {
+        handleEditTitleEvent(collectionData.id, collectionData.name);
+        render();
+    });
+
+    rootElement.appendChild(collectionDetailBodyElement(collectionData));
+}
+
+/*** Render Collections Overview ***/
 
 function collectionSummaryInnerUpperElement(collectionSummaryData) {
     const elem = e("div", {class: ["collection-summary-box-inner-upper"]});
@@ -275,31 +303,7 @@ function renderCollectionsOverview() {
     ));
 }
 
-function renderCollectionDetail() {
-    const collectionData = getTodoCollection(state.openCollectionID);
-
-    const head = rootElement.appendChild(e("div", {id: "app-head"}));
-    const backButton = head.appendChild(e("div", {class: ["head-button"]}));
-    const title = head.appendChild(e("span", {id: "head-title"}));
-    const editButton = head.appendChild(e("div", {class: ["head-button"]}));
-
-    backButton.appendChild(txt("Back"));
-    backButton.addEventListener("click", (ev) => {
-        openOverview();
-        render();
-    });
-
-    const titleText = title.appendChild(e("b", {}));
-    titleText.appendChild(txt(collectionData.name));
-
-    editButton.appendChild(txt("Edit Title"));
-    editButton.addEventListener("click", (ev) => {
-        handleEditTitleEvent(collectionData.id, collectionData.name);
-        render();
-    });
-
-    rootElement.appendChild(collectionDetailBodyElement(collectionData));
-}
+/*** Render Root ***/
 
 function render() {
     rootElement.innerHTML = "";

@@ -12,7 +12,10 @@
 
 import {calculate} from "./algorithm.js";
 
+const assert = console.assert;
+
 const payoutsDisp = document.querySelector("#payouts-disp");
+const resetButton = document.querySelector("#reset-button");
 
 const lineCells = {
     a: document.querySelector("#cell-a"),
@@ -65,7 +68,7 @@ function element(tagName, attributes={}) {
     const elem = document.createElement(tagName);
     if ("id" in attributes) elem.setAttribute("id", attributes.id);
     if ("class" in attributes) {
-        console.assert(attributes.class instanceof Array, "Class must be an array.");
+        assert(attributes.class instanceof Array, "Class must be an array.");
         elem.classList.add(...attributes.class);
     }
     return elem;
@@ -74,19 +77,34 @@ function element(tagName, attributes={}) {
 /*** Rendering: Specifics ***/
 
 function lineCellElement(letter) {
-    const ret = element("div", {class: ["line-button"]});
+    const ret = element("div", {class: ["line-box"]});
     const lineAverage = calculated.lineAverages[letter];
-    ret.appendChild(txt(lineAverage.toFixed(2)));
+    ret.appendChild(txt(lineAverage.toFixed(1)));
     return ret;
 }
 
-function numCellElement() {
-    const ret = element("div", {class: ["num-button"]});
-    for (let i = 1; i <= 9; ++i) {
-        const elem = ret.appendChild(element("div"));
-        elem.appendChild(txt(String(i)));
+function numCellElement(position) {
+    const currNumber = state.knownNumbers[position];
+    if (currNumber !== null) {
+        const ret = element("div", {class: ["num-box-revealed"]});
+        ret.appendChild(txt(String(currNumber)));
+        return ret;
+    } else {
+        const ret = element("div", {class: ["num-box"]});
+        for (let i = 1; i <= 9; ++i) {
+            const elem = ret.appendChild(element("div"));
+            if (calculated.numbersNotSeen.has(i)) {
+                elem.classList.add("button");
+                elem.appendChild(txt(String(i)));
+                elem.addEventListener("click", e => {
+                    setNumber(position, i);
+                    render();
+                });
+            }
+            // If number has been seen, the button won't be rendered
+        }
+        return ret;
     }
-    return ret;
 }
 
 /*** Rendering: Top Level ***/
@@ -101,7 +119,7 @@ function renderLineCells() {
 function renderNumCells() {
     for (const [i, cellElem] of numCells.entries()) {
         cellElem.innerHTML = "";
-        cellElem.appendChild(numCellElement());
+        cellElem.appendChild(numCellElement(i));
     }
 }
 
@@ -119,7 +137,20 @@ function render() {
     renderLineCells();
 }
 
+resetButton.addEventListener("click", e => {
+    reset();
+    render();
+})
+
 /*** State ***/
+
+function setNumber(position, number) {
+    assert(state.knownNumbers[position] === null);
+    state.knownNumbers[position] = number;
+    checkState();
+    doCalculation();
+    render();
+}
 
 function doCalculation() {
     calculated = calculate(state.knownNumbers, payouts);
@@ -135,6 +166,17 @@ function reset() {
         ],
     };
     doCalculation();
+    checkState();
+}
+
+function checkState() {
+    const seenNumbers = new Set();
+    for (const n of state.knownNumbers) {
+        if (n === null) continue;
+        assert((n > 0) && (n <= 9));
+        assert(!seenNumbers.has(n));
+        seenNumbers.add(n);
+    }
 }
 
 let state = {}; // Minimal set of app state

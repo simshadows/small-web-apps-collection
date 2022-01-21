@@ -10,6 +10,8 @@
 //      f 3 4 5
 //      g 6 7 8
 
+import {calculate} from "./algorithm.js";
+
 const payoutsDisp = document.querySelector("#payouts-disp");
 
 const lineCells = {
@@ -71,6 +73,13 @@ function element(tagName, attributes={}) {
 
 /*** Rendering: Specifics ***/
 
+function lineCellElement(letter) {
+    const ret = element("div", {class: ["line-button"]});
+    const lineAverage = calculated.lineAverages[letter];
+    ret.appendChild(txt(lineAverage.toFixed(2)));
+    return ret;
+}
+
 function numCellElement() {
     const ret = element("div", {class: ["num-button"]});
     for (let i = 1; i <= 9; ++i) {
@@ -85,8 +94,7 @@ function numCellElement() {
 function renderLineCells() {
     for (const [letter, cellElem] of Object.entries(lineCells)) {
         cellElem.innerHTML = "";
-        const elem = cellElem.appendChild(element("div", {class: ["line-button"]}));
-        elem.appendChild(txt("x"));
+        cellElem.appendChild(lineCellElement(letter));
     }
 }
 
@@ -111,5 +119,27 @@ function render() {
     renderLineCells();
 }
 
+/*** State ***/
+
+function doCalculation() {
+    calculated = calculate(state.knownNumbers, payouts);
+    console.log(calculated);
+}
+
+function reset() {
+    state = {
+        knownNumbers: [
+            null, null, null,
+            null, null, null,
+            null, null, null,
+        ],
+    };
+    doCalculation();
+}
+
+let state = {}; // Minimal set of app state
+let calculated = {}; // Values calculated from that state
+
+reset();
 render();
 

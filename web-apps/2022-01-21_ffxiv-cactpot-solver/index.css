@@ -1,0 +1,147 @@
+/*
+ * Filename: index.css
+ * Author:   simshadows <contact@simshadows.com>
+ * License:  GNU Affero General Public License v3 (AGPL-3.0)
+ */
+
+@font-face {
+    font-family: Inconsolata;
+    src: url(./assets/inconsolata-font/Inconsolata-VariableFont_wdth,wght.ttf);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: default;
+    font-family: Inconsolata, Consolas, monospace;
+}
+body {
+    padding: 1em;
+}
+
+#app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 0.5em;
+
+    width: 100%;
+    height: 100%;
+
+    font-size: 5.5vh;
+    font-weight: bold;
+}
+
+div.app-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    row-gap: 0.4em;
+
+    padding: 0.5em;
+    height: 100%;
+    background: #666;
+}
+
+#app-left {
+    flex: 1;
+}
+#playarea {
+    flex: 1;
+
+    display: grid;
+    gap: 0.4em;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    grid-auto-flow: row;
+
+    width: 100%;
+}
+
+#app-right {
+    width: 6em;
+}
+#payouts-disp {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.1em;
+
+    width: 100%;
+}
+#payouts-disp > * {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 50%;
+    background: #aaa;
+}
+#payouts-edit {
+    background: #fff;
+}
+
+.cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cell > * {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+    width: 100%;
+}
+.cell-next-row {
+    grid-column: 1;
+}
+
+#cell-a {
+    grid-column: 2;
+}
+
+.bottom-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fff;
+    width: 100%;
+    height: 2em;
+}
+
+.line-button {
+    background: #aaa;
+}
+
+.num-button {
+    display: grid;
+    gap: 0.1em;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-auto-flow: row;
+
+    padding: 0.2em;
+    background: #aaa;
+}
+.num-button > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #fff;
+    font-size: 75%;
+    height: 100%;
+    width: 100%;
+}
+

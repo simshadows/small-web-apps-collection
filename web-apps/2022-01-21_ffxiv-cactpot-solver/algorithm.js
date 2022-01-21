@@ -27,7 +27,7 @@ function permutationsFullLength(arr) {
     return ret;
 }
 
-function calculateLineAverages(knownNumbers, payouts, numbersNotSeen) {
+function calculateLinesAverages(knownNumbers, payouts, numbersNotSeen) {
     assert(knownNumbers instanceof Array);
     assert(knownNumbers.length === 9);
 
@@ -69,11 +69,35 @@ function calculateLineAverages(knownNumbers, payouts, numbersNotSeen) {
         lineSums.h += payouts[m[6] + m[7] + m[8] - 6];
     }
 
-    const lineAverages = {};
+    const linesAverages = {};
     for (const [k, v] of Object.entries(lineSums)) {
-        lineAverages[k] = v / numbersNotSeenPermutations.length;
+        linesAverages[k] = v / numbersNotSeenPermutations.length;
     }
-    return lineAverages;
+    return linesAverages;
+}
+
+function averageOfLinesMaps(linesMapsArray) {
+    assert(linesMapsArray instanceof Array);
+    assert(linesMapsArray.length > 0); // Not designed for anything larger
+    const ret = {};
+    for (const k of Object.keys(linesMapsArray[0])) {
+        ret[k] = [];
+    }
+    for (const linesMap of linesMapsArray) {
+        assert(typeof linesMap === "object");
+        assert(Object.keys(linesMap).length === 8);
+        for (const [k, v] of Object.entries(linesMap)) {
+            assert(typeof v === "number");
+            ret[k].push(v);
+        }
+    }
+    for (const k of Object.keys(ret)) {
+        const arr = ret[k];
+        const sum = arr.reduce((a, b) => (a + b), 0);
+        ret[k] = sum / arr.length;
+    }
+    console.log(ret);
+    return ret;
 }
 
 function calculateRecursive(knownNumbers, payouts, numbersNotSeen, remainToSelect) {
@@ -86,10 +110,41 @@ function calculateRecursive(knownNumbers, payouts, numbersNotSeen, remainToSelec
     assert(numbersNotSeen instanceof Set);
     assert(typeof remainToSelect === "number");
 
-    const lineAverages = calculateLineAverages(knownNumbers, payouts, numbersNotSeen);
+    // selectionScore will be an array of 9 ints, corresponding to a number cell.
+    // Each number indicates the average of the possible maximum line averages, were you to pick the cell.
+    const selectionScores = [];
+    let selectionScoresMax = 0;
 
+    // linesAveragesArr will be an array of lines averages, which will eventually be averaged together
+    // to form an aggregate lines average.
+    const linesAveragesArr = [];
+
+    for (let i = 0; i < knownNumbers.length; ++i) {
+        if (knownNumbers[i] !== null) {
+            selectionScores.push(null);
+        } else {
+            let sumOfLinesAveragesMaxVals = 0;
+            for (const n of numbersNotSeen) {
+                const newKnownNumbers = knownNumbers.slice();
+                const newNumbersNotSeen = new Set(numbersNotSeen);
+                newKnownNumbers[i] = n;
+                newNumbersNotSeen.delete(n);
+                const linesAverages = calculateLinesAverages(newKnownNumbers, payouts, newNumbersNotSeen);
+                const linesAveragesMax = Math.max(...Object.values(linesAverages));
+                sumOfLinesAveragesMaxVals += linesAveragesMax;
+                linesAveragesArr.push(linesAverages);
+            }
+            const selectionScore = sumOfLinesAveragesMaxVals / numbersNotSeen.size;
+            if (selectionScoresMax < selectionScore) selectionScoresMax = selectionScore;
+            selectionScores.push(selectionScore);
+        }
+    }
+
+    const linesAverages = averageOfLinesMaps(linesAveragesArr);
     return {
-        lineAverages,
+        linesAverages,
+        selectionScores,
+        selectionScoresMax,
     };
 }
 
@@ -108,7 +163,10 @@ export function calculate(knownNumbers, payouts) {
     const results = calculateRecursive(knownNumbers, payouts, numbersNotSeen, remainToSelect);
 
     return {
-        lineAverages: results.lineAverages,
+        linesAverages: results.linesAverages,
+        selectionScores: results.selectionScores,
+        selectionScoresMax: results.selectionScoresMax,
+
         numbersNotSeen: numbersNotSeen,
         remainToSelect: remainToSelect,
     };

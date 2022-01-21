@@ -79,9 +79,9 @@ function element(tagName, attributes={}) {
 
 function lineCellElement(letter) {
     const ret = element("div", {class: ["line-box"]});
-    const lineAverage = calculated.lineAverages[letter];
-    ret.appendChild(txt(lineAverage.toFixed(1)));
-    if ((calculated.remainToSelect === 0) && (lineAverage === Math.max(...Object.values(calculated.lineAverages)))) {
+    const linesAverage = calculated.linesAverages[letter];
+    ret.appendChild(txt(linesAverage.toFixed(1)));
+    if ((calculated.remainToSelect === 0) && (linesAverage === Math.max(...Object.values(calculated.linesAverages)))) {
         ret.classList.add("line-box-best");
     }
     return ret;
@@ -96,6 +96,9 @@ function numCellElement(position) {
     } else {
         const ret = element("div", {class: ["num-box"]});
         if (calculated.remainToSelect === 0) return ret;
+        if ((calculated.remainToSelect !== 4) && (calculated.selectionScores[position] === calculated.selectionScoresMax)) {
+            ret.classList.add("num-box-highlight");
+        }
         for (let i = 1; i <= 9; ++i) {
             const elem = ret.appendChild(element("div"));
             if (calculated.numbersNotSeen.has(i)) {

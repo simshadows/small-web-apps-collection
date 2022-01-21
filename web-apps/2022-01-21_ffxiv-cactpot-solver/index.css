@@ -157,6 +157,9 @@ div.line-box-best {
     width: 100%;
 }
 
+.num-box-highlight {
+    background: #36bf36;
+}
 .num-box-revealed {
     display: flex;
     align-items: center;

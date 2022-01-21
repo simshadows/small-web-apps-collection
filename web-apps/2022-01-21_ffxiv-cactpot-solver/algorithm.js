@@ -110,7 +110,7 @@ function calculateRecursive(knownNumbers, payouts, numbersNotSeen, remainToSelec
     assert(typeof remainToSelect === "number");
 
     // selectionScore will be an array of 9 ints, corresponding to a number cell.
-    // Each number indicates the average of the possible maximum line averages, were you to pick the cell.
+    // Entries can be null if that cell already has a number.
     const selectionScores = [];
     let selectionScoresMax = 0;
 

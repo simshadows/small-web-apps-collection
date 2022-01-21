@@ -129,9 +129,12 @@ div.button:active {
     height: 2em;
 }
 
-.line-box {
+div.line-box {
     background: #aaa;
     font-size: 75%;
+}
+div.line-box-best {
+    background: #67cf67;
 }
 
 .num-box {
@@ -160,6 +163,6 @@ div.button:active {
     justify-content: center;
 
     font-size: 200%;
-    background: #aaa;
+    background: #fff;
 }
 

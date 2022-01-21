@@ -110,6 +110,7 @@ export function calculate(knownNumbers, payouts) {
     return {
         lineAverages: results.lineAverages,
         numbersNotSeen: numbersNotSeen,
+        remainToSelect: remainToSelect,
     };
 }
 

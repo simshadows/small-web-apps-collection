@@ -106,10 +106,6 @@ div.app-section {
     grid-column: 1;
 }
 
-#cell-a {
-    grid-column: 2;
-}
-
 div.button {
     background: #fff;
 }

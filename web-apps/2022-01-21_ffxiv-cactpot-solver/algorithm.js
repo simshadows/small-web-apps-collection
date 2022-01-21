@@ -37,10 +37,10 @@ function calculateLineAverages(knownNumbers, payouts, numbersNotSeen) {
     assert(numbersNotSeen instanceof Set);
 
     // Layout:
-    //        a b c d
-    //      e 0 1 2
-    //      f 3 4 5
-    //      g 6 7 8
+    //      a b c d e
+    //      f 0 1 2
+    //      g 3 4 5
+    //      h 6 7 8
     const lineSums = {
         a: 0,
         b: 0,
@@ -49,6 +49,7 @@ function calculateLineAverages(knownNumbers, payouts, numbersNotSeen) {
         e: 0,
         f: 0,
         g: 0,
+        h: 0,
     };
 
     const numbersNotSeenPermutations = permutationsFullLength(Array.from(numbersNotSeen));
@@ -58,13 +59,14 @@ function calculateLineAverages(knownNumbers, payouts, numbersNotSeen) {
             // permutation Array is modified!
             m.push((k === null) ? permutation.pop() : k);
         }
-        lineSums.a += payouts[m[0] + m[3] + m[6] - 6];
-        lineSums.b += payouts[m[1] + m[4] + m[7] - 6];
-        lineSums.c += payouts[m[2] + m[5] + m[8] - 6];
-        lineSums.d += payouts[m[2] + m[4] + m[6] - 6];
-        lineSums.e += payouts[m[0] + m[1] + m[2] - 6];
-        lineSums.f += payouts[m[3] + m[4] + m[5] - 6];
-        lineSums.g += payouts[m[6] + m[7] + m[8] - 6];
+        lineSums.a += payouts[m[0] + m[4] + m[8] - 6];
+        lineSums.b += payouts[m[0] + m[3] + m[6] - 6];
+        lineSums.c += payouts[m[1] + m[4] + m[7] - 6];
+        lineSums.d += payouts[m[2] + m[5] + m[8] - 6];
+        lineSums.e += payouts[m[2] + m[4] + m[6] - 6];
+        lineSums.f += payouts[m[0] + m[1] + m[2] - 6];
+        lineSums.g += payouts[m[3] + m[4] + m[5] - 6];
+        lineSums.h += payouts[m[6] + m[7] + m[8] - 6];
     }
 
     const lineAverages = {};

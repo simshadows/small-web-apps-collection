@@ -5,10 +5,10 @@
  */
 
 // Layout:
-//        a b c d
-//      e 0 1 2
-//      f 3 4 5
-//      g 6 7 8
+//      a b c d e
+//      f 0 1 2
+//      g 3 4 5
+//      h 6 7 8
 
 import {calculate} from "./algorithm.js";
 
@@ -25,6 +25,7 @@ const lineCells = {
     e: document.querySelector("#cell-e"),
     f: document.querySelector("#cell-f"),
     g: document.querySelector("#cell-g"),
+    h: document.querySelector("#cell-h"),
 }
 const numCells = [
     document.querySelector("#cell-0"),

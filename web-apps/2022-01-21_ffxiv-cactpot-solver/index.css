@@ -65,28 +65,40 @@ div.app-section {
 }
 
 #app-right {
-    width: 6em;
+    width: 5.2em;
 }
 #payouts-disp {
     flex: 1;
 
     display: flex;
     flex-direction: column;
-    row-gap: 0.1em;
+    row-gap: 0.15em;
 
     width: 100%;
 }
-#payouts-disp > * {
+#payouts-disp > div {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    font-size: 60%;
-    background: #aaa;
+    column-gap: 0.15em;
 }
-#payouts-edit {
-    background: #fff;
+#payouts-disp > div > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+    background: #aaa;
+    font-size: 60%;
+}
+div.payouts-score-box {
+    width: 2.5em;
+}
+div.payouts-mgp-box {
+    flex: 1;
+
+    background: #aaa;
 }
 
 .cell {

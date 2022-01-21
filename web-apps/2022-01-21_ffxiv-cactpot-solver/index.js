@@ -148,7 +148,12 @@ function renderPayouts() {
     payoutsDisp.innerHTML = "";
     for (const [i, payout] of payouts.entries()) {
         const elem = payoutsDisp.appendChild(element("div"));
-        elem.appendChild(txt(String(i + 6) + " --> " + String(payout)));
+
+        const scoreBox = elem.appendChild(element("div", {class: ["payouts-score-box"]}));
+        scoreBox.appendChild(txt(String(i + 6)));
+
+        const mgpBox = elem.appendChild(element("div", {class: ["payouts-mgp-box"]}));
+        mgpBox.appendChild(txt(String(payout)));
     }
 }
 

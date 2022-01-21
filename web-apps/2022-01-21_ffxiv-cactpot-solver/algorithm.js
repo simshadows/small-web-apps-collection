@@ -96,7 +96,6 @@ function averageOfLinesMaps(linesMapsArray) {
         const sum = arr.reduce((a, b) => (a + b), 0);
         ret[k] = sum / arr.length;
     }
-    console.log(ret);
     return ret;
 }
 

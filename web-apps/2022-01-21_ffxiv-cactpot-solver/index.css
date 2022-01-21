@@ -93,6 +93,7 @@ div.app-section {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 }
 .cell > * {
     display: flex;
@@ -107,6 +108,10 @@ div.app-section {
 }
 
 div.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     background: #fff;
 }
 div.button {
@@ -119,16 +124,6 @@ div.button:active {
     background: #aaf;
 }
 
-.bottom-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #fff;
-    width: 100%;
-    height: 2em;
-}
-
 div.line-box {
     background: #aaa;
     font-size: 75%;
@@ -138,16 +133,38 @@ div.line-box-best {
 }
 
 .num-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    background: #aaa;
+}
+.num-box > div {
+    width: 100%;
+}
+
+.num-score-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.1em 0 0 0;
+    font-size: 45%;
+}
+
+.num-box-buttongrid {
+    flex: 1;
+
     display: grid;
     gap: 0.1em;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
     grid-auto-flow: row;
 
-    padding: 0.2em;
-    background: #aaa;
+    padding: 0.1em 0.2em 0.2em 0.2em;
 }
-.num-box > div {
+.num-box-buttongrid > div {
     display: flex;
     align-items: center;
     justify-content: center;

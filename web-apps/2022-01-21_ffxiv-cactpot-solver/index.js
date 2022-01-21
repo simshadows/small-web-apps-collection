@@ -87,32 +87,27 @@ function lineCellElement(letter) {
     return ret;
 }
 
-function numCellElement(position) {
-    const currNumber = state.knownNumbers[position];
-    if (currNumber !== null) {
-        const ret = element("div", {class: ["num-box-revealed"]});
-        ret.appendChild(txt(String(currNumber)));
-        return ret;
-    } else {
-        const ret = element("div", {class: ["num-box"]});
-        if (calculated.remainToSelect === 0) return ret;
-        if ((calculated.remainToSelect !== 4) && (calculated.selectionScores[position] === calculated.selectionScoresMax)) {
-            ret.classList.add("num-box-highlight");
+function numCellButtonsElement(position) {
+    const ret = element("div", {class: ["num-box-buttongrid"]});
+    for (let i = 1; i <= 9; ++i) {
+        const elem = ret.appendChild(element("div"));
+        if (calculated.numbersNotSeen.has(i)) {
+            elem.classList.add("button");
+            elem.appendChild(txt(String(i)));
+            elem.addEventListener("click", e => {
+                setNumber(position, i);
+                render();
+            });
         }
-        for (let i = 1; i <= 9; ++i) {
-            const elem = ret.appendChild(element("div"));
-            if (calculated.numbersNotSeen.has(i)) {
-                elem.classList.add("button");
-                elem.appendChild(txt(String(i)));
-                elem.addEventListener("click", e => {
-                    setNumber(position, i);
-                    render();
-                });
-            }
-            // If number has been seen, the button won't be rendered
-        }
-        return ret;
+        // If number has been seen, the button won't be rendered
     }
+    return ret;
+}
+
+function numCellSelectionScoreElement(selectionScore) {
+    const ret = element("div", {class: ["num-score-box"]});
+    ret.appendChild(txt(String(selectionScore.toFixed(2))));
+    return ret;
 }
 
 /*** Rendering: Top Level ***/
@@ -127,7 +122,25 @@ function renderLineCells() {
 function renderNumCells() {
     for (const [i, cellElem] of numCells.entries()) {
         cellElem.innerHTML = "";
-        cellElem.appendChild(numCellElement(i));
+        const cellElemInner = cellElem.appendChild(element("div"));
+
+        const currNumber = state.knownNumbers[i];
+        if (currNumber !== null) {
+            cellElemInner.classList.add("num-box-revealed");
+            cellElemInner.appendChild(txt(String(currNumber)));
+        } else {
+            if (calculated.remainToSelect === 0) continue;
+
+            cellElemInner.classList.add("num-box");
+            const selectionScore = calculated.selectionScores[i];
+            assert(selectionScore !== null);
+            cellElemInner.appendChild(numCellSelectionScoreElement(selectionScore));
+            cellElemInner.appendChild(numCellButtonsElement(i));
+        }
+
+        if ((calculated.remainToSelect !== 4) && (calculated.selectionScores[i] === calculated.selectionScoresMax)) {
+            cellElemInner.classList.add("num-box-highlight");
+        }
     }
 }
 

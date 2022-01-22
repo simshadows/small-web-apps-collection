@@ -51,13 +51,18 @@ function calculateLinesAverages(knownNumbers, payouts, numbersNotSeen) {
         h: 0,
     };
 
+    const unknownNumberPositions = [];
+    for (const [i, n] of knownNumbers.entries()) {
+        if (n === null) unknownNumberPositions.push(i);
+    }
+    assert(unknownNumberPositions.length === numbersNotSeen.size);
+
     const numbersNotSeenPermutations = permutationsFullLength(Array.from(numbersNotSeen));
     //console.log("calculateLinesAverages returned " + String(numbersNotSeenPermutations.length) + " items");
     for (const permutation of numbersNotSeenPermutations) {
-        const m = [];
-        for (const k of knownNumbers) {
-            // permutation Array is modified!
-            m.push((k === null) ? permutation.pop() : k);
+        const m = knownNumbers.slice();
+        for (const i of unknownNumberPositions) {
+            m[i] = permutation.pop(); // permutation Array is modified!
         }
         lineSums.a += payouts[m[0] + m[4] + m[8] - 6];
         lineSums.b += payouts[m[0] + m[3] + m[6] - 6];

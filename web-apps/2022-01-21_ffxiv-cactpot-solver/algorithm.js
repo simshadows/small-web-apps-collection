@@ -59,8 +59,8 @@ function calculateLinesAverages(knownNumbers, payouts, numbersNotSeen) {
 
     const numbersNotSeenPermutations = permutationsFullLength(Array.from(numbersNotSeen));
     //console.log("calculateLinesAverages returned " + String(numbersNotSeenPermutations.length) + " items");
+    const m = knownNumbers.slice();
     for (const permutation of numbersNotSeenPermutations) {
-        const m = knownNumbers.slice();
         for (const i of unknownNumberPositions) {
             m[i] = permutation.pop(); // permutation Array is modified!
         }

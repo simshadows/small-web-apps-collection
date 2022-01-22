@@ -11,19 +11,18 @@ function permutationsFullLength(arr) {
     if (arr.length == 0) return [[]];
 
     const ret = [];
-    function op(remaining, partialSolution) {
+    function op(remaining, partialSolution, partialSolutionNextIndex) {
         if (remaining.length === 0) {
-            ret.push(partialSolution);
+            ret.push(partialSolution.slice());
         } else {
             for (let i = 0; i < remaining.length; ++i) {
                 const newRemaining = remaining.slice();
-                const extracted = newRemaining.splice(i, 1);
-                const newPartialSolution = partialSolution.concat(extracted);
-                op(newRemaining, newPartialSolution);
+                partialSolution[partialSolutionNextIndex] = newRemaining.splice(i, 1)[0];
+                op(newRemaining, partialSolution, partialSolutionNextIndex + 1);
             }
         }
     }
-    op(arr, []);
+    op(arr, [], 0);
     return ret;
 }
 
@@ -53,6 +52,7 @@ function calculateLinesAverages(knownNumbers, payouts, numbersNotSeen) {
     };
 
     const numbersNotSeenPermutations = permutationsFullLength(Array.from(numbersNotSeen));
+    //console.log("calculateLinesAverages returned " + String(numbersNotSeenPermutations.length) + " items");
     for (const permutation of numbersNotSeenPermutations) {
         const m = [];
         for (const k of knownNumbers) {
@@ -81,25 +81,24 @@ function averageOfLinesMaps(linesMapsArray) {
     assert(linesMapsArray.length > 0); // Not designed for anything larger
     const ret = {};
     for (const k of Object.keys(linesMapsArray[0])) {
-        ret[k] = [];
+        ret[k] = 0;
     }
     for (const linesMap of linesMapsArray) {
         assert(typeof linesMap === "object");
         assert(Object.keys(linesMap).length === 8);
         for (const [k, v] of Object.entries(linesMap)) {
             assert(typeof v === "number");
-            ret[k].push(v);
+            ret[k] += v;
         }
     }
     for (const k of Object.keys(ret)) {
-        const arr = ret[k];
-        const sum = arr.reduce((a, b) => (a + b), 0);
-        ret[k] = sum / arr.length;
+        ret[k] /= linesMapsArray.length;
     }
     return ret;
 }
 
-function calculateRecursive(knownNumbers, payouts, numbersNotSeen, remainToSelect) {
+// I need a better name for this...
+function calculate2(knownNumbers, payouts, numbersNotSeen, remainToSelect) {
     assert(knownNumbers instanceof Array);
     assert(knownNumbers.length === 9);
 
@@ -159,7 +158,7 @@ export function calculate(knownNumbers, payouts) {
     }
 
     const remainToSelect = numbersNotSeen.size - 5;
-    const results = calculateRecursive(knownNumbers, payouts, numbersNotSeen, remainToSelect);
+    const results = calculate2(knownNumbers, payouts, numbersNotSeen, remainToSelect);
 
     return {
         linesAverages: results.linesAverages,

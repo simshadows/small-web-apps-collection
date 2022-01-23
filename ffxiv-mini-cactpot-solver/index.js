@@ -85,8 +85,8 @@ function element(tagName, attributes={}) {
 function lineCellElement(letter) {
     const ret = element("div", {class: ["line-box"]});
     const linesAverage = calculated.linesAverages[letter];
-    ret.appendChild(txt(Math.round(linesAverage).toFixed(0)));
-    if ((calculated.remainToSelect === 0) && (linesAverage === Math.max(...Object.values(calculated.linesAverages)))) {
+    ret.appendChild(txt(roundDecPl(linesAverage, 2).toFixed(2)));
+    if ((calculated.remainToSelect === 0) && (linesAverage === calculated.linesAveragesMax)) {
         ret.classList.add("line-box-best");
     }
     return ret;
@@ -183,8 +183,12 @@ function setNumber(position, number) {
 }
 
 function doCalculation() {
+    const start = new Date();
     calculated = calculate(state.knownNumbers, payouts);
+    const end = new Date();
+    const durationStr = roundDecPl(((end - start) / 1000), 2).toFixed(2) + "s";
     console.log(calculated);
+    console.log("calculate() ran for " + durationStr + " (real time)");
 }
 
 function doCalculationWorkaround() {
@@ -199,7 +203,17 @@ function doCalculationWorkaround() {
             g: 360.3452380952381,
             h: 360.3452380952381,
         },
-        selectionScores: [0,0,0,0,0,0,0,0,0],
+        selectionScores: [
+            1510.4806216931217, // Cell 0
+            1453.1979497354498, // Cell 1
+            1510.4806216931217, // Cell 2
+            1453.1979497354498, // Cell 3
+            1510.1404431216934, // Cell 4
+            1453.1979497354498, // Cell 5
+            1510.4806216931217, // Cell 6
+            1453.1979497354498, // Cell 7
+            1510.4806216931217, // Cell 8
+        ],
         selectionScoresMax: 0,
 
         numbersNotSeen: new Set([1,2,3,4,5,6,7,8,9]),

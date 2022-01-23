@@ -162,8 +162,16 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
     // to form an aggregate lines average.
     const linesAveragesArr = [];
 
-    if (remainToSelect === 0) {
-        // Selection score of a cell is calculated as the average of line-averages-max values.
+    if (remainToSelect <= 1) {
+        // We only have one cell remaining to select.
+        // After we select this cell, we will pick the line with the highest average MGP earning.
+        // Therefore, for each unknown cell, we calculate this value for each possible number that can be in that cell,
+        // and the average is the cell's selection score.
+
+        // TL;DR: selection score of a cell = average of all maximum-line-averages
+
+        // (Yes, this block will also run if remainToSelect is zero because we don't really care at that point.)
+
         for (let i = 0; i < knownNumbers.length; ++i) {
             if (knownNumbers[i] !== null) {
                 selectionScores.push(null);
@@ -181,7 +189,13 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
             selectionScores.push(sumOfLinesAveragesMaxVals / numbersNotSeen.size);
         }
     } else {
-        // Selection score of a cell is calculated as the average of selection-scores-max values.
+        // We have more than one more cell to select.
+        // After we select this cell, the next cell we pick will also have the highest selection score.
+        // Therefore, for each unknown cell, we calculate this value for each possible number that can be in that cell,
+        // and the average is the cell's selection score.
+
+        // TL;DR: selection score of a cell = average of all maximum-selection-scores
+
         for (let i = 0; i < knownNumbers.length; ++i) {
             if (knownNumbers[i] !== null) {
                 selectionScores.push(null);
@@ -241,6 +255,7 @@ export function calculate(knownNumbers, payouts) {
 
     return {
         linesAverages: results.linesAverages,
+        linesAveragesMax: Math.max(...Object.values(results.linesAverages)),
         selectionScores: results.selectionScores,
         selectionScoresMax: results.selectionScoresMax,
 

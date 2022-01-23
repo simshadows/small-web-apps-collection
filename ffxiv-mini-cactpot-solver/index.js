@@ -12,6 +12,9 @@
 
 import {calculate} from "./algorithm.js";
 
+const USE_WORKAROUND = true;
+const FAST_BENCHMARK = false;
+
 const assert = console.assert;
 
 const payoutsDisp = document.querySelector("#payouts-disp");
@@ -131,7 +134,12 @@ function renderNumCells() {
 
         const currNumber = state.knownNumbers[i];
         if (currNumber !== null) {
+            cellElemInner.classList.add("button");
             cellElemInner.classList.add("num-box-revealed");
+            cellElemInner.addEventListener("click", e => {
+                setNumber(i, null);
+                render();
+            });
             cellElemInner.appendChild(txt(String(currNumber)));
         } else {
             if (calculated.remainToSelect === 0) continue;
@@ -176,13 +184,19 @@ resetButton.addEventListener("click", e => {
 /*** State ***/
 
 function setNumber(position, number) {
-    assert(state.knownNumbers[position] === null);
     state.knownNumbers[position] = number;
     checkState();
     doCalculation();
 }
 
 function doCalculation() {
+    const noSelections = state.knownNumbers.every((e) => (e === null));
+    if (USE_WORKAROUND && noSelections) {
+        // Empty board is slow, so we use this hacky solution to speed it up.
+        doCalculationWorkaround(); 
+        return;
+    }
+
     const start = new Date();
     calculated = calculate(state.knownNumbers, payouts);
     const end = new Date();
@@ -224,13 +238,12 @@ function doCalculationWorkaround() {
 function reset() {
     state = {
         knownNumbers: [
-            null, null, null,
-            null, null, null,
-            null, null, null,
+            null                         , null, null,
+            ((FAST_BENCHMARK) ? 1 : null), null, null,
+            null                         , null, null,
         ],
     };
-    //doCalculation(); // If possible, please use this to organically recalculate the initial state
-    doCalculationWorkaround(); // Only use this if the algorithm is too slow!
+    doCalculation();
     checkState();
 }
 

@@ -73,6 +73,11 @@ function toDisplayableNumber(n) {
     return (n === null) ? "?" : roundDecPl(n, 2).toFixed(2);
 }
 
+// Close enough to be considered equal within an arbitrary tolerance.
+function floatsAreEqual(a, b) {
+    return Math.abs(a - b) < 0.00000000001;
+}
+
 function matchesDefaultPayouts(arr) {
     assert(arr.length === defaultPayouts.length);
     for (const [i, v] of defaultPayouts.entries()) {
@@ -101,7 +106,7 @@ function lineCellElement(letter) {
     const ret = element("div", {class: ["line-box"]});
     const linesAverage = calculated.linesAverages[letter];
     ret.appendChild(txt(toDisplayableNumber(linesAverage)));
-    if ((calculated.remainToSelect === 0) && (linesAverage === calculated.linesAveragesMax)) {
+    if ((calculated.remainToSelect === 0) && floatsAreEqual(linesAverage, calculated.linesAveragesMax)) {
         ret.classList.add("line-box-best");
     }
     return ret;
@@ -162,7 +167,7 @@ function renderNumCells() {
             cellElemInner.appendChild(numCellButtonsElement(i));
         }
 
-        if ((calculated.remainToSelect !== 4) && (calculated.selectionScores[i] === calculated.selectionScoresMax)) {
+        if ((calculated.remainToSelect !== 4) && floatsAreEqual(calculated.selectionScores[i], calculated.selectionScoresMax)) {
             cellElemInner.classList.add("num-box-highlight");
         }
     }

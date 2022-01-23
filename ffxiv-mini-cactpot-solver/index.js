@@ -75,12 +75,16 @@ function floatsAreEqual(a, b) {
     return Math.abs(a - b) < 0.00000000001;
 }
 
-function matchesDefaultPayouts(arr) {
-    assert(arr.length === defaultPayouts.length);
-    for (const [i, v] of defaultPayouts.entries()) {
-        if (arr[i] !== v) return false;
+function intArraysAreEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (const [i, v] of a.entries()) {
+        if (b[i] !== v) return false;
     }
     return true;
+}
+
+function matchesDefaultPayouts(arr) {
+    return intArraysAreEqual(arr, defaultPayouts);
 }
 
 /*** DOM Helpers ***/
@@ -224,7 +228,14 @@ const calcWrapper = (()=>{
         calcWorker = new Worker("./worker.js", {type: "module"});
         calcWorker.onmessage = function(e) {
             const result = e.data[0];
-            const startTime = e.data[1];
+            const knownNumbers = e.data[1];
+            const payouts = e.data[2];
+            const startTime = e.data[3];
+
+            // We make sure state didn't change since it was called
+            if (!intArraysAreEqual(knownNumbers, state.knownNumbers)) return;
+            if (!intArraysAreEqual(payouts, state.payouts)) return;
+
             handleCalculationResult(result, startTime);
             render();
         };

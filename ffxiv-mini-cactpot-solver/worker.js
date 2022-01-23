@@ -12,6 +12,6 @@ onmessage = (e) => {
     const startTime = e.data[2];
 
     const result = calculate(knownNumbers, payouts);
-    postMessage([result, startTime]);
+    postMessage([result, knownNumbers, payouts, startTime]);
 }
 

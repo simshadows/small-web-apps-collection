@@ -1,8 +1,10 @@
-# Sim's Random Scripts and Programs
+# Sim's Small Web Apps Collection
 
-A bunch of small scripts and programs I made for various purposes. May as well stash them somewhere.
+A collection of various small web apps.
 
-Look around and maybe you'll find something useful? idk
+Hosted at <https://apps.simshadows.com/>.
 
-*(This repository is currently a mess. I'll clean it up shortly!)*
+## License
+
+All original source code is licensed under the [*GNU Affero General Public License v3.0 (AGPLv3)*](https://www.gnu.org/licenses/agpl-3.0.en.html).
 

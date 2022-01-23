@@ -16,6 +16,8 @@ const USE_FAST_INITIAL_VALUES = true;
 const USE_ASYNC_UI = true;
 const FAST_BENCHMARK_MODE = false;
 
+const usingAsyncUI = USE_ASYNC_UI && window.Worker;
+
 const assert = console.assert;
 
 const payoutsDisp = document.querySelector("#payouts-disp");
@@ -103,11 +105,15 @@ function element(tagName, attributes={}) {
 
 function toDisplayedNumberElement(n) {
     if (n === null) {
-        const elem = element("div", {class: ["la-ball-pulse"]});
-        elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
-        elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
-        elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
-        return elem;
+        if (usingAsyncUI) {
+            const elem = element("div", {class: ["la-ball-pulse"]});
+            elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
+            elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
+            elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
+            return elem;
+        } else {
+            return txt("?");
+        }
     } else {
         return txt(roundDecPl(n, 2).toFixed(2));
     }
@@ -263,31 +269,28 @@ const calcWrapper = (()=>{
         };
     }
 
-    function doCalculation() {
-        const noSelections = state.knownNumbers.every((e) => (e === null));
-        if (USE_FAST_INITIAL_VALUES && noSelections) {
-            // Empty board is slow, so we use this hacky solution to speed it up.
-            doCalculationWorkaround(); 
-            return;
-        }
-        if (USE_ASYNC_UI && window.Worker) {
-            doCalculationAsync();
-        } else {
-            doCalculationSync();
-        }
-    }
-
-    function doCalculationSync() {
-        const start = new Date();
-        const result = calculate(state.knownNumbers, state.payouts);
-        handleCalculationResult(result, start);
-    }
-
-    function doCalculationAsync() {
-        setDummyCalculatedValues();
-        initWorker();
-        const start = new Date();
-        calcWorker.postMessage([state.knownNumbers, state.payouts, start]);
+    function setDefaultInitialValues() {
+        calculated.linesAverages = {
+            a: 360.3452380952381,
+            b: 360.3452380952381,
+            c: 360.3452380952381,
+            d: 360.3452380952381,
+            e: 360.3452380952381,
+            f: 360.3452380952381,
+            g: 360.3452380952381,
+            h: 360.3452380952381,
+        };
+        calculated.selectionScores = [
+            1510.4806216931217, // Cell 0
+            1453.1979497354498, // Cell 1
+            1510.4806216931217, // Cell 2
+            1453.1979497354498, // Cell 3
+            1510.1404431216934, // Cell 4
+            1453.1979497354498, // Cell 5
+            1510.4806216931217, // Cell 6
+            1453.1979497354498, // Cell 7
+            1510.4806216931217, // Cell 8
+        ];
     }
 
     function handleCalculationResult(result, startTime) {
@@ -298,30 +301,38 @@ const calcWrapper = (()=>{
         console.log("calculate() ran for " + durationStr + " (real time)");
     }
 
-    function doCalculationWorkaround() {
+    function doCalculationSync() {
+        const noSelections = state.knownNumbers.every((e) => (e === null));
+        if (USE_FAST_INITIAL_VALUES && noSelections) {
+            // Empty board is slow, so we use this hacky solution to speed it up.
+            setDummyCalculatedValues();
+            if (matchesDefaultPayouts(state.payouts)) setDefaultInitialValues();
+            return;
+        }
+
+        const start = new Date();
+        const result = calculate(state.knownNumbers, state.payouts);
+        handleCalculationResult(result, start);
+    }
+
+    function doCalculationAsync() {
         setDummyCalculatedValues();
-        if (matchesDefaultPayouts(state.payouts)) {
-            calculated.linesAverages = {
-                a: 360.3452380952381,
-                b: 360.3452380952381,
-                c: 360.3452380952381,
-                d: 360.3452380952381,
-                e: 360.3452380952381,
-                f: 360.3452380952381,
-                g: 360.3452380952381,
-                h: 360.3452380952381,
-            };
-            calculated.selectionScores = [
-                1510.4806216931217, // Cell 0
-                1453.1979497354498, // Cell 1
-                1510.4806216931217, // Cell 2
-                1453.1979497354498, // Cell 3
-                1510.1404431216934, // Cell 4
-                1453.1979497354498, // Cell 5
-                1510.4806216931217, // Cell 6
-                1453.1979497354498, // Cell 7
-                1510.4806216931217, // Cell 8
-            ];
+        const noSelections = state.knownNumbers.every((e) => (e === null));
+        if (USE_FAST_INITIAL_VALUES && noSelections && matchesDefaultPayouts(state.payouts)) {
+            setDefaultInitialValues();
+            return;
+        }
+
+        initWorker();
+        const start = new Date();
+        calcWorker.postMessage([state.knownNumbers, state.payouts, start]);
+    }
+
+    function doCalculation() {
+        if (usingAsyncUI) {
+            doCalculationAsync();
+        } else {
+            doCalculationSync();
         }
     }
 

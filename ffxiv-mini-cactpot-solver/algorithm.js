@@ -247,17 +247,21 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
     return ret;
 }
 
+export function calculateNumbersNotSeen(knownNumbers) {
+    const ret = new Set([1,2,3,4,5,6,7,8,9]);
+    for (const knownNumber of knownNumbers) {
+        if (knownNumber === null) continue;
+        const success = ret.delete(knownNumber);
+        if (!success) throw "Duplicate number found: " + String(knownNumber);
+    }
+    return ret;
+}
+
 export function calculate(knownNumbers, payouts) {
     assert(knownNumbers instanceof Array);
     assert(knownNumbers.length === 9);
 
-    const numbersNotSeen = new Set([1,2,3,4,5,6,7,8,9]);
-    for (const knownNumber of knownNumbers) {
-        if (knownNumber === null) continue;
-        const success = numbersNotSeen.delete(knownNumber);
-        if (!success) throw "Duplicate number found: " + String(knownNumber);
-    }
-
+    const numbersNotSeen = calculateNumbersNotSeen(knownNumbers);
     const remainToSelect = numbersNotSeen.size - 5;
 
     const allPossibleStates = getAllPossibleStates(knownNumbers, payouts, numbersNotSeen);

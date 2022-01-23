@@ -10,10 +10,11 @@
 //      g 3 4 5
 //      h 6 7 8
 
-import {calculate} from "./algorithm.js";
+import {calculate, calculateNumbersNotSeen} from "./algorithm.js";
 
-const USE_WORKAROUND = true;
-const FAST_BENCHMARK = false;
+const USE_FAST_INITIAL_VALUES = true;
+const USE_ASYNC_UI = true;
+const FAST_BENCHMARK_MODE = false;
 
 const assert = console.assert;
 
@@ -205,12 +206,117 @@ resetButton.addEventListener("click", e => {
     render();
 })
 
+/*** Calculation ***/
+
+const calcWrapper = (()=>{
+    let calcWorker;
+
+    function initWorker() {
+        if (calcWorker !== undefined) calcWorker.terminate();
+        calcWorker = new Worker("./worker.js", {type: "module"});
+        calcWorker.onmessage = function(e) {
+            const result = e.data[0];
+            const startTime = e.data[1];
+            handleCalculationResult(result, startTime);
+            render();
+        };
+    }
+
+    function setDummyCalculatedValues() {
+        // All these nulls should render as a placeholder in the Ui until real numbers are loaded in.
+        const numbersNotSeen = calculateNumbersNotSeen(state.knownNumbers);
+        calculated = {
+            linesAverages: {
+                a: null,
+                b: null,
+                c: null,
+                d: null,
+                e: null,
+                f: null,
+                g: null,
+                h: null,
+            },
+            selectionScores: [null,null,null,null,null,null,null,null,null],
+            selectionScoresMax: -1,
+
+            numbersNotSeen: numbersNotSeen,
+            remainToSelect: numbersNotSeen.size - 5,
+        };
+    }
+
+    function doCalculation() {
+        const noSelections = state.knownNumbers.every((e) => (e === null));
+        if (USE_FAST_INITIAL_VALUES && noSelections) {
+            // Empty board is slow, so we use this hacky solution to speed it up.
+            doCalculationWorkaround(); 
+            return;
+        }
+        if (USE_ASYNC_UI && window.Worker) {
+            doCalculationAsync();
+        } else {
+            doCalculationSync();
+        }
+    }
+
+    function doCalculationSync() {
+        const start = new Date();
+        const result = calculate(state.knownNumbers, state.payouts);
+        handleCalculationResult(result, start);
+    }
+
+    function doCalculationAsync() {
+        setDummyCalculatedValues();
+        initWorker();
+        const start = new Date();
+        calcWorker.postMessage([state.knownNumbers, state.payouts, start]);
+    }
+
+    function handleCalculationResult(result, startTime) {
+        calculated = result;
+        const endTime = new Date();
+        const durationStr = roundDecPl(((endTime - startTime) / 1000), 2).toFixed(2) + "s";
+        console.log(calculated);
+        console.log("calculate() ran for " + durationStr + " (real time)");
+    }
+
+    function doCalculationWorkaround() {
+        setDummyCalculatedValues();
+        if (matchesDefaultPayouts(state.payouts)) {
+            calculated.linesAverages = {
+                a: 360.3452380952381,
+                b: 360.3452380952381,
+                c: 360.3452380952381,
+                d: 360.3452380952381,
+                e: 360.3452380952381,
+                f: 360.3452380952381,
+                g: 360.3452380952381,
+                h: 360.3452380952381,
+            };
+            calculated.selectionScores = [
+                1510.4806216931217, // Cell 0
+                1453.1979497354498, // Cell 1
+                1510.4806216931217, // Cell 2
+                1453.1979497354498, // Cell 3
+                1510.1404431216934, // Cell 4
+                1453.1979497354498, // Cell 5
+                1510.4806216931217, // Cell 6
+                1453.1979497354498, // Cell 7
+                1510.4806216931217, // Cell 8
+            ];
+        }
+    }
+
+    return {
+        doCalculation,
+    };
+})();
+
 /*** State ***/
 
 function setNumber(position, number) {
     state.knownNumbers[position] = number;
     checkState();
-    doCalculation();
+    calcWrapper.doCalculation();
 }
 
 function setPayout(lineSum, mgpPayoutInput) {
@@ -229,76 +335,17 @@ function setPayout(lineSum, mgpPayoutInput) {
     }
     state.payouts[lineSum - 6] = mgpPayout;
     checkState();
-    doCalculation();
-}
-
-function doCalculation() {
-    const noSelections = state.knownNumbers.every((e) => (e === null));
-    if (USE_WORKAROUND && noSelections) {
-        // Empty board is slow, so we use this hacky solution to speed it up.
-        doCalculationWorkaround(); 
-        return;
-    }
-
-    const start = new Date();
-    calculated = calculate(state.knownNumbers, state.payouts);
-    const end = new Date();
-    const durationStr = roundDecPl(((end - start) / 1000), 2).toFixed(2) + "s";
-    console.log(calculated);
-    console.log("calculate() ran for " + durationStr + " (real time)");
-}
-
-function doCalculationWorkaround() {
-    calculated = {
-        linesAverages: {
-            a: null,
-            b: null,
-            c: null,
-            d: null,
-            e: null,
-            f: null,
-            g: null,
-            h: null,
-        },
-        selectionScores: [null,null,null,null,null,null,null,null,null],
-        selectionScoresMax: 0,
-
-        numbersNotSeen: new Set([1,2,3,4,5,6,7,8,9]),
-        remainToSelect: 4,
-    };
-
-    if (matchesDefaultPayouts(state.payouts)) {
-        calculated.linesAverages = {
-            a: 360.3452380952381,
-            b: 360.3452380952381,
-            c: 360.3452380952381,
-            d: 360.3452380952381,
-            e: 360.3452380952381,
-            f: 360.3452380952381,
-            g: 360.3452380952381,
-            h: 360.3452380952381,
-        };
-        calculated.selectionScores = [
-            1510.4806216931217, // Cell 0
-            1453.1979497354498, // Cell 1
-            1510.4806216931217, // Cell 2
-            1453.1979497354498, // Cell 3
-            1510.1404431216934, // Cell 4
-            1453.1979497354498, // Cell 5
-            1510.4806216931217, // Cell 6
-            1453.1979497354498, // Cell 7
-            1510.4806216931217, // Cell 8
-        ];
-    }
+    calcWrapper.doCalculation();
 }
 
 function reset() {
     state.knownNumbers = [
-        null                         , null, null,
-        ((FAST_BENCHMARK) ? 1 : null), null, null,
-        null                         , null, null,
+        null, null, null,
+        null, null, null,
+        null, null, null,
     ];
-    doCalculation();
+    if (FAST_BENCHMARK_MODE) state.knownNumbers[3] = 1;
+    calcWrapper.doCalculation();
     checkState();
 }
 
@@ -313,6 +360,7 @@ function checkState() {
 }
 
 const state = {
+    knownNumbers: undefined,
     payouts: defaultPayouts.slice(),
 };
 let calculated = {};

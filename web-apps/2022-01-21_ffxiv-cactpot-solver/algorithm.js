@@ -6,6 +6,9 @@
 
 const assert = console.assert;
 
+/*** Helpers ***/
+
+// General-purpose permutator
 function permutationsFullLength(arr) {
     assert(arr instanceof Array);
     if (arr.length == 0) return [[]];
@@ -26,59 +29,23 @@ function permutationsFullLength(arr) {
     return ret;
 }
 
-function calculateLinesAverages(knownNumbers, payouts, numbersNotSeen) {
-    assert(knownNumbers instanceof Array);
-    assert(knownNumbers.length === 9);
+function calculateLinePayouts(state, payouts) {
+    assert(state instanceof Array);
+    assert(state.length === 9);
 
     assert(payouts instanceof Array);
     assert(payouts.length === 19);
 
-    assert(numbersNotSeen instanceof Set);
-
-    // Layout:
-    //      a b c d e
-    //      f 0 1 2
-    //      g 3 4 5
-    //      h 6 7 8
-    const lineSums = {
-        a: 0,
-        b: 0,
-        c: 0,
-        d: 0,
-        e: 0,
-        f: 0,
-        g: 0,
-        h: 0,
+    return {
+        a: payouts[state[0] + state[4] + state[8] - 6],
+        b: payouts[state[0] + state[3] + state[6] - 6],
+        c: payouts[state[1] + state[4] + state[7] - 6],
+        d: payouts[state[2] + state[5] + state[8] - 6],
+        e: payouts[state[2] + state[4] + state[6] - 6],
+        f: payouts[state[0] + state[1] + state[2] - 6],
+        g: payouts[state[3] + state[4] + state[5] - 6],
+        h: payouts[state[6] + state[7] + state[8] - 6],
     };
-
-    const unknownNumberPositions = [];
-    for (const [i, n] of knownNumbers.entries()) {
-        if (n === null) unknownNumberPositions.push(i);
-    }
-    assert(unknownNumberPositions.length === numbersNotSeen.size);
-
-    const numbersNotSeenPermutations = permutationsFullLength(Array.from(numbersNotSeen));
-    //console.log("calculateLinesAverages returned " + String(numbersNotSeenPermutations.length) + " items");
-    const m = knownNumbers.slice();
-    for (const permutation of numbersNotSeenPermutations) {
-        for (const i of unknownNumberPositions) {
-            m[i] = permutation.pop(); // permutation Array is modified!
-        }
-        lineSums.a += payouts[m[0] + m[4] + m[8] - 6];
-        lineSums.b += payouts[m[0] + m[3] + m[6] - 6];
-        lineSums.c += payouts[m[1] + m[4] + m[7] - 6];
-        lineSums.d += payouts[m[2] + m[5] + m[8] - 6];
-        lineSums.e += payouts[m[2] + m[4] + m[6] - 6];
-        lineSums.f += payouts[m[0] + m[1] + m[2] - 6];
-        lineSums.g += payouts[m[3] + m[4] + m[5] - 6];
-        lineSums.h += payouts[m[6] + m[7] + m[8] - 6];
-    }
-
-    const linesAverages = {};
-    for (const [k, v] of Object.entries(lineSums)) {
-        linesAverages[k] = v / numbersNotSeenPermutations.length;
-    }
-    return linesAverages;
 }
 
 function averageOfLinesMaps(linesMapsArray) {
@@ -102,13 +69,87 @@ function averageOfLinesMaps(linesMapsArray) {
     return ret;
 }
 
-// I need a better name for this...
-function calculate2(knownNumbers, payouts, numbersNotSeen, remainToSelect) {
+/*** Stages ***/
+
+function getAllPossibleStates(knownNumbers, payouts, numbersNotSeen) {
     assert(knownNumbers instanceof Array);
     assert(knownNumbers.length === 9);
 
     assert(payouts instanceof Array);
     assert(payouts.length === 19);
+
+    assert(numbersNotSeen instanceof Set);
+
+    const unknownNumberPositions = [];
+    for (const [i, n] of knownNumbers.entries()) {
+        if (n === null) unknownNumberPositions.push(i);
+    }
+    assert(unknownNumberPositions.length === numbersNotSeen.size);
+
+    const ret = [];
+
+    const numbersNotSeenPermutations = permutationsFullLength(Array.from(numbersNotSeen));
+    //console.log("permutationsFullLength returned " + String(numbersNotSeenPermutations.length) + " items");
+    for (const permutation of numbersNotSeenPermutations) {
+        const m = knownNumbers.slice();
+        for (const i of unknownNumberPositions) {
+            m[i] = permutation.pop(); // permutation Array is modified!
+        }
+        assert(permutation.length === 0);
+        ret.push({
+            configuration: m,
+            linePayouts: calculateLinePayouts(m, payouts),
+        });
+    }
+    return ret;
+}
+
+function calculateLinesAverages(allPossibleStates) {
+    assert(allPossibleStates instanceof Array);
+
+    // Layout:
+    //      a b c d e
+    //      f 0 1 2
+    //      g 3 4 5
+    //      h 6 7 8
+    const ret = {
+        a: 0,
+        b: 0,
+        c: 0,
+        d: 0,
+        e: 0,
+        f: 0,
+        g: 0,
+        h: 0,
+    };
+
+    for (const obj of allPossibleStates) {
+        ret.a += obj.linePayouts.a;
+        ret.b += obj.linePayouts.b;
+        ret.c += obj.linePayouts.c;
+        ret.d += obj.linePayouts.d;
+        ret.e += obj.linePayouts.e;
+        ret.f += obj.linePayouts.f;
+        ret.g += obj.linePayouts.g;
+        ret.h += obj.linePayouts.h;
+    }
+    for (const k of Object.keys(ret)) {
+        ret[k] /= allPossibleStates.length;
+    }
+    return ret;
+}
+
+/*** Top-Level ***/
+
+// I need a better name for this...
+function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect) {
+    assert(allPossibleStates instanceof Array);
+    assert(allPossibleStates.length > 0);
+    assert(allPossibleStates[0].configuration instanceof Array); // Spot Checks
+    assert(allPossibleStates[0].configuration.length === 9);
+
+    assert(knownNumbers instanceof Array);
+    assert(knownNumbers.length === 9);
 
     assert(numbersNotSeen instanceof Set);
     assert(typeof remainToSelect === "number");
@@ -128,11 +169,8 @@ function calculate2(knownNumbers, payouts, numbersNotSeen, remainToSelect) {
         } else {
             let sumOfLinesAveragesMaxVals = 0;
             for (const n of numbersNotSeen) {
-                const newKnownNumbers = knownNumbers.slice();
-                const newNumbersNotSeen = new Set(numbersNotSeen);
-                newKnownNumbers[i] = n;
-                newNumbersNotSeen.delete(n);
-                const linesAverages = calculateLinesAverages(newKnownNumbers, payouts, newNumbersNotSeen);
+                const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
+                const linesAverages = calculateLinesAverages(statesSubset);
                 const linesAveragesMax = Math.max(...Object.values(linesAverages));
                 sumOfLinesAveragesMaxVals += linesAveragesMax;
                 linesAveragesArr.push(linesAverages);
@@ -142,8 +180,8 @@ function calculate2(knownNumbers, payouts, numbersNotSeen, remainToSelect) {
             selectionScores.push(selectionScore);
         }
     }
-
     const linesAverages = averageOfLinesMaps(linesAveragesArr);
+
     return {
         linesAverages,
         selectionScores,
@@ -163,7 +201,14 @@ export function calculate(knownNumbers, payouts) {
     }
 
     const remainToSelect = numbersNotSeen.size - 5;
-    const results = calculate2(knownNumbers, payouts, numbersNotSeen, remainToSelect);
+
+    const allPossibleStates = getAllPossibleStates(knownNumbers, payouts, numbersNotSeen);
+    assert(allPossibleStates instanceof Array);
+    assert(allPossibleStates.length > 0);
+    assert(allPossibleStates[0].configuration.length === 9); // Spot check. All elements are length-9 arrays.
+    console.log("Generated " + String(allPossibleStates.length) + " possible states.");
+
+    const results = calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect);
 
     return {
         linesAverages: results.linesAverages,

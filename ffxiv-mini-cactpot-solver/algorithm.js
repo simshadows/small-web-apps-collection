@@ -157,7 +157,6 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
     // selectionScore will be an array of 9 ints, corresponding to a number cell.
     // Entries can be null if that cell already has a number.
     const selectionScores = [];
-    let selectionScoresMax = 0;
 
     // linesAveragesArr will be an array of lines averages, which will eventually be averaged together
     // to form an aggregate lines average.
@@ -167,25 +166,46 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
         if (knownNumbers[i] !== null) {
             selectionScores.push(null);
         } else {
-            let sumOfLinesAveragesMaxVals = 0;
-            for (const n of numbersNotSeen) {
-                const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
-                const linesAverages = calculateLinesAverages(statesSubset);
-                const linesAveragesMax = Math.max(...Object.values(linesAverages));
-                sumOfLinesAveragesMaxVals += linesAveragesMax;
-                linesAveragesArr.push(linesAverages);
+            if (remainToSelect === 0) {
+                // Selection score of a cell is calculated as the average of line-averages-max values.
+                let sumOfLinesAveragesMaxVals = 0;
+                for (const n of numbersNotSeen) {
+                    const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
+                    const linesAverages = calculateLinesAverages(statesSubset);
+                    const linesAveragesMax = Math.max(...Object.values(linesAverages));
+                    sumOfLinesAveragesMaxVals += linesAveragesMax;
+                    linesAveragesArr.push(linesAverages);
+                }
+                selectionScores.push(sumOfLinesAveragesMaxVals / numbersNotSeen.size);
+            } else {
+                // Selection score of a cell is calculated as the average of selection-scores-max values.
+                let sumOfSelectionScores = 0;
+                const newKnownNumbers = knownNumbers.slice();
+                const newNumbersNotSeen = new Set(numbersNotSeen);
+                for (const n of numbersNotSeen) {
+                    // Set up memos
+                    newKnownNumbers[i] = n;
+                    newNumbersNotSeen.delete(n);
+
+                    const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
+                    const result = calculate2(statesSubset, newKnownNumbers, newNumbersNotSeen, remainToSelect - 1);
+                    linesAveragesArr.push(result.linesAverages);
+                    sumOfSelectionScores += result.selectionScoresMax;
+
+                    // Restore memos
+                    newNumbersNotSeen.add(n);
+                    // No need to restore newKnownNumbers since the relevant element will be overwritten
+                }
+                selectionScores.push(sumOfSelectionScores / numbersNotSeen.size);
             }
-            const selectionScore = sumOfLinesAveragesMaxVals / numbersNotSeen.size;
-            if (selectionScoresMax < selectionScore) selectionScoresMax = selectionScore;
-            selectionScores.push(selectionScore);
         }
     }
     const linesAverages = averageOfLinesMaps(linesAveragesArr);
 
     return {
-        linesAverages,
-        selectionScores,
-        selectionScoresMax,
+        linesAverages: linesAverages,
+        selectionScores: selectionScores,
+        selectionScoresMax: Math.max(...selectionScores),
     };
 }
 

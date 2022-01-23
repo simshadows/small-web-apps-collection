@@ -14,13 +14,21 @@
 }
 
 html, body {
+    display: flex;
+    flex-direction: column;
+
     height: 100%;
-    width: 100%;
+    min-width: fit-content;
+    min-width: -moz-fit-content;
+    min-height: fit-content;
+    min-height: -moz-fit-content;
     margin: 0;
     padding: 0;
-    cursor: default;
+
     font-family: Inconsolata, Consolas, monospace;
+    cursor: default;
 }
+
 body {
     display: flex;
     align-items: center;

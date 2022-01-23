@@ -42,7 +42,7 @@ const numCells = [
     document.querySelector("#cell-8"),
 ]
 
-const payouts = [
+const defaultPayouts = [
     10000, // 6
     36, // 7
     720, // 8
@@ -69,6 +69,18 @@ function roundDecPl(n, p) {
     return Math.round(n * a) / a;
 }
 
+function toDisplayableNumber(n) {
+    return (n === null) ? "?" : roundDecPl(n, 2).toFixed(2);
+}
+
+function matchesDefaultPayouts(arr) {
+    assert(arr.length === defaultPayouts.length);
+    for (const [i, v] of defaultPayouts.entries()) {
+        if (arr[i] !== v) return false;
+    }
+    return true;
+}
+
 /*** DOM Helpers ***/
 
 const txt = document.createTextNode.bind(document);
@@ -88,7 +100,7 @@ function element(tagName, attributes={}) {
 function lineCellElement(letter) {
     const ret = element("div", {class: ["line-box"]});
     const linesAverage = calculated.linesAverages[letter];
-    ret.appendChild(txt(roundDecPl(linesAverage, 2).toFixed(2)));
+    ret.appendChild(txt(toDisplayableNumber(linesAverage)));
     if ((calculated.remainToSelect === 0) && (linesAverage === calculated.linesAveragesMax)) {
         ret.classList.add("line-box-best");
     }
@@ -114,7 +126,7 @@ function numCellButtonsElement(position) {
 
 function numCellSelectionScoreElement(selectionScore) {
     const ret = element("div", {class: ["num-score-box"]});
-    ret.appendChild(txt(String(roundDecPl(selectionScore, 2).toFixed(2))));
+    ret.appendChild(txt(toDisplayableNumber(selectionScore)));
     return ret;
 }
 
@@ -146,7 +158,6 @@ function renderNumCells() {
 
             cellElemInner.classList.add("num-box");
             const selectionScore = calculated.selectionScores[i];
-            assert(selectionScore !== null);
             cellElemInner.appendChild(numCellSelectionScoreElement(selectionScore));
             cellElemInner.appendChild(numCellButtonsElement(i));
         }
@@ -159,14 +170,22 @@ function renderNumCells() {
 
 function renderPayouts() {
     payoutsDisp.innerHTML = "";
-    for (const [i, payout] of payouts.entries()) {
+    for (const [i, payout] of state.payouts.entries()) {
         const elem = payoutsDisp.appendChild(element("div"));
 
         const scoreBox = elem.appendChild(element("div", {class: ["payouts-score-box"]}));
         scoreBox.appendChild(txt(String(i + 6)));
 
         const mgpBox = elem.appendChild(element("div", {class: ["payouts-mgp-box"]}));
-        mgpBox.appendChild(txt(String(payout)));
+        const textbox = mgpBox.appendChild(element("input"));
+        textbox.setAttribute("type", "text");
+        textbox.value = String(payout);
+        textbox.addEventListener("change", e => {
+            const mgpPayoutInput = e.target.value;
+            console.log(mgpPayoutInput);
+            setPayout(i + 6, mgpPayoutInput);
+            render();
+        });
     }
 }
 
@@ -189,6 +208,25 @@ function setNumber(position, number) {
     doCalculation();
 }
 
+function setPayout(lineSum, mgpPayoutInput) {
+    const mgpPayout = parseFloat(mgpPayoutInput);
+    if (typeof mgpPayout !== "number") {
+        console.warn("Invalid MGP payout input. Must parse to a number. Actual value: " + String(mgpPayoutInput));
+        return;
+    }
+    if (Number.isNaN(mgpPayout)) {
+        console.warn("Invalid MGP payout input. Must not be NaN. Actual value: " + String(mgpPayoutInput));
+        return;
+    }
+    if (String(mgpPayout) !== mgpPayoutInput) {
+        console.warn("Invalid MGP payout input. Must not partially parse. Actual value: " + String(mgpPayoutInput));
+        return;
+    }
+    state.payouts[lineSum - 6] = mgpPayout;
+    checkState();
+    doCalculation();
+}
+
 function doCalculation() {
     const noSelections = state.knownNumbers.every((e) => (e === null));
     if (USE_WORKAROUND && noSelections) {
@@ -198,7 +236,7 @@ function doCalculation() {
     }
 
     const start = new Date();
-    calculated = calculate(state.knownNumbers, payouts);
+    calculated = calculate(state.knownNumbers, state.payouts);
     const end = new Date();
     const durationStr = roundDecPl(((end - start) / 1000), 2).toFixed(2) + "s";
     console.log(calculated);
@@ -208,6 +246,24 @@ function doCalculation() {
 function doCalculationWorkaround() {
     calculated = {
         linesAverages: {
+            a: null,
+            b: null,
+            c: null,
+            d: null,
+            e: null,
+            f: null,
+            g: null,
+            h: null,
+        },
+        selectionScores: [null,null,null,null,null,null,null,null,null],
+        selectionScoresMax: 0,
+
+        numbersNotSeen: new Set([1,2,3,4,5,6,7,8,9]),
+        remainToSelect: 4,
+    };
+
+    if (matchesDefaultPayouts(state.payouts)) {
+        calculated.linesAverages = {
             a: 360.3452380952381,
             b: 360.3452380952381,
             c: 360.3452380952381,
@@ -216,8 +272,8 @@ function doCalculationWorkaround() {
             f: 360.3452380952381,
             g: 360.3452380952381,
             h: 360.3452380952381,
-        },
-        selectionScores: [
+        };
+        calculated.selectionScores = [
             1510.4806216931217, // Cell 0
             1453.1979497354498, // Cell 1
             1510.4806216931217, // Cell 2
@@ -227,22 +283,16 @@ function doCalculationWorkaround() {
             1510.4806216931217, // Cell 6
             1453.1979497354498, // Cell 7
             1510.4806216931217, // Cell 8
-        ],
-        selectionScoresMax: 0,
-
-        numbersNotSeen: new Set([1,2,3,4,5,6,7,8,9]),
-        remainToSelect: 4,
-    };
+        ];
+    }
 }
 
 function reset() {
-    state = {
-        knownNumbers: [
-            null                         , null, null,
-            ((FAST_BENCHMARK) ? 1 : null), null, null,
-            null                         , null, null,
-        ],
-    };
+    state.knownNumbers = [
+        null                         , null, null,
+        ((FAST_BENCHMARK) ? 1 : null), null, null,
+        null                         , null, null,
+    ];
     doCalculation();
     checkState();
 }
@@ -257,8 +307,10 @@ function checkState() {
     }
 }
 
-let state = {}; // Minimal set of app state
-let calculated = {}; // Values calculated from that state
+const state = {
+    payouts: defaultPayouts.slice(),
+};
+let calculated = {};
 
 reset();
 render();

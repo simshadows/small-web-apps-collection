@@ -44,9 +44,9 @@ body {
     justify-content: center;
     column-gap: 0.5em;
 
-    width: 25em;
+    width: 24.4em;
     height: 16em;
-    min-width: 25em;
+    min-width: 24.4em;
     min-height: 16em;
 
     font-weight: bold;
@@ -80,7 +80,8 @@ div.app-section {
 }
 
 #app-right {
-    width: 5.2em;
+    width: 4.6em;
+    min-width: 4.6em;
 }
 #payouts-disp {
     flex: 1;
@@ -101,19 +102,30 @@ div.app-section {
 #payouts-disp > div > div {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
 
     height: 100%;
     background: #aaa;
     font-size: 60%;
 }
 div.payouts-score-box {
-    width: 2.5em;
+    width: 2em;
+    padding: 0 0.2em 0 0.2em;
 }
 div.payouts-mgp-box {
     flex: 1;
 
     background: #aaa;
+}
+div.payouts-mgp-box > input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    font: inherit;
+    text-align: right;
+    padding: 0 0.2em 0 0.2em;
+    background: #fff;
 }
 
 .cell {

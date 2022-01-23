@@ -8,6 +8,19 @@ const assert = console.assert;
 
 /*** Helpers ***/
 
+class IntArrayToObjMap {
+    constructor() {
+        // knownNumbers --> newObj
+        this._data = new Map();
+    }
+    get(knownNumbers) {
+        return this._data.get(knownNumbers.join());
+    }
+    set(knownNumbers, newObj) {
+        this._data.set(knownNumbers.join(), newObj);
+    }
+}
+
 // General-purpose permutator
 function permutationsFullLength(arr) {
     assert(arr instanceof Array);
@@ -142,7 +155,7 @@ function calculateLinesAverages(allPossibleStates) {
 /*** Top-Level ***/
 
 // I need a better name for this...
-function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect) {
+function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect, memo0) {
     assert(allPossibleStates instanceof Array);
     assert(allPossibleStates.length > 0);
     assert(allPossibleStates[0].configuration instanceof Array); // Spot Checks
@@ -153,6 +166,9 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
 
     assert(numbersNotSeen instanceof Set);
     assert(typeof remainToSelect === "number");
+
+    const memoResult = memo0.get(knownNumbers);
+    if (memoResult !== undefined) return memoResult;
 
     // selectionScore will be an array of 9 ints, corresponding to a number cell.
     // Entries can be null if that cell already has a number.
@@ -206,18 +222,15 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
             const newKnownNumbers = knownNumbers.slice();
             const newNumbersNotSeen = new Set(numbersNotSeen);
             for (const n of numbersNotSeen) {
-                // Set up memos
                 newKnownNumbers[i] = n;
                 newNumbersNotSeen.delete(n);
 
                 const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
-                const result = calculate2(statesSubset, newKnownNumbers, newNumbersNotSeen, remainToSelect - 1);
+                const result = calculate2(statesSubset, newKnownNumbers, newNumbersNotSeen, remainToSelect - 1, memo0);
                 linesAveragesArr.push(result.linesAverages);
                 sumOfSelectionScores += result.selectionScoresMax;
 
-                // Restore memos
                 newNumbersNotSeen.add(n);
-                // No need to restore newKnownNumbers since the relevant element will be overwritten
             }
             selectionScores.push(sumOfSelectionScores / numbersNotSeen.size);
         }
@@ -225,11 +238,13 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
 
     const linesAverages = averageOfLinesMaps(linesAveragesArr);
 
-    return {
+    const ret = {
         linesAverages: linesAverages,
         selectionScores: selectionScores,
         selectionScoresMax: Math.max(...selectionScores),
     };
+    memo0.set(knownNumbers, ret);
+    return ret;
 }
 
 export function calculate(knownNumbers, payouts) {
@@ -251,7 +266,9 @@ export function calculate(knownNumbers, payouts) {
     assert(allPossibleStates[0].configuration.length === 9); // Spot check. All elements are length-9 arrays.
     console.log("Generated " + String(allPossibleStates.length) + " possible states.");
 
-    const results = calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect);
+    const memo0 = new IntArrayToObjMap();
+
+    const results = calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect, memo0);
 
     return {
         linesAverages: results.linesAverages,

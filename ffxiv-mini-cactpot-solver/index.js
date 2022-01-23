@@ -70,10 +70,6 @@ function roundDecPl(n, p) {
     return Math.round(n * a) / a;
 }
 
-function toDisplayableNumber(n) {
-    return (n === null) ? "?" : roundDecPl(n, 2).toFixed(2);
-}
-
 // Close enough to be considered equal within an arbitrary tolerance.
 function floatsAreEqual(a, b) {
     return Math.abs(a - b) < 0.00000000001;
@@ -101,12 +97,24 @@ function element(tagName, attributes={}) {
     return elem;
 }
 
+function toDisplayedNumberElement(n) {
+    if (n === null) {
+        const elem = element("div", {class: ["la-ball-pulse"]});
+        elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
+        elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
+        elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
+        return elem;
+    } else {
+        return txt(roundDecPl(n, 2).toFixed(2));
+    }
+}
+
 /*** Rendering: Specifics ***/
 
 function lineCellElement(letter) {
     const ret = element("div", {class: ["line-box"]});
     const linesAverage = calculated.linesAverages[letter];
-    ret.appendChild(txt(toDisplayableNumber(linesAverage)));
+    ret.appendChild(toDisplayedNumberElement(linesAverage));
     if ((calculated.remainToSelect === 0) && floatsAreEqual(linesAverage, calculated.linesAveragesMax)) {
         ret.classList.add("line-box-best");
     }
@@ -132,7 +140,7 @@ function numCellButtonsElement(position) {
 
 function numCellSelectionScoreElement(selectionScore) {
     const ret = element("div", {class: ["num-score-box"]});
-    ret.appendChild(txt(toDisplayableNumber(selectionScore)));
+    ret.appendChild(toDisplayedNumberElement(selectionScore));
     return ret;
 }
 

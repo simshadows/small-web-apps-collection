@@ -61,6 +61,11 @@ const payouts = [
     3600, // 24
 ];
 
+function roundDecPl(n, p) {
+    const a = Math.pow(10, p);
+    return Math.round(n * a) / a;
+}
+
 /*** DOM Helpers ***/
 
 const txt = document.createTextNode.bind(document);
@@ -80,7 +85,7 @@ function element(tagName, attributes={}) {
 function lineCellElement(letter) {
     const ret = element("div", {class: ["line-box"]});
     const linesAverage = calculated.linesAverages[letter];
-    ret.appendChild(txt(linesAverage.toFixed(1)));
+    ret.appendChild(txt(Math.round(linesAverage).toFixed(0)));
     if ((calculated.remainToSelect === 0) && (linesAverage === Math.max(...Object.values(calculated.linesAverages)))) {
         ret.classList.add("line-box-best");
     }
@@ -106,7 +111,7 @@ function numCellButtonsElement(position) {
 
 function numCellSelectionScoreElement(selectionScore) {
     const ret = element("div", {class: ["num-score-box"]});
-    ret.appendChild(txt(String(selectionScore.toFixed(2))));
+    ret.appendChild(txt(String(roundDecPl(selectionScore, 2).toFixed(2))));
     return ret;
 }
 
@@ -182,6 +187,26 @@ function doCalculation() {
     console.log(calculated);
 }
 
+function doCalculationWorkaround() {
+    calculated = {
+        linesAverages: {
+            a: 360.3452380952381,
+            b: 360.3452380952381,
+            c: 360.3452380952381,
+            d: 360.3452380952381,
+            e: 360.3452380952381,
+            f: 360.3452380952381,
+            g: 360.3452380952381,
+            h: 360.3452380952381,
+        },
+        selectionScores: [0,0,0,0,0,0,0,0,0],
+        selectionScoresMax: 0,
+
+        numbersNotSeen: new Set([1,2,3,4,5,6,7,8,9]),
+        remainToSelect: 4,
+    };
+}
+
 function reset() {
     state = {
         knownNumbers: [
@@ -190,7 +215,8 @@ function reset() {
             null, null, null,
         ],
     };
-    doCalculation();
+    //doCalculation(); // If possible, please use this to organically recalculate the initial state
+    doCalculationWorkaround(); // Only use this if the algorithm is too slow!
     checkState();
 }
 

@@ -10,7 +10,16 @@
 //      g 3 4 5
 //      h 6 7 8
 
-import {calculate, calculateNumbersNotSeen} from "./algorithm.js";
+import {
+    calculate,
+    calculateNumbersNotSeen,
+} from "./algorithm.js";
+import {
+    getDefaultPayouts,
+    intArraysAreEqual,
+    matchesDefaultPayouts,
+    addDefaultInitialValues,
+} from "./hardcoded.js";
 
 const USE_FAST_INITIAL_VALUES = true;
 const USE_ASYNC_UI = true;
@@ -45,28 +54,6 @@ const numCells = [
     document.querySelector("#cell-8"),
 ]
 
-const defaultPayouts = [
-    10000, // 6
-    36, // 7
-    720, // 8
-    360, // 9
-    80, // 10
-    252, // 11
-    108, // 12
-    72, // 13
-    54, // 14
-    180, // 15
-    72, // 16
-    180, // 17
-    119, // 18
-    36, // 19
-    306, // 20
-    1080, // 21
-    144, // 22
-    1800, // 23
-    3600, // 24
-];
-
 function roundDecPl(n, p) {
     const a = Math.pow(10, p);
     return Math.round(n * a) / a;
@@ -75,18 +62,6 @@ function roundDecPl(n, p) {
 // Close enough to be considered equal within an arbitrary tolerance.
 function floatsAreEqual(a, b) {
     return Math.abs(a - b) < 0.00000000001;
-}
-
-function intArraysAreEqual(a, b) {
-    if (a.length !== b.length) return false;
-    for (const [i, v] of a.entries()) {
-        if (b[i] !== v) return false;
-    }
-    return true;
-}
-
-function matchesDefaultPayouts(arr) {
-    return intArraysAreEqual(arr, defaultPayouts);
 }
 
 /*** DOM Helpers ***/
@@ -206,7 +181,6 @@ function renderPayouts() {
         textbox.value = String(payout);
         textbox.addEventListener("change", e => {
             const mgpPayoutInput = e.target.value;
-            console.log(mgpPayoutInput);
             setPayout(i + 6, mgpPayoutInput);
             render();
         });
@@ -269,30 +243,6 @@ const calcWrapper = (()=>{
         };
     }
 
-    function setDefaultInitialValues() {
-        calculated.linesAverages = {
-            a: 360.3452380952381,
-            b: 360.3452380952381,
-            c: 360.3452380952381,
-            d: 360.3452380952381,
-            e: 360.3452380952381,
-            f: 360.3452380952381,
-            g: 360.3452380952381,
-            h: 360.3452380952381,
-        };
-        calculated.selectionScores = [
-            1510.4806216931217, // Cell 0
-            1453.1979497354498, // Cell 1
-            1510.4806216931217, // Cell 2
-            1453.1979497354498, // Cell 3
-            1510.1404431216934, // Cell 4
-            1453.1979497354498, // Cell 5
-            1510.4806216931217, // Cell 6
-            1453.1979497354498, // Cell 7
-            1510.4806216931217, // Cell 8
-        ];
-    }
-
     function handleCalculationResult(result, startTime) {
         calculated = result;
         const endTime = new Date();
@@ -306,7 +256,7 @@ const calcWrapper = (()=>{
         if (USE_FAST_INITIAL_VALUES && noSelections) {
             // Empty board is slow, so we use this hacky solution to speed it up.
             setDummyCalculatedValues();
-            if (matchesDefaultPayouts(state.payouts)) setDefaultInitialValues();
+            if (matchesDefaultPayouts(state.payouts)) addDefaultInitialValues(calculated);
             return;
         }
 
@@ -319,7 +269,7 @@ const calcWrapper = (()=>{
         setDummyCalculatedValues();
         const noSelections = state.knownNumbers.every((e) => (e === null));
         if (USE_FAST_INITIAL_VALUES && noSelections && matchesDefaultPayouts(state.payouts)) {
-            setDefaultInitialValues();
+            addDefaultInitialValues(calculated);
             return;
         }
 
@@ -391,7 +341,7 @@ function checkState() {
 
 const state = {
     knownNumbers: undefined,
-    payouts: defaultPayouts.slice(),
+    payouts: getDefaultPayouts(),
 };
 let calculated = {};
 

@@ -221,6 +221,7 @@ const calcWrapper = (()=>{
         // worker module support.
         calcWorker.onerror = function(e) {
             //e.preventDefault(); // We'll let the browser log the errors for debugging
+            calcWorker.terminate()
             console.warn("Falling back to non-async calculations.");
             state.useAsyncUI = false;
             doCalculationSync(); // Complete the calculation in main thread

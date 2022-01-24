@@ -24,8 +24,6 @@ const USE_HARDCODED_VALUES = true;
 const USE_ASYNC_UI = true;
 const FAST_BENCHMARK_MODE = false;
 
-const usingAsyncUI = USE_ASYNC_UI && window.Worker;
-
 const assert = console.assert;
 
 const payoutsDisp = document.querySelector("#payouts-disp");
@@ -79,7 +77,7 @@ function element(tagName, attributes={}) {
 
 function toDisplayedNumberElement(n) {
     if (n === null) {
-        if (usingAsyncUI) {
+        if (state.useAsyncUI) {
             const elem = element("div", {class: ["la-ball-pulse"]});
             elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
             elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
@@ -218,6 +216,16 @@ const calcWrapper = (()=>{
             handleCalculationResult(result, startTime);
             render();
         };
+
+        // We do a synchronous calculation as a fallback for browsers without
+        // worker module support.
+        calcWorker.onerror = function(e) {
+            //e.preventDefault(); // We'll let the browser log the errors for debugging
+            console.warn("Falling back to non-async calculations.");
+            state.useAsyncUI = false;
+            doCalculationSync(); // Complete the calculation in main thread
+            render();
+        };
     }
 
     function setDummyCalculatedValues() {
@@ -291,7 +299,7 @@ const calcWrapper = (()=>{
     }
 
     function doCalculation() {
-        if (usingAsyncUI) {
+        if (state.useAsyncUI) {
             doCalculationAsync();
         } else {
             doCalculationSync();
@@ -352,6 +360,7 @@ function checkState() {
 }
 
 const state = {
+    useAsyncUI: USE_ASYNC_UI && window.Worker,
     knownNumbers: undefined,
     payouts: getDefaultPayouts(),
 };

@@ -4,6 +4,23 @@
  * License:  GNU Affero General Public License v3 (AGPL-3.0)
  */
 
+:root {
+    --color-text-1: #000;
+    --color-text-2: #000;
+    --color-loading-spinner: #444;
+
+    --color-background-1: #fff;
+    --color-background-2: #666;
+
+    --color-foreground-1: #fff;
+    --color-foreground-1-highlight: #ccf;
+    --color-foreground-2: #aaa;
+
+    --color-linebox-highlight: #67cf67;
+    --color-numbox-highlight: #36bf36;
+}
+
+
 @font-face {
     font-family: Inconsolata;
     src: url(/common-dependencies/inconsolata-font/Inconsolata-VariableFont_wdth,wght.ttf);
@@ -24,6 +41,8 @@ html, body {
     min-height: -moz-fit-content;
     margin: 0;
     padding: 0;
+    background: var(--color-background-1);
+    color: var(--color-text-1);
 
     font-family: Inconsolata, Consolas, monospace;
     cursor: default;
@@ -61,7 +80,7 @@ div.app-section {
 
     padding: 0.5em;
     height: 100%;
-    background: #666;
+    background: var(--color-background-2);
 }
 
 #app-left {
@@ -105,17 +124,16 @@ div.app-section {
     justify-content: flex-end;
 
     height: 100%;
-    background: #aaa;
+    background: var(--color-foreground-2);
     font-size: 60%;
 }
 div.payouts-score-box {
     width: 2em;
     padding: 0 0.2em 0 0.2em;
+    color: var(--color-text-2);
 }
 div.payouts-mgp-box {
     flex: 1;
-
-    background: #aaa;
 }
 div.payouts-mgp-box > input {
     width: 100%;
@@ -125,7 +143,8 @@ div.payouts-mgp-box > input {
     font: inherit;
     text-align: right;
     padding: 0 0.2em 0 0.2em;
-    background: #fff;
+    background: var(--color-foreground-1);
+    color: var(--color-text-1);
 }
 
 .cell {
@@ -151,13 +170,13 @@ div.button {
     align-items: center;
     justify-content: center;
 
-    background: #fff;
+    background: var(--color-foreground-1);
 }
 div.button {
     cursor: pointer;
 }
 div.button:hover {
-    background: #ccf;
+    background: var(--color-foreground-1-highlight);
 }
 div.button:active {
     background: #aaf;
@@ -172,17 +191,18 @@ div.button:active {
     width: 1.8em;
 }
 #reset-button > div > svg {
-    fill: #000;
+    fill: var(--color-text-1);
     height: 100%;
     width: 100%;
 }
 
 div.line-box {
-    background: #aaa;
+    background: var(--color-foreground-2);
+    color: var(--color-text-2);
     font-size: 75%;
 }
 div.line-box-best {
-    background: #67cf67;
+    background: var(--color-linebox-highlight);
 }
 
 .num-box {
@@ -191,7 +211,7 @@ div.line-box-best {
     justify-content: center;
     flex-direction: column;
 
-    background: #aaa;
+    background: var(--color-foreground-2);
 }
 .num-box > div {
     width: 100%;
@@ -204,6 +224,7 @@ div.line-box-best {
 
     padding: 0.1em 0 0 0;
     font-size: 45%;
+    color: var(--color-text-2);
 }
 
 .num-box-buttongrid {
@@ -228,7 +249,7 @@ div.line-box-best {
 }
 
 .num-box-highlight {
-    background: #36bf36;
+    background: var(--color-numbox-highlight);
 }
 .num-box-revealed {
     display: flex;
@@ -240,6 +261,6 @@ div.line-box-best {
 }
 
 .loading-spinner-custom {
-    color: #444;
+    color: var(--color-loading-spinner); 
 }
 

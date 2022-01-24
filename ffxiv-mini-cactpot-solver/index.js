@@ -17,11 +17,10 @@ import {
 import {
     getDefaultPayouts,
     intArraysAreEqual,
-    matchesDefaultPayouts,
     getHardcodedValues,
 } from "./hardcoded.js";
 
-const USE_FAST_INITIAL_VALUES = true;
+const USE_HARDCODED_VALUES = true;
 const USE_ASYNC_UI = true;
 const FAST_BENCHMARK_MODE = false;
 
@@ -251,16 +250,24 @@ const calcWrapper = (()=>{
         console.log("calculate() ran for " + durationStr + " (real time)");
     }
 
+    function applyHardcodedValues(hardcodedValues) {
+        calculated.linesAverages = hardcodedValues.linesAverages;
+        calculated.linesAveragesMax = Math.max(...Object.values(hardcodedValues.linesAverages));
+        calculated.selectionScores = hardcodedValues.selectionScores;
+        calculated.selectionScoresMax = Math.max(...hardcodedValues.selectionScores);
+    }
+
     function doCalculationSync() {
-        const noSelections = state.knownNumbers.every((e) => (e === null));
-        if (USE_FAST_INITIAL_VALUES && noSelections) {
+        if (USE_HARDCODED_VALUES) {
             setDummyCalculatedValues();
             const hardcodedValues = getHardcodedValues(state.knownNumbers, state.payouts);
             if (hardcodedValues) {
-                calculated.linesAverages = hardcodedValues.linesAverages;
-                calculated.selectionScores = hardcodedValues.selectionScores;
+                applyHardcodedValues(hardcodedValues);
+                return;
             }
-            return;
+
+            const noSelections = state.knownNumbers.every((e) => (e === null));
+            if (noSelections) return; // Initial state will have no calculated values
         }
 
         const start = new Date();
@@ -270,12 +277,10 @@ const calcWrapper = (()=>{
 
     function doCalculationAsync() {
         setDummyCalculatedValues();
-        const noSelections = state.knownNumbers.every((e) => (e === null));
-        if (USE_FAST_INITIAL_VALUES && noSelections) {
+        if (USE_HARDCODED_VALUES) {
             const hardcodedValues = getHardcodedValues(state.knownNumbers, state.payouts);
             if (hardcodedValues) {
-                calculated.linesAverages = hardcodedValues.linesAverages;
-                calculated.selectionScores = hardcodedValues.selectionScores;
+                applyHardcodedValues(hardcodedValues);
                 return;
             }
         }

@@ -18,7 +18,7 @@ import {
     getDefaultPayouts,
     intArraysAreEqual,
     matchesDefaultPayouts,
-    addDefaultInitialValues,
+    getHardcodedValues,
 } from "./hardcoded.js";
 
 const USE_FAST_INITIAL_VALUES = true;
@@ -254,9 +254,12 @@ const calcWrapper = (()=>{
     function doCalculationSync() {
         const noSelections = state.knownNumbers.every((e) => (e === null));
         if (USE_FAST_INITIAL_VALUES && noSelections) {
-            // Empty board is slow, so we use this hacky solution to speed it up.
             setDummyCalculatedValues();
-            if (matchesDefaultPayouts(state.payouts)) addDefaultInitialValues(calculated);
+            const hardcodedValues = getHardcodedValues(state.knownNumbers, state.payouts);
+            if (hardcodedValues) {
+                calculated.linesAverages = hardcodedValues.linesAverages;
+                calculated.selectionScores = hardcodedValues.selectionScores;
+            }
             return;
         }
 
@@ -268,9 +271,13 @@ const calcWrapper = (()=>{
     function doCalculationAsync() {
         setDummyCalculatedValues();
         const noSelections = state.knownNumbers.every((e) => (e === null));
-        if (USE_FAST_INITIAL_VALUES && noSelections && matchesDefaultPayouts(state.payouts)) {
-            addDefaultInitialValues(calculated);
-            return;
+        if (USE_FAST_INITIAL_VALUES && noSelections) {
+            const hardcodedValues = getHardcodedValues(state.knownNumbers, state.payouts);
+            if (hardcodedValues) {
+                calculated.linesAverages = hardcodedValues.linesAverages;
+                calculated.selectionScores = hardcodedValues.selectionScores;
+                return;
+            }
         }
 
         initWorker();

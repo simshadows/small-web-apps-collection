@@ -6,7 +6,7 @@
 
 @font-face {
     font-family: Inconsolata;
-    src: url(/common-assets/inconsolata-font/Inconsolata-VariableFont_wdth,wght.ttf);
+    src: url(/common-dependencies/inconsolata-font/Inconsolata-VariableFont_wdth,wght.ttf);
 }
 
 * {

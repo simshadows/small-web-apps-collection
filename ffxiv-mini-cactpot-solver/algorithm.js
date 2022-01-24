@@ -158,7 +158,7 @@ function calculateLinesAverages(allPossibleStates) {
 /*** Top-Level ***/
 
 // I need a better name for this...
-function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect, memo0) {
+function calculate2(knownNumbers, memo0, allPossibleStates, numbersNotSeen, remainToSelect) {
     assert(allPossibleStates instanceof Array);
     assert(allPossibleStates.length > 0);
     assert(allPossibleStates[0].configuration instanceof Array); // Spot Checks
@@ -169,9 +169,6 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
 
     assert(numbersNotSeen instanceof Set);
     assert(typeof remainToSelect === "number");
-
-    const memoResult = memo0.get(knownNumbers);
-    if (memoResult !== undefined) return memoResult;
 
     // selectionScore will be an array of 9 ints, corresponding to a number cell.
     // Entries can be null if that cell already has a number.
@@ -230,7 +227,8 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
                 if (!result) {
                     newNumbersNotSeen.delete(n);
                     const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
-                    result = calculate2(statesSubset, newKnownNumbers, newNumbersNotSeen, remainToSelect - 1, memo0);
+                    result = calculate2(newKnownNumbers, memo0, statesSubset, newNumbersNotSeen, remainToSelect - 1);
+                    memo0.set(newKnownNumbers, result);
                     newNumbersNotSeen.add(n);
                 }
                 linesAveragesArr.push(result.linesAverages);
@@ -242,13 +240,11 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
 
     const linesAverages = averageOfLinesMaps(linesAveragesArr);
 
-    const ret = {
+    return {
         linesAverages: linesAverages,
         selectionScores: selectionScores,
         selectionScoresMax: Math.max(...selectionScores),
     };
-    memo0.set(knownNumbers, ret);
-    return ret;
 }
 
 export function calculateNumbersNotSeen(knownNumbers) {
@@ -276,7 +272,7 @@ export function calculate(knownNumbers, payouts) {
 
     const memo0 = new IntArrayToObjMap();
 
-    const results = calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSelect, memo0);
+    const results = calculate2(knownNumbers, memo0, allPossibleStates, numbersNotSeen, remainToSelect);
 
     return {
         linesAverages: results.linesAverages,

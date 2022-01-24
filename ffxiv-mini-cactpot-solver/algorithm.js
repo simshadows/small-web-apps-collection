@@ -16,6 +16,9 @@ class IntArrayToObjMap {
     get(knownNumbers) {
         return this._data.get(knownNumbers.join());
     }
+    has(knownNumbers) {
+        return this._data.has(knownNumbers.join());
+    }
     set(knownNumbers, newObj) {
         this._data.set(knownNumbers.join(), newObj);
     }
@@ -223,14 +226,15 @@ function calculate2(allPossibleStates, knownNumbers, numbersNotSeen, remainToSel
             const newNumbersNotSeen = new Set(numbersNotSeen);
             for (const n of numbersNotSeen) {
                 newKnownNumbers[i] = n;
-                newNumbersNotSeen.delete(n);
-
-                const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
-                const result = calculate2(statesSubset, newKnownNumbers, newNumbersNotSeen, remainToSelect - 1, memo0);
+                let result = memo0.get(newKnownNumbers);
+                if (!result) {
+                    newNumbersNotSeen.delete(n);
+                    const statesSubset = allPossibleStates.filter((x) => (x.configuration[i] === n));
+                    result = calculate2(statesSubset, newKnownNumbers, newNumbersNotSeen, remainToSelect - 1, memo0);
+                    newNumbersNotSeen.add(n);
+                }
                 linesAveragesArr.push(result.linesAverages);
                 sumOfSelectionScores += result.selectionScoresMax;
-
-                newNumbersNotSeen.add(n);
             }
             selectionScores.push(sumOfSelectionScores / numbersNotSeen.size);
         }

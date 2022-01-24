@@ -67,10 +67,14 @@ const txt = document.createTextNode.bind(document);
 
 function element(tagName, attributes={}) {
     const elem = document.createElement(tagName);
-    if ("id" in attributes) elem.setAttribute("id", attributes.id);
-    if ("class" in attributes) {
-        assert(attributes.class instanceof Array, "Class must be an array.");
-        elem.classList.add(...attributes.class);
+    for (const [k, v] of Object.entries(attributes)) {
+        switch (k) {
+            case "class":
+                elem.classList.add(...((v instanceof Array) ? v : [v]));
+                break;
+            default:
+                elem.setAttribute(k, v);
+        }
     }
     return elem;
 }
@@ -78,10 +82,10 @@ function element(tagName, attributes={}) {
 function toDisplayedNumberElement(n) {
     if (n === null) {
         if (state.useAsyncUI) {
-            const elem = element("div", {class: ["la-ball-pulse"]});
-            elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
-            elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
-            elem.appendChild(element("div", {class: ["loading-spinner-custom"]}));
+            const elem = element("div", {class: "la-ball-pulse"});
+            elem.appendChild(element("div", {class: "loading-spinner-custom"}));
+            elem.appendChild(element("div", {class: "loading-spinner-custom"}));
+            elem.appendChild(element("div", {class: "loading-spinner-custom"}));
             return elem;
         } else {
             return txt("?");
@@ -94,7 +98,7 @@ function toDisplayedNumberElement(n) {
 /*** Rendering: Specifics ***/
 
 function lineCellElement(letter) {
-    const ret = element("div", {class: ["line-box"]});
+    const ret = element("div", {class: "line-box"});
     const linesAverage = calculated.linesAverages[letter];
     ret.appendChild(toDisplayedNumberElement(linesAverage));
     if ((calculated.remainToSelect === 0) && floatsAreEqual(linesAverage, calculated.linesAveragesMax)) {
@@ -104,7 +108,7 @@ function lineCellElement(letter) {
 }
 
 function numCellButtonsElement(position) {
-    const ret = element("div", {class: ["num-box-buttongrid"]});
+    const ret = element("div", {class: "num-box-buttongrid"});
     for (let i = 1; i <= 9; ++i) {
         const elem = ret.appendChild(element("div"));
         if (calculated.numbersNotSeen.has(i)) {
@@ -121,7 +125,7 @@ function numCellButtonsElement(position) {
 }
 
 function numCellSelectionScoreElement(selectionScore) {
-    const ret = element("div", {class: ["num-score-box"]});
+    const ret = element("div", {class: "num-score-box"});
     ret.appendChild(toDisplayedNumberElement(selectionScore));
     return ret;
 }
@@ -169,12 +173,11 @@ function renderPayouts() {
     for (const [i, payout] of state.payouts.entries()) {
         const elem = payoutsDisp.appendChild(element("div"));
 
-        const scoreBox = elem.appendChild(element("div", {class: ["payouts-score-box"]}));
+        const scoreBox = elem.appendChild(element("div", {class: "payouts-score-box"}));
         scoreBox.appendChild(txt(String(i + 6)));
 
-        const mgpBox = elem.appendChild(element("div", {class: ["payouts-mgp-box"]}));
-        const textbox = mgpBox.appendChild(element("input"));
-        textbox.setAttribute("type", "text");
+        const mgpBox = elem.appendChild(element("div", {class: "payouts-mgp-box"}));
+        const textbox = mgpBox.appendChild(element("input", {type: "text"}));
         textbox.value = String(payout);
         textbox.addEventListener("change", e => {
             const mgpPayoutInput = e.target.value;

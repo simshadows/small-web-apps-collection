@@ -13,7 +13,8 @@
     --color-background-2: #666;
 
     --color-foreground-1: #fff;
-    --color-foreground-1-highlight: #ccf;
+    --color-foreground-1-mouseover: #ccf;
+    --color-foreground-1-click: #aaf;
     --color-foreground-2: #aaa;
 
     --color-linebox-highlight: #67cf67;
@@ -147,13 +148,13 @@ div.payouts-mgp-box > input {
     color: var(--color-text-1);
 }
 
-.cell {
+div.cell {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
 }
-.cell > * {
+div.cell > * {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -161,7 +162,7 @@ div.payouts-mgp-box > input {
     height: 100%;
     width: 100%;
 }
-.cell-next-row {
+div.cell-next-row {
     grid-column: 1;
 }
 
@@ -176,10 +177,10 @@ div.button {
     cursor: pointer;
 }
 div.button:hover {
-    background: var(--color-foreground-1-highlight);
+    background: var(--color-foreground-1-mouseover);
 }
 div.button:active {
-    background: #aaf;
+    background: var(--color-foreground-1-click);
 }
 
 #reset-button > div {
@@ -205,7 +206,7 @@ div.line-box-best {
     background: var(--color-linebox-highlight);
 }
 
-.num-box {
+div.num-box {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -213,11 +214,11 @@ div.line-box-best {
 
     background: var(--color-foreground-2);
 }
-.num-box > div {
+div.num-box > div {
     width: 100%;
 }
 
-.num-score-box {
+div.num-score-box {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -227,7 +228,7 @@ div.line-box-best {
     color: var(--color-text-2);
 }
 
-.num-box-buttongrid {
+div.num-box-buttongrid {
     flex: 1;
 
     display: grid;
@@ -238,7 +239,7 @@ div.line-box-best {
 
     padding: 0.1em 0.2em 0.2em 0.2em;
 }
-.num-box-buttongrid > div {
+div.num-box-buttongrid > div {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -248,16 +249,16 @@ div.line-box-best {
     width: 100%;
 }
 
-.num-box-highlight {
+div.num-box-highlight {
     background: var(--color-numbox-highlight);
 }
-.num-box-revealed {
+div.num-box-revealed {
     display: flex;
     align-items: center;
     justify-content: center;
 
     font-size: 200%;
-    background: #fff;
+    background: var(--color-foreground-1);
 }
 
 .loading-spinner-custom {

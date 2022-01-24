@@ -6,7 +6,7 @@
 
 @font-face {
     font-family: Inconsolata;
-    src: url(./assets/inconsolata-font/Inconsolata-VariableFont_wdth,wght.ttf);
+    src: url(/common-assets/inconsolata-font/Inconsolata-VariableFont_wdth,wght.ttf);
 }
 
 * {
@@ -161,6 +161,20 @@ div.button:hover {
 }
 div.button:active {
     background: #aaf;
+}
+
+#reset-button > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 1.8em;
+    width: 1.8em;
+}
+#reset-button > div > svg {
+    fill: #000;
+    height: 100%;
+    width: 100%;
 }
 
 div.line-box {

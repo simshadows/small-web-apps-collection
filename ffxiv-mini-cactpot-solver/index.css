@@ -66,9 +66,7 @@ body {
     justify-content: center;
     column-gap: 0.5em;
 
-    width: 26em;
     height: 17em;
-    min-width: 26em;
     min-height: 17em;
 
     font-weight: bold;
@@ -89,6 +87,9 @@ div.app-section {
 
 #app-left {
     flex: 1;
+
+    width: 21.4em;
+    min-width: 21.4em;
 }
 #playarea {
     flex: 1;
@@ -178,7 +179,6 @@ div.button {
     align-items: center;
     justify-content: center;
 
-    border: thin solid var(--color-border);
     background: var(--color-foreground-1);
 }
 div.button {

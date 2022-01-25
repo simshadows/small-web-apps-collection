@@ -26,6 +26,8 @@ const FAST_BENCHMARK_MODE = false;
 
 const assert = console.assert;
 
+const rightSection = document.querySelector("#app-right");
+
 const payoutsDisp = document.querySelector("#payouts-disp");
 const advancedButton = document.querySelector("#advanced-button");
 const resetButton = document.querySelector("#reset-button");
@@ -180,6 +182,8 @@ function renderNumCells() {
 }
 
 function renderPayouts() {
+    rightSection.style.display = (state.advancedMode) ? "" : "none";
+
     payoutsDisp.innerHTML = "";
     for (const [i, payout] of state.payouts.entries()) {
         const elem = payoutsDisp.appendChild(element("div"));

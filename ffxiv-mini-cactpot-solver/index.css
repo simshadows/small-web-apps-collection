@@ -17,6 +17,8 @@
     --color-foreground-1-click: #aaf;
     --color-foreground-2: #aaa;
 
+    --color-border: #000;
+
     --color-linebox-highlight: #67cf67;
     --color-numbox-highlight: #36bf36;
 }
@@ -64,10 +66,10 @@ body {
     justify-content: center;
     column-gap: 0.5em;
 
-    width: 24.4em;
-    height: 16em;
-    min-width: 24.4em;
-    min-height: 16em;
+    width: 26em;
+    height: 17em;
+    min-width: 26em;
+    min-height: 17em;
 
     font-weight: bold;
 }
@@ -82,6 +84,7 @@ div.app-section {
     padding: 0.5em;
     height: 100%;
     background: var(--color-background-2);
+    border: thin solid var(--color-border);
 }
 
 #app-left {
@@ -132,9 +135,12 @@ div.payouts-score-box {
     width: 2em;
     padding: 0 0.2em 0 0.2em;
     color: var(--color-text-2);
+    border: thin solid var(--color-border);
 }
 div.payouts-mgp-box {
     flex: 1;
+
+    border: thin solid var(--color-border);
 }
 div.payouts-mgp-box > input {
     width: 100%;
@@ -153,6 +159,7 @@ div.cell {
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    border: thin solid var(--color-border);
 }
 div.cell > * {
     display: flex;
@@ -171,6 +178,7 @@ div.button {
     align-items: center;
     justify-content: center;
 
+    border: thin solid var(--color-border);
     background: var(--color-foreground-1);
 }
 div.button {
@@ -181,6 +189,20 @@ div.button:hover {
 }
 div.button:active {
     background: var(--color-foreground-1-click);
+}
+
+#advanced-button > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 1.8em;
+    width: 1.8em;
+}
+#advanced-button > div > svg {
+    fill: var(--color-text-1);
+    height: 100%;
+    width: 100%;
 }
 
 #reset-button > div {
@@ -247,6 +269,10 @@ div.num-box-buttongrid > div {
     font-size: 75%;
     height: 100%;
     width: 100%;
+}
+
+div.num-box-buttongrid-simplemode {
+    padding: 0.2em 0.2em 0.2em 0.2em;
 }
 
 div.num-box-highlight {

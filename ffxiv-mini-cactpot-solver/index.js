@@ -27,6 +27,7 @@ const FAST_BENCHMARK_MODE = false;
 const assert = console.assert;
 
 const payoutsDisp = document.querySelector("#payouts-disp");
+const advancedButton = document.querySelector("#advanced-button");
 const resetButton = document.querySelector("#reset-button");
 
 const lineCells = {
@@ -100,7 +101,11 @@ function toDisplayedNumberElement(n) {
 function lineCellElement(letter) {
     const ret = element("div", {class: "line-box"});
     const linesAverage = calculated.linesAverages[letter];
-    ret.appendChild(toDisplayedNumberElement(linesAverage));
+
+    if (state.advancedMode) {
+        ret.appendChild(toDisplayedNumberElement(linesAverage));
+    }
+
     if ((calculated.remainToSelect === 0) && floatsAreEqual(linesAverage, calculated.linesAveragesMax)) {
         ret.classList.add("line-box-best");
     }
@@ -109,6 +114,9 @@ function lineCellElement(letter) {
 
 function numCellButtonsElement(position) {
     const ret = element("div", {class: "num-box-buttongrid"});
+
+    if (!state.advancedMode) ret.classList.add("num-box-buttongrid-simplemode");
+
     for (let i = 1; i <= 9; ++i) {
         const elem = ret.appendChild(element("div"));
         if (calculated.numbersNotSeen.has(i)) {
@@ -155,10 +163,13 @@ function renderNumCells() {
             cellElemInner.appendChild(txt(String(currNumber)));
         } else {
             if (calculated.remainToSelect === 0) continue;
+                cellElemInner.classList.add("num-box");
 
-            cellElemInner.classList.add("num-box");
-            const selectionScore = calculated.selectionScores[i];
-            cellElemInner.appendChild(numCellSelectionScoreElement(selectionScore));
+            if (state.advancedMode) {
+                const selectionScore = calculated.selectionScores[i];
+                cellElemInner.appendChild(numCellSelectionScoreElement(selectionScore));
+            }
+
             cellElemInner.appendChild(numCellButtonsElement(i));
         }
 
@@ -195,6 +206,11 @@ function render() {
 
 resetButton.addEventListener("click", e => {
     reset();
+    render();
+})
+
+advancedButton.addEventListener("click", e => {
+    toggleAdvancedMode();
     render();
 })
 
@@ -356,6 +372,12 @@ function reset() {
     checkState();
 }
 
+function toggleAdvancedMode() {
+    state.advancedMode = !state.advancedMode;
+    console.log(`Advanced Mode = ${state.advancedMode}`);
+    checkState();
+}
+
 function checkState() {
     const seenNumbers = new Set();
     for (const n of state.knownNumbers) {
@@ -368,6 +390,7 @@ function checkState() {
 
 const state = {
     useAsyncUI: USE_ASYNC_UI && window.Worker,
+    advancedMode: false,
     knownNumbers: undefined,
     payouts: getDefaultPayouts(),
 };

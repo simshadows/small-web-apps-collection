@@ -20,6 +20,15 @@ Full source code is available here:
     <!-- Dependency from <https://github.com/danielcardoso/load-awesome> -->
     <link href="/common-dependencies/load-awesome-v1/css/ball-pulse.css" rel="stylesheet">
 
+    <link rel="preload"  as="script" crossOrigin="anonymous" href="./algorithm.js">
+    <link rel="preload"  as="script" crossOrigin="anonymous" href="./hardcoded.js">
+    <link rel="preload"  as="script" crossOrigin="anonymous" href="./index.js">
+    <link rel="prefetch" as="script" crossOrigin="anonymous" href="./worker.js">
+    <link rel="prefetch" as="image" href="./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-down.svg">
+    <link rel="prefetch" as="image" href="./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-right.svg">
+    <link rel="prefetch" as="image" href="./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-down-modified-down-left.svg">
+    <link rel="prefetch" as="image" href="./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-down-modified-down-right.svg">
+
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HC3WXWRSRQ"></script>
     <script>
@@ -52,7 +61,7 @@ Full source code is available here:
             <div class="cell" id="cell-4"></div>
             <div class="cell" id="cell-5"></div>
             <div class="cell">
-                <div id="advanced-button" class="button">
+                <div id="advanced-button" class="button icon-in-cell">
                     <div><svg><use href="/common-dependencies/fontawesome-free-v6-web/sprites/solid.svg#hashtag"></use></svg></div>
                 </div>
             </div>
@@ -62,7 +71,7 @@ Full source code is available here:
             <div class="cell" id="cell-7"></div>
             <div class="cell" id="cell-8"></div>
             <div class="cell">
-                <div id="reset-button" class="button">
+                <div id="reset-button" class="button icon-in-cell">
                     <div><svg><use href="/common-dependencies/fontawesome-free-v6-web/sprites/solid.svg#arrow-rotate-right"></use></svg></div>
                 </div>
             </div>

@@ -191,21 +191,21 @@ div.button:active {
     background: var(--color-foreground-1-click);
 }
 
-#advanced-button > div {
+div.svg-in-cell > div {
     display: flex;
     align-items: center;
     justify-content: center;
 
-    height: 1.8em;
-    width: 1.8em;
+    height: 3em;
+    width: 3em;
 }
-#advanced-button > div > svg {
+div.svg-in-cell > div > svg {
     fill: var(--color-text-1);
     height: 100%;
     width: 100%;
 }
 
-#reset-button > div {
+div.icon-in-cell > div {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -213,7 +213,7 @@ div.button:active {
     height: 1.8em;
     width: 1.8em;
 }
-#reset-button > div > svg {
+div.icon-in-cell > div > svg {
     fill: var(--color-text-1);
     height: 100%;
     width: 100%;
@@ -269,6 +269,9 @@ div.num-box-buttongrid > div {
     font-size: 75%;
     height: 100%;
     width: 100%;
+}
+div.num-box-buttongrid > div.button {
+    border: thin solid var(--color-border);
 }
 
 div.num-box-buttongrid-simplemode {

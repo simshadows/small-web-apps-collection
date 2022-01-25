@@ -110,6 +110,28 @@ function lineCellElement(letter) {
 
     if ((calculated.remainToSelect === 0) && floatsAreEqual(linesAverage, calculated.linesAveragesMax)) {
         ret.classList.add("line-box-best");
+        if (!state.advancedMode) {
+            const iconName = (()=>{
+                switch (letter) {
+                    case "a": return "circle-down-modified-down-right";
+                    case "b": return "circle-down";
+                    case "c": return "circle-down";
+                    case "d": return "circle-down";
+                    case "e": return "circle-down-modified-down-left";
+                    case "f": return "circle-right";
+                    case "g": return "circle-right";
+                    case "h": return "circle-right";
+                    default:
+                        console.warn(`Unrecognized letter: ${letter}`);
+                        return "circle-left"; // Fail elegantly with an obviously wrong icon
+                }
+            })();
+            const iconURL = `./assets/fontawesome-free-v6-web-modified/svgs/regular/${iconName}.svg`;
+
+            ret.classList.add("svg-in-cell");
+            const e1 = ret.appendChild(element("div"));
+            e1.appendChild(element("img", {src: iconURL}));
+        }
     }
     return ret;
 }

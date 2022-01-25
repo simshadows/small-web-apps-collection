@@ -310,6 +310,9 @@ const calcWrapper = (()=>{
         }
     }
 
+    // Run once to immediately fall back to non-async UI if needed
+    initWorker();
+
     return {
         doCalculation,
     };

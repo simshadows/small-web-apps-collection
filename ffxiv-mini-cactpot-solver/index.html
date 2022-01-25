@@ -20,9 +20,10 @@ Full source code is available here:
     <!-- Dependency from <https://github.com/danielcardoso/load-awesome> -->
     <link href="/common-dependencies/load-awesome-v1/css/ball-pulse.css" rel="stylesheet">
 
-    <link rel="preload"  as="script" crossOrigin="anonymous" href="./algorithm.js">
-    <link rel="preload"  as="script" crossOrigin="anonymous" href="./hardcoded.js">
-    <link rel="preload"  as="script" crossOrigin="anonymous" href="./index.js">
+    <link rel="preload" as="font" crossOrigin="anonymous" href="/common-dependencies/inconsolata-font/Inconsolata-VariableFont_wdth,wght.ttf">
+    <link rel="preload" as="script" crossOrigin="anonymous" href="./algorithm.js">
+    <link rel="preload" as="script" crossOrigin="anonymous" href="./hardcoded.js">
+    <link rel="preload" as="script" crossOrigin="anonymous" href="./index.js">
     <link rel="prefetch" as="script" crossOrigin="anonymous" href="./worker.js">
     <link rel="prefetch" as="image" href="./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-down.svg">
     <link rel="prefetch" as="image" href="./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-right.svg">
@@ -47,7 +48,7 @@ Full source code is available here:
         <div id="playarea">
             <div class="cell" id="cell-a"></div>
             <div class="cell" id="cell-b"></div>
-            <div class="cell" id="cell-c">Loading...</div>
+            <div class="cell" id="cell-c"></div>
             <div class="cell" id="cell-d"></div>
             <div class="cell" id="cell-e"></div>
 
@@ -55,6 +56,10 @@ Full source code is available here:
             <div class="cell" id="cell-0"></div>
             <div class="cell" id="cell-1"></div>
             <div class="cell" id="cell-2"></div>
+            <div class="cell" id="info-cell" style="display: none;">
+                Expected/avg. rewards shown.<br><br>
+                Payouts are configurable using the table on the right.
+            </div>
 
             <div class="cell cell-next-row" id="cell-g"></div>
             <div class="cell" id="cell-3"></div>

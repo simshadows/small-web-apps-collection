@@ -290,6 +290,12 @@ div.num-box-revealed {
     background: var(--color-foreground-1);
 }
 
+#info-cell {
+    padding: 0.5em;
+    font-size: 42%;
+    border: none;
+}
+
 .loading-spinner-custom {
     color: var(--color-loading-spinner); 
 }

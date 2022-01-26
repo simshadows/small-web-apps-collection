@@ -66,9 +66,6 @@ body {
     justify-content: center;
     column-gap: 0.5em;
 
-    height: 17em;
-    min-height: 17em;
-
     font-weight: bold;
 }
 
@@ -87,9 +84,6 @@ div.app-section {
 
 #app-left {
     flex: 1;
-
-    width: 21.4em;
-    min-width: 21.4em;
 }
 #playarea {
     flex: 1;
@@ -161,6 +155,8 @@ div.cell {
     justify-content: center;
     flex-direction: column;
     border: thin solid var(--color-border);
+    width: 3.8em;
+    height: 3.8em;
 }
 div.cell > * {
     display: flex;
@@ -291,9 +287,13 @@ div.num-box-buttongrid-simplemode {
 }
 
 #info-cell {
+    border: none;
+}
+#info-cell > div {
+    width: 100%;
+    height: 100%;
     padding: 0.5em;
     font-size: 42%;
-    border: none;
 }
 
 .loading-spinner-custom {

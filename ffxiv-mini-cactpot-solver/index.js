@@ -160,6 +160,36 @@ function numCellSelectionScoreElement(selectionScore) {
     return ret;
 }
 
+function numCellElement(i) {
+    const ret = element("div", {class: "num-box"});
+
+    const currNumber = state.knownNumbers[i];
+    if (currNumber !== null) {
+        ret.classList.add("num-revealed");
+        ret.classList.add("button");
+        ret.addEventListener("click", e => {
+            setNumber(i, null);
+            render();
+        });
+        ret.appendChild(txt(String(currNumber)));
+    } else {
+        if (calculated.remainToSelect === 0) return ret;
+        ret.classList.add("num-unknown");
+
+        if (state.advancedMode) {
+            const selectionScore = calculated.selectionScores[i];
+            ret.appendChild(numCellSelectionScoreElement(selectionScore));
+        }
+
+        ret.appendChild(numCellButtonsElement(i));
+    }
+
+    if ((calculated.remainToSelect !== 4) && floatsAreEqual(calculated.selectionScores[i], calculated.selectionScoresMax)) {
+        ret.classList.add("highlight-best");
+    }
+    return ret;
+}
+
 /*** Rendering: Top Level ***/
 
 function renderLineCells() {
@@ -172,32 +202,7 @@ function renderLineCells() {
 function renderNumCells() {
     for (const [i, cellElem] of numCells.entries()) {
         cellElem.innerHTML = "";
-        const cellElemInner = cellElem.appendChild(element("div", {class: "num-box"}));
-
-        const currNumber = state.knownNumbers[i];
-        if (currNumber !== null) {
-            cellElemInner.classList.add("num-revealed");
-            cellElemInner.classList.add("button");
-            cellElemInner.addEventListener("click", e => {
-                setNumber(i, null);
-                render();
-            });
-            cellElemInner.appendChild(txt(String(currNumber)));
-        } else {
-            if (calculated.remainToSelect === 0) continue;
-            cellElemInner.classList.add("num-unknown");
-
-            if (state.advancedMode) {
-                const selectionScore = calculated.selectionScores[i];
-                cellElemInner.appendChild(numCellSelectionScoreElement(selectionScore));
-            }
-
-            cellElemInner.appendChild(numCellButtonsElement(i));
-        }
-
-        if ((calculated.remainToSelect !== 4) && floatsAreEqual(calculated.selectionScores[i], calculated.selectionScoresMax)) {
-            cellElemInner.classList.add("highlight-best");
-        }
+        cellElem.appendChild(numCellElement(i));
     }
 }
 

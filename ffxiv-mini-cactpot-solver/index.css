@@ -233,7 +233,7 @@ div.num-box {
 div.num-box > div {
     width: 100%;
 }
-div.num-box.num-unknown {
+div.num-box.num-selectable {
     background: var(--color-foreground-2);
 }
 div.num-box.num-revealed {
@@ -243,6 +243,9 @@ div.num-box.num-revealed {
 
     font-size: 200%;
     background: var(--color-foreground-1);
+}
+div.num-box.num-unknown {
+    /* background: none; */ /* Should be redundant */
 }
 div.num-box.highlight-best {
     background: var(--color-numbox-highlight);

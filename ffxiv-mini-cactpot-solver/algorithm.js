@@ -24,6 +24,12 @@ class IntArrayToObjMap {
     }
 }
 
+// Close enough to be considered equal within an arbitrary tolerance.
+// TODO: This shouldn't be a export...
+export function floatsAreEqual(a, b) {
+    return Math.abs(a - b) < 0.00000000001;
+}
+
 // General-purpose permutator
 function permutationsFullLength(arr) {
     assert(arr instanceof Array);
@@ -274,11 +280,15 @@ export function calculate(knownNumbers, payouts) {
 
     const results = calculate2(knownNumbers, memo0, allPossibleStates, numbersNotSeen, remainToSelect);
 
+    const linesAverages = results.linesAverages;
+    const linesAveragesMax = Math.max(...Object.values(linesAverages));
+    const linesAveragesIsBest = Object.entries(linesAverages).map((x) => [x[0], floatsAreEqual(x[1], linesAveragesMax)]);
+
     return {
-        linesAverages: results.linesAverages,
-        linesAveragesMax: Math.max(...Object.values(results.linesAverages)),
+        linesAverages: linesAverages,
+        linesAveragesIsBest: Object.fromEntries(linesAveragesIsBest),
         selectionScores: results.selectionScores,
-        selectionScoresMax: results.selectionScoresMax,
+        selectionScoresIsBest: results.selectionScores.map((x) => floatsAreEqual(x, results.selectionScoresMax)),
 
         numbersNotSeen: numbersNotSeen,
         remainToSelect: remainToSelect,

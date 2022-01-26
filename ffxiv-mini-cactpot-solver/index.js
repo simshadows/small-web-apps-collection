@@ -11,6 +11,7 @@
 //      h 6 7 8
 
 import {
+    floatsAreEqual,
     calculate,
     calculateNumbersNotSeen,
 } from "./algorithm.js";
@@ -59,11 +60,6 @@ function roundDecPl(n, p) {
     return Math.round(n * a) / a;
 }
 
-// Close enough to be considered equal within an arbitrary tolerance.
-function floatsAreEqual(a, b) {
-    return Math.abs(a - b) < 0.00000000001;
-}
-
 /*** DOM Helpers ***/
 
 const txt = document.createTextNode.bind(document);
@@ -102,15 +98,15 @@ function toDisplayedNumberElement(n) {
 
 function lineCellElement(letter) {
     const lineAverage = calculated.linesAverages[letter];
-    const isHighlighted = (calculated.remainToSelect === 0) && floatsAreEqual(lineAverage, calculated.linesAveragesMax);
+    const isBestLine = (calculated.remainToSelect === 0) && calculated.linesAveragesIsBest[letter];
 
     const ret = element("div", {class: "line-box"});
 
-    if (isHighlighted) ret.classList.add("highlight-best");
+    if (isBestLine) ret.classList.add("highlight-best");
 
     if (state.advancedMode) {
         ret.appendChild(toDisplayedNumberElement(lineAverage));
-    } else if (isHighlighted) {
+    } else if (isBestLine) {
         ret.classList.add("svg-in-cell");
 
         const spriteURL = "/common-dependencies/fontawesome-free-v6-web/sprites/regular.svg#circle-down";
@@ -162,9 +158,10 @@ function numCellSelectionScoreElement(selectionScore) {
 }
 
 function numCellElement(i) {
+    const currNumber = state.knownNumbers[i];
+
     const ret = element("div", {class: "num-box"});
 
-    const currNumber = state.knownNumbers[i];
     if (currNumber !== null) {
         ret.classList.add("num-revealed");
         ret.classList.add("button");
@@ -173,9 +170,10 @@ function numCellElement(i) {
             render();
         });
         ret.appendChild(txt(String(currNumber)));
-    } else {
-        if (calculated.remainToSelect === 0) return ret;
+    } else if (calculated.remainToSelect === 0) {
         ret.classList.add("num-unknown");
+    } else {
+        ret.classList.add("num-selectable");
 
         if (state.advancedMode) {
             const selectionScore = calculated.selectionScores[i];
@@ -185,9 +183,24 @@ function numCellElement(i) {
         ret.appendChild(numCellButtonsElement(i));
     }
 
-    if ((calculated.remainToSelect !== 4) && floatsAreEqual(calculated.selectionScores[i], calculated.selectionScoresMax)) {
-        ret.classList.add("highlight-best");
-    }
+    const highlight = (()=>{
+        if (calculated.remainToSelect === 4) {
+            // Start of the game
+            return false;
+        } else if (calculated.remainToSelect === 0) {
+            // End of the game
+            //const lineAverage = calculated.linesAverages[letter];
+            //const isBestLine = floatsAreEqual(lineAverage, calculated.linesAveragesMax);
+            //switch
+            return false;
+        } else {
+            // Middle of the game
+            return calculated.selectionScoresIsBest[i];
+        }
+    })();
+    if (highlight) ret.classList.add("highlight-best");
+
+
     return ret;
 }
 
@@ -283,18 +296,10 @@ const calcWrapper = (()=>{
         // All these nulls should render as a placeholder in the Ui until real numbers are loaded in.
         const numbersNotSeen = calculateNumbersNotSeen(state.knownNumbers);
         calculated = {
-            linesAverages: {
-                a: null,
-                b: null,
-                c: null,
-                d: null,
-                e: null,
-                f: null,
-                g: null,
-                h: null,
-            },
+            linesAverages: {a: null, b: null, c: null, d: null, e: null, f: null, g: null, h: null},
+            linesAveragesIsBest: {a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false},
             selectionScores: [null,null,null,null,null,null,null,null,null],
-            selectionScoresMax: -1,
+            selectionScoresIsBest: [false,false,false,false,false,false,false,false,false],
 
             numbersNotSeen: numbersNotSeen,
             remainToSelect: numbersNotSeen.size - 5,
@@ -310,10 +315,18 @@ const calcWrapper = (()=>{
     }
 
     function applyHardcodedValues(hardcodedValues) {
-        calculated.linesAverages = hardcodedValues.linesAverages;
-        calculated.linesAveragesMax = Math.max(...Object.values(hardcodedValues.linesAverages));
-        calculated.selectionScores = hardcodedValues.selectionScores;
-        calculated.selectionScoresMax = Math.max(...hardcodedValues.selectionScores);
+        // TODO: Some of this is a repeat of the same three lines in algorithm.js. Deduplicate it?
+
+        const linesAverages = hardcodedValues.linesAverages;
+        const linesAveragesMax = Math.max(...Object.values(linesAverages));
+
+        const selectionScores = hardcodedValues.selectionScores;
+        const selectionScoresMax = Math.max(...selectionScores);
+
+        calculated.linesAverages = linesAverages;
+        calculated.linesAveragesIsBest = Object.entries(linesAverages).map((x) => [x[0], floatsAreEqual(x[1], linesAveragesMax)]);
+        calculated.selectionScores = selectionScores;
+        calculated.selectionScoresIsBest = selectionScores.map((x) => floatsAreEqual(x, selectionScoresMax));
     }
 
     function doCalculationSync() {

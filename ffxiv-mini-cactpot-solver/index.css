@@ -50,9 +50,8 @@ body {
 }
 
 #app {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-auto-flow: column;
     column-gap: 0.5em;
 
     font-weight: bold;

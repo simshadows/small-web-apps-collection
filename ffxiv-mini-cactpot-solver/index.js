@@ -113,7 +113,7 @@ function lineCellElement(letter) {
     } else if (isHighlighted) {
         ret.classList.add("svg-in-cell");
 
-        const iconURL = `./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-down.svg`;
+        const spriteURL = "/common-dependencies/fontawesome-free-v6-web/sprites/regular.svg#circle-down";
         const rotateAngle = (()=>{
             switch (letter) {
                 default: console.error(`Unrecognized letter: ${letter}`);
@@ -129,8 +129,8 @@ function lineCellElement(letter) {
         })();
 
         const e1 = ret.appendChild(element("div"));
-        const e2 = e1.appendChild(element("img", {src: iconURL}));
-        e2.style.transform = `rotate(${rotateAngle}deg)`;
+        // For some reason, doing it properly doesn't work.
+        e1.innerHTML = `<svg style="transform: rotate(${rotateAngle}deg);"><use href="${spriteURL}"></use></svg>`;
     }
     return ret;
 }

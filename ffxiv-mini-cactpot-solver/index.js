@@ -190,10 +190,20 @@ function numCellElement(i) {
             return false;
         } else if (calculated.remainToSelect === 0) {
             // End of the game
-            //const lineAverage = calculated.linesAverages[letter];
-            //const isBestLine = floatsAreEqual(lineAverage, calculated.linesAveragesMax);
-            //switch
-            return false;
+            const w = calculated.linesAveragesBest;
+            // TODO: This is extremely error-prone. Find a better way?
+            switch (i) {
+                default: console.error(`Unrecognized position ${i}`);
+                case 0: return w.a || w.b || w.f;
+                case 1: return w.c || w.f;
+                case 2: return w.d || w.e || w.f;
+                case 3: return w.b || w.g;
+                case 4: return w.a || w.c || w.e || w.g;
+                case 5: return w.d || w.g;
+                case 6: return w.b || w.e || w.h;
+                case 7: return w.c || w.h;
+                case 8: return w.a || w.d || w.h;
+            }
         } else {
             // Middle of the game
             return calculated.selectionScoresBest[i];

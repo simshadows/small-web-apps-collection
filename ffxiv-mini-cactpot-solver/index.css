@@ -19,8 +19,8 @@
 
     --color-border: #000;
 
-    --color-linebox-highlight: #67cf67;
-    --color-numbox-highlight: #36bf36;
+    --color-highlight-desaturated: #67cf67;
+    --color-highlight-saturated: #36bf36;
 }
 
 
@@ -221,7 +221,7 @@ div.line-box {
     background: var(--color-foreground-2);
 }
 div.line-box.highlight-best {
-    background: var(--color-linebox-highlight);
+    background: var(--color-highlight-desaturated);
 }
 
 div.num-box {
@@ -247,8 +247,14 @@ div.num-box.num-revealed {
 div.num-box.num-unknown {
     /* background: none; */ /* Should be redundant */
 }
-div.num-box.highlight-best {
-    background: var(--color-numbox-highlight);
+div.num-box.num-selectable.highlight-best {
+    background: var(--color-highlight-saturated);
+}
+div.num-box.num-revealed.highlight-best {
+    /* background: var(--color-highlight-desaturated); */ /* We won't use this yet */
+}
+div.num-box.num-unknown.highlight-best {
+    /* background: var(--color-highlight-desaturated); */ /* We won't use this yet */
 }
 
 div.num-score-box {

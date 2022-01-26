@@ -33,6 +33,13 @@
     box-sizing: border-box;
 }
 
+html, body {
+    min-width: fit-content;
+    min-width: -moz-fit-content;
+    min-height: fit-content;
+    min-height: -moz-fit-content;
+}
+
 body {
     display: flex;
     align-items: center;

@@ -101,37 +101,35 @@ function toDisplayedNumberElement(n) {
 /*** Rendering: Specifics ***/
 
 function lineCellElement(letter) {
+    const lineAverage = calculated.linesAverages[letter];
+    const isHighlighted = (calculated.remainToSelect === 0) && floatsAreEqual(lineAverage, calculated.linesAveragesMax);
+
     const ret = element("div", {class: "line-box"});
-    const linesAverage = calculated.linesAverages[letter];
+
+    if (isHighlighted) ret.classList.add("highlight-best");
 
     if (state.advancedMode) {
-        ret.appendChild(toDisplayedNumberElement(linesAverage));
-    }
+        ret.appendChild(toDisplayedNumberElement(lineAverage));
+    } else if (isHighlighted) {
+        ret.classList.add("svg-in-cell");
 
-    if ((calculated.remainToSelect === 0) && floatsAreEqual(linesAverage, calculated.linesAveragesMax)) {
-        ret.classList.add("line-box-best");
-        if (!state.advancedMode) {
-            const iconName = (()=>{
-                switch (letter) {
-                    case "a": return "circle-down-modified-down-right";
-                    case "b": return "circle-down";
-                    case "c": return "circle-down";
-                    case "d": return "circle-down";
-                    case "e": return "circle-down-modified-down-left";
-                    case "f": return "circle-right";
-                    case "g": return "circle-right";
-                    case "h": return "circle-right";
-                    default:
-                        console.warn(`Unrecognized letter: ${letter}`);
-                        return "circle-left"; // Fail elegantly with an obviously wrong icon
-                }
-            })();
-            const iconURL = `./assets/fontawesome-free-v6-web-modified/svgs/regular/${iconName}.svg`;
+        const iconName = (()=>{
+            switch (letter) {
+                default: console.error(`Unrecognized letter: ${letter}`);
+                case "a": return "circle-down-modified-down-right";
+                case "b":
+                case "c":
+                case "d": return "circle-down";
+                case "e": return "circle-down-modified-down-left";
+                case "f":
+                case "g":
+                case "h": return "circle-right";
+            }
+        })();
+        const iconURL = `./assets/fontawesome-free-v6-web-modified/svgs/regular/${iconName}.svg`;
 
-            ret.classList.add("svg-in-cell");
-            const e1 = ret.appendChild(element("div"));
-            e1.appendChild(element("img", {src: iconURL}));
-        }
+        const e1 = ret.appendChild(element("div"));
+        e1.appendChild(element("img", {src: iconURL}));
     }
     return ret;
 }
@@ -174,12 +172,12 @@ function renderLineCells() {
 function renderNumCells() {
     for (const [i, cellElem] of numCells.entries()) {
         cellElem.innerHTML = "";
-        const cellElemInner = cellElem.appendChild(element("div"));
+        const cellElemInner = cellElem.appendChild(element("div", {class: "num-box"}));
 
         const currNumber = state.knownNumbers[i];
         if (currNumber !== null) {
+            cellElemInner.classList.add("num-revealed");
             cellElemInner.classList.add("button");
-            cellElemInner.classList.add("num-box-revealed");
             cellElemInner.addEventListener("click", e => {
                 setNumber(i, null);
                 render();
@@ -187,7 +185,7 @@ function renderNumCells() {
             cellElemInner.appendChild(txt(String(currNumber)));
         } else {
             if (calculated.remainToSelect === 0) continue;
-                cellElemInner.classList.add("num-box");
+            cellElemInner.classList.add("num-unknown");
 
             if (state.advancedMode) {
                 const selectionScore = calculated.selectionScores[i];
@@ -198,7 +196,7 @@ function renderNumCells() {
         }
 
         if ((calculated.remainToSelect !== 4) && floatsAreEqual(calculated.selectionScores[i], calculated.selectionScoresMax)) {
-            cellElemInner.classList.add("num-box-highlight");
+            cellElemInner.classList.add("highlight-best");
         }
     }
 }

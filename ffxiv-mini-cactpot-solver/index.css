@@ -220,11 +220,11 @@ div.icon-in-cell > div > svg {
 }
 
 div.line-box {
-    background: var(--color-foreground-2);
-    color: var(--color-text-2);
     font-size: 75%;
+    color: var(--color-text-2);
+    background: var(--color-foreground-2);
 }
-div.line-box-best {
+div.line-box.highlight-best {
     background: var(--color-linebox-highlight);
 }
 
@@ -233,11 +233,23 @@ div.num-box {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-
-    background: var(--color-foreground-2);
 }
 div.num-box > div {
     width: 100%;
+}
+div.num-box.num-unknown {
+    background: var(--color-foreground-2);
+}
+div.num-box.num-revealed {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 200%;
+    background: var(--color-foreground-1);
+}
+div.num-box.highlight-best {
+    background: var(--color-numbox-highlight);
 }
 
 div.num-score-box {
@@ -276,18 +288,6 @@ div.num-box-buttongrid > div.button {
 
 div.num-box-buttongrid-simplemode {
     padding: 0.2em 0.2em 0.2em 0.2em;
-}
-
-div.num-box-highlight {
-    background: var(--color-numbox-highlight);
-}
-div.num-box-revealed {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 200%;
-    background: var(--color-foreground-1);
 }
 
 #info-cell {

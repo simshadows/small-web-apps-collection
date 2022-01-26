@@ -113,23 +113,24 @@ function lineCellElement(letter) {
     } else if (isHighlighted) {
         ret.classList.add("svg-in-cell");
 
-        const iconName = (()=>{
+        const iconURL = `./assets/fontawesome-free-v6-web-modified/svgs/regular/circle-down.svg`;
+        const rotateAngle = (()=>{
             switch (letter) {
                 default: console.error(`Unrecognized letter: ${letter}`);
-                case "a": return "circle-down-modified-down-right";
+                case "a": return "-45";
                 case "b":
                 case "c":
-                case "d": return "circle-down";
-                case "e": return "circle-down-modified-down-left";
+                case "d": return "0";
+                case "e": return "45";
                 case "f":
                 case "g":
-                case "h": return "circle-right";
+                case "h": return "-90";
             }
         })();
-        const iconURL = `./assets/fontawesome-free-v6-web-modified/svgs/regular/${iconName}.svg`;
 
         const e1 = ret.appendChild(element("div"));
-        e1.appendChild(element("img", {src: iconURL}));
+        const e2 = e1.appendChild(element("img", {src: iconURL}));
+        e2.style.transform = `rotate(${rotateAngle}deg)`;
     }
     return ret;
 }

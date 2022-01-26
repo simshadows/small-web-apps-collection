@@ -386,7 +386,7 @@ const postprocessedValues = (()=>{
     const ret = new Map();
     for (const [knownNumbers, x] of preprocessedValues) {
         const key = knownNumbers.join();
-        if (ret.has(key)) console.warn("Duplicate key: " + String(key));
+        if (ret.has(key)) console.warn(`Duplicate key: ${key}`);
         ret.set(key, x);
     }
     return ret;

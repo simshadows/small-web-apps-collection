@@ -319,9 +319,9 @@ const calcWrapper = (()=>{
     function handleCalculationResult(result, startTime) {
         calculated = result;
         const endTime = new Date();
-        const durationStr = roundDecPl(((endTime - startTime) / 1000), 2).toFixed(2) + "s";
         console.log(calculated);
-        console.log("calculate() ran for " + durationStr + " (real time)");
+        const durationStr = roundDecPl(((endTime - startTime) / 1000), 2).toFixed(2);
+        console.log(`calculate() ran for ${durationStr}s (real time)`);
     }
 
     function applyHardcodedValues(hardcodedValues) {
@@ -398,15 +398,15 @@ function setNumber(position, number) {
 function setPayout(lineSum, mgpPayoutInput) {
     const mgpPayout = parseFloat(mgpPayoutInput);
     if (typeof mgpPayout !== "number") {
-        console.warn("Invalid MGP payout input. Must parse to a number. Actual value: " + String(mgpPayoutInput));
+        console.error(`Invalid MGP payout input. Must parse to a number. Actual value: ${mgpPayoutInput}`);
         return;
     }
     if (Number.isNaN(mgpPayout)) {
-        console.warn("Invalid MGP payout input. Must not be NaN. Actual value: " + String(mgpPayoutInput));
+        console.error(`Invalid MGP payout input. Must not be NaN. Actual value: ${mgpPayoutInput}`);
         return;
     }
     if (String(mgpPayout) !== mgpPayoutInput) {
-        console.warn("Invalid MGP payout input. Must not partially parse. Actual value: " + String(mgpPayoutInput));
+        console.error(`Invalid MGP payout input. Must not partially parse. Actual value: ${mgpPayoutInput}`);
         return;
     }
     state.payouts[lineSum - 6] = mgpPayout;

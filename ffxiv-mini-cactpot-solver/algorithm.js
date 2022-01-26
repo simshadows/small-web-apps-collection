@@ -110,7 +110,6 @@ function getAllPossibleStates(knownNumbers, payouts, numbersNotSeen) {
     const ret = [];
 
     const numbersNotSeenPermutations = permutationsFullLength(Array.from(numbersNotSeen));
-    //console.log("permutationsFullLength returned " + String(numbersNotSeenPermutations.length) + " items");
     for (const permutation of numbersNotSeenPermutations) {
         const m = knownNumbers.slice();
         for (const i of unknownNumberPositions) {
@@ -257,7 +256,7 @@ export function calculateNumbersNotSeen(knownNumbers) {
     for (const knownNumber of knownNumbers) {
         if (knownNumber === null) continue;
         const success = ret.delete(knownNumber);
-        if (!success) throw "Duplicate number found: " + String(knownNumber);
+        if (!success) throw `Duplicate number found: ${knownNumber}`;
     }
     return ret;
 }
@@ -283,7 +282,7 @@ export function calculate(knownNumbers, payouts) {
     assert(allPossibleStates instanceof Array);
     assert(allPossibleStates.length > 0);
     assert(allPossibleStates[0].configuration.length === 9); // Spot check. All elements are length-9 arrays.
-    console.log("Generated " + String(allPossibleStates.length) + " possible states.");
+    console.log(`Generated ${allPossibleStates.length} possible states.`);
 
     const memo0 = new IntArrayToObjMap();
 

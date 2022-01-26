@@ -28,9 +28,8 @@ const FAST_BENCHMARK_MODE = false;
 
 const assert = console.assert;
 
-const rightSection = document.querySelector("#app-right");
+const appElement = document.querySelector("#app");
 const payoutsDisp = document.querySelector("#payouts-disp");
-const infoCell = document.querySelector("#info-cell");
 const advancedButton = document.querySelector("#advanced-button");
 const resetButton = document.querySelector("#reset-button");
 
@@ -251,8 +250,8 @@ function renderPayouts() {
 }
 
 function render() {
-    rightSection.style.display = (state.advancedMode) ? "" : "none";
-    infoCell.style.display = (state.advancedMode) ? "" : "none";
+    // Hack to tell the CSS which mode is being used
+    appElement.className = (state.advancedMode) ? "app-advanced-mode" : "app-simple-mode";
 
     renderPayouts();
     renderNumCells();

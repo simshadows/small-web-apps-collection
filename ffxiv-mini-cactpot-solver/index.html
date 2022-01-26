@@ -13,7 +13,7 @@ Full source code is available here:
 <head>
     <title>FFXIV Mini Cactpot Solver</title>
     <meta charset="utf-8">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> --> <!-- This gives a poor result -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="./index.css">
     <link rel="icon" type="image/x-icon" href="./assets/mgp.png">
 
@@ -58,7 +58,7 @@ Full source code is available here:
 
 <body>
 
-<div id="app">
+<div class="app-simple-mode" id="app">
     <div class="app-section" id="app-left">
         <div id="playarea">
             <div class="cell" id="cell-a"></div>
@@ -71,18 +71,18 @@ Full source code is available here:
             <div class="cell" id="cell-0"></div>
             <div class="cell" id="cell-1"></div>
             <div class="cell" id="cell-2"></div>
-            <div class="cell" id="info-cell" style="display: none;">
+            <div class="cell" id="info-cell">
                 <div>
                     Expected/avg. rewards shown.<br><br>
                     Payouts are configurable using the table on the right.
                 </div>
             </div>
 
-            <div class="cell cell-next-row" id="cell-g"></div>
+            <div class="cell" id="cell-g"></div>
             <div class="cell" id="cell-3"></div>
             <div class="cell" id="cell-4"></div>
             <div class="cell" id="cell-5"></div>
-            <div class="cell">
+            <div class="cell" id="advanced-cell">
                 <div id="advanced-button" class="button icon-in-cell">
                     <div><svg><use href="/common-dependencies/fontawesome-free-v6-web/sprites/solid.svg#hashtag"></use></svg></div>
                 </div>
@@ -92,14 +92,14 @@ Full source code is available here:
             <div class="cell" id="cell-6"></div>
             <div class="cell" id="cell-7"></div>
             <div class="cell" id="cell-8"></div>
-            <div class="cell">
+            <div class="cell" id="reset-cell">
                 <div id="reset-button" class="button icon-in-cell">
                     <div><svg><use href="/common-dependencies/fontawesome-free-v6-web/sprites/solid.svg#arrow-rotate-right"></use></svg></div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="app-section" id="app-right" style="display: none;">
+    <div class="app-section" id="app-right">
         <div id="payouts-disp">
             <div></div>
         </div>

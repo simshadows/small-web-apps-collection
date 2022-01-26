@@ -166,8 +166,8 @@ div.cell > * {
     height: 100%;
     width: 100%;
 }
-div.cell-next-row {
-    grid-column: 1;
+#cell-g {
+    grid-column: 1; /* next row */
 }
 
 div.button {
@@ -250,12 +250,14 @@ div.num-box.num-unknown {
 div.num-box.num-selectable.highlight-best {
     background: var(--color-highlight-saturated);
 }
+/* We don't use these here because it looks weird to me, but I might do it anyway depending on feedback
 div.num-box.num-revealed.highlight-best {
-    /* background: var(--color-highlight-desaturated); */ /* We won't use this yet */
+    background: var(--color-highlight-desaturated);
 }
 div.num-box.num-unknown.highlight-best {
-    /* background: var(--color-highlight-desaturated); */ /* We won't use this yet */
+    background: var(--color-highlight-desaturated);
 }
+*/
 
 div.num-score-box {
     display: flex;
@@ -307,5 +309,60 @@ div.num-box-buttongrid-simplemode {
 
 .loading-spinner-custom {
     color: var(--color-loading-spinner); 
+}
+
+/*** Simple Mode UI ***/
+
+div.app-simple-mode #app-right,
+div.app-simple-mode #info-cell {
+    display: none;
+}
+
+/*** Mobile UI ***/
+
+@media only screen and (max-width: 55em),
+       only screen and (max-height: 43em) {
+    div.app-simple-mode #playarea {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+    }
+
+    div.app-simple-mode #cell-a,
+    div.app-simple-mode #cell-b,
+    div.app-simple-mode #cell-c,
+    div.app-simple-mode #cell-d,
+    div.app-simple-mode #cell-e,
+    div.app-simple-mode #cell-f,
+    div.app-simple-mode #cell-g,
+    div.app-simple-mode #cell-h {
+        display: none;
+    }
+
+    div.app-simple-mode #cell-3 {
+        grid-column: 1; /* next row */
+    }
+
+    div.num-box.num-revealed.highlight-best {
+        background: var(--color-highlight-desaturated);
+    }
+    div.num-box.num-unknown.highlight-best {
+        background: var(--color-highlight-desaturated);
+    }
+}
+
+@media only screen and (max-width: 45em) {
+    div.app-simple-mode #playarea {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+    }
+
+    div.app-simple-mode #advanced-cell {
+        grid-row: 4;
+        grid-column: 2;
+    }
+    div.app-simple-mode #reset-cell {
+        grid-row: 4;
+        grid-column: 3;
+    }
 }
 

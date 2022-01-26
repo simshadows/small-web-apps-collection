@@ -332,6 +332,7 @@ const calcWrapper = (()=>{
     }
 
     function doCalculationSync() {
+        console.log("Running non-async calculation.");
         if (USE_HARDCODED_VALUES) {
             setDummyCalculatedValues();
             const hardcodedValues = getHardcodedValues(state.knownNumbers, state.payouts);
@@ -350,6 +351,7 @@ const calcWrapper = (()=>{
     }
 
     function doCalculationAsync() {
+        console.log("Running async calculation.");
         setDummyCalculatedValues();
         if (USE_HARDCODED_VALUES) {
             const hardcodedValues = getHardcodedValues(state.knownNumbers, state.payouts);
@@ -365,7 +367,12 @@ const calcWrapper = (()=>{
     }
 
     function doCalculation() {
-        if (state.useAsyncUI) {
+        // Don't use async calculation after the second selection because waiting for the worker
+        // takes noticeably long, and the calculation tends to be very quick
+        // (TODO: This is a hacky way of doing this. Find a better solution?)
+        const numbersNotSeen = calculateNumbersNotSeen(state.knownNumbers);
+
+        if (state.useAsyncUI && (numbersNotSeen.size >= 8)) {
             doCalculationAsync();
         } else {
             doCalculationSync();

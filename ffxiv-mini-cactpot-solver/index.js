@@ -11,9 +11,10 @@
 //      h 6 7 8
 
 import {
-    floatsAreEqual,
     calculate,
     calculateNumbersNotSeen,
+    calculateSelectionScoresBest,
+    calculateLinesAveragesBest,
 } from "./algorithm.js";
 import {
     getDefaultPayouts,
@@ -98,7 +99,7 @@ function toDisplayedNumberElement(n) {
 
 function lineCellElement(letter) {
     const lineAverage = calculated.linesAverages[letter];
-    const isBestLine = (calculated.remainToSelect === 0) && calculated.linesAveragesIsBest[letter];
+    const isBestLine = (calculated.remainToSelect === 0) && calculated.linesAveragesBest[letter];
 
     const ret = element("div", {class: "line-box"});
 
@@ -195,7 +196,7 @@ function numCellElement(i) {
             return false;
         } else {
             // Middle of the game
-            return calculated.selectionScoresIsBest[i];
+            return calculated.selectionScoresBest[i];
         }
     })();
     if (highlight) ret.classList.add("highlight-best");
@@ -297,9 +298,9 @@ const calcWrapper = (()=>{
         const numbersNotSeen = calculateNumbersNotSeen(state.knownNumbers);
         calculated = {
             linesAverages: {a: null, b: null, c: null, d: null, e: null, f: null, g: null, h: null},
-            linesAveragesIsBest: {a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false},
+            linesAveragesBest: {a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false},
             selectionScores: [null,null,null,null,null,null,null,null,null],
-            selectionScoresIsBest: [false,false,false,false,false,false,false,false,false],
+            selectionScoresBest: [false,false,false,false,false,false,false,false,false],
 
             numbersNotSeen: numbersNotSeen,
             remainToSelect: numbersNotSeen.size - 5,
@@ -315,18 +316,10 @@ const calcWrapper = (()=>{
     }
 
     function applyHardcodedValues(hardcodedValues) {
-        // TODO: Some of this is a repeat of the same three lines in algorithm.js. Deduplicate it?
-
-        const linesAverages = hardcodedValues.linesAverages;
-        const linesAveragesMax = Math.max(...Object.values(linesAverages));
-
-        const selectionScores = hardcodedValues.selectionScores;
-        const selectionScoresMax = Math.max(...selectionScores);
-
-        calculated.linesAverages = linesAverages;
-        calculated.linesAveragesIsBest = Object.entries(linesAverages).map((x) => [x[0], floatsAreEqual(x[1], linesAveragesMax)]);
-        calculated.selectionScores = selectionScores;
-        calculated.selectionScoresIsBest = selectionScores.map((x) => floatsAreEqual(x, selectionScoresMax));
+        calculated.linesAverages = hardcodedValues.linesAverages;
+        calculated.linesAveragesBest = calculateLinesAveragesBest(hardcodedValues.linesAverages);
+        calculated.selectionScores = hardcodedValues.selectionScores;
+        calculated.selectionScoresBest = calculateSelectionScoresBest(hardcodedValues.selectionScores);
     }
 
     function doCalculationSync() {

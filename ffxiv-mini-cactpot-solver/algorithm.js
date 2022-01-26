@@ -25,8 +25,7 @@ class IntArrayToObjMap {
 }
 
 // Close enough to be considered equal within an arbitrary tolerance.
-// TODO: This shouldn't be a export...
-export function floatsAreEqual(a, b) {
+function floatsAreEqual(a, b) {
     return Math.abs(a - b) < 0.00000000001;
 }
 
@@ -263,6 +262,16 @@ export function calculateNumbersNotSeen(knownNumbers) {
     return ret;
 }
 
+export function calculateLinesAveragesBest(linesAverages) {
+    const linesAveragesMax = Math.max(...Object.values(linesAverages));
+    return Object.fromEntries(Object.entries(linesAverages).map((x) => [x[0], floatsAreEqual(x[1], linesAveragesMax)]));
+}
+
+export function calculateSelectionScoresBest(selectionScores) {
+    const selectionScoresMax = Math.max(...selectionScores);
+    return selectionScores.map((x) => floatsAreEqual(x, selectionScoresMax));
+}
+
 export function calculate(knownNumbers, payouts) {
     assert(knownNumbers instanceof Array);
     assert(knownNumbers.length === 9);
@@ -279,16 +288,11 @@ export function calculate(knownNumbers, payouts) {
     const memo0 = new IntArrayToObjMap();
 
     const results = calculate2(knownNumbers, memo0, allPossibleStates, numbersNotSeen, remainToSelect);
-
-    const linesAverages = results.linesAverages;
-    const linesAveragesMax = Math.max(...Object.values(linesAverages));
-    const linesAveragesIsBest = Object.entries(linesAverages).map((x) => [x[0], floatsAreEqual(x[1], linesAveragesMax)]);
-
     return {
-        linesAverages: linesAverages,
-        linesAveragesIsBest: Object.fromEntries(linesAveragesIsBest),
+        linesAverages: results.linesAverages,
+        linesAveragesBest: calculateLinesAveragesBest(results.linesAverages),
         selectionScores: results.selectionScores,
-        selectionScoresIsBest: results.selectionScores.map((x) => floatsAreEqual(x, results.selectionScoresMax)),
+        selectionScoresBest: calculateSelectionScoresBest(results.selectionScores),
 
         numbersNotSeen: numbersNotSeen,
         remainToSelect: remainToSelect,

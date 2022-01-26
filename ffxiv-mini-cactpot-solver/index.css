@@ -53,7 +53,6 @@ body {
     color: var(--color-text-1);
     font-family: Inconsolata, Consolas, monospace;
     cursor: default;
-    font-size: 2.4em;
 }
 
 #app {
@@ -62,6 +61,7 @@ body {
     column-gap: 0.5em;
 
     font-weight: bold;
+    font-size: 2.4em;
 }
 
 div.app-section {
@@ -313,10 +313,19 @@ div.app-simple-mode #info-cell {
     display: none;
 }
 
+/*** Advanced Mode UI ***/
+
+@media only screen and (max-width: 66em),
+       only screen and (max-height: 44em) {
+    #app.app-advanced-mode {
+        font-size: 2.0em;
+    }
+}
+
 /*** Mobile UI ***/
 
 @media only screen and (max-width: 55em),
-       only screen and (max-height: 43em) {
+       only screen and (max-height: 44em) {
     div.app-simple-mode #playarea {
         grid-template-columns: repeat(4, 1fr);
         grid-template-rows: repeat(3, 1fr);
@@ -337,10 +346,10 @@ div.app-simple-mode #info-cell {
         grid-column: 1; /* next row */
     }
 
-    div.num-box.num-revealed.highlight-best {
+    div.app-simple-mode div.num-box.num-revealed.highlight-best {
         background: var(--color-highlight-desaturated);
     }
-    div.num-box.num-unknown.highlight-best {
+    div.app-simple-mode div.num-box.num-unknown.highlight-best {
         background: var(--color-highlight-desaturated);
     }
 }
@@ -364,7 +373,7 @@ div.app-simple-mode #info-cell {
 
 @media only screen and (max-width: 34em),
        only screen and (max-height: 33em) {
-    body {
+    #app.app-simple-mode {
         font-size: 1.6em;
     }
 }

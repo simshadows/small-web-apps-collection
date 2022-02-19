@@ -5,17 +5,20 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 import "./index.css";
 
-function getSimpleCylinder() {
-    const radius = 0.1;
+function getSimpleBox() {
     return new THREE.Mesh(
-        new THREE.CylinderGeometry(radius, radius, 10.0, 20),
+        new THREE.BoxGeometry(2.0, 0.8, 0.8),
         new THREE.MeshNormalMaterial(),
     );
 }
 
-function getSimpleBox() {
+function getSimpleLine() {
+    const path = new THREE.LineCurve3(
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(2, 2, 2),
+    );
     return new THREE.Mesh(
-        new THREE.BoxGeometry(2.0, 0.8, 0.8),
+        new THREE.TubeGeometry(path, 1, 0.2, 8, false), // I have no idea why I can't set closed to true
         new THREE.MeshNormalMaterial(),
     );
 }
@@ -36,7 +39,7 @@ function animation() {
 
 const meshes = [
     getSimpleBox(),
-    getSimpleCylinder(),
+    getSimpleLine(),
 ];
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 100);

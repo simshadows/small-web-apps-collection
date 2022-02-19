@@ -1,6 +1,7 @@
 import "regenerator-runtime/runtime";
 
 import * as THREE from "three";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 import "./index.css";
 
@@ -46,6 +47,8 @@ for (const mesh of meshes) scene.add(mesh);
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setAnimationLoop(animation);
 document.body.appendChild(renderer.domElement);
+
+new OrbitControls(camera, renderer.domElement);
 
 function resizeCanvas() {
     const width = window.innerWidth;

@@ -8,13 +8,58 @@ const __dirname = dirname(__filename);
 const yarnRoot = resolve(__dirname, "..");
 
 const tclContentsPath = resolve(yarnRoot, "apps-toolchainless", "*");
-const distPath = resolve(yarnRoot, "dist");
 
-await execute(`rm -r ${distPath}`);
-await execute(`mkdir ${distPath}`);
-await execute(`cp -r ${tclContentsPath} ${distPath}`);
+/*** Argument Parse ***/
 
-const output3dLsystemsExplorer = resolve(yarnRoot, "dist", "3d-lsystems-explorer");
+const args = process.argv.slice(2);
+console.log("Build arguments:");
+console.log(args);
+console.log();
 
-await execute(`yarn workspace 3d-lsystems-explorer build -o ${output3dLsystemsExplorer}`);
+let buildOutputPath = resolve(yarnRoot, "dist");
+
+let currOption = "";
+for (const s of args) {
+    if (currOption === "") {
+        switch (s) {
+            case "-o":
+                currOption = "output";
+                break;
+            default:
+                console.error(`Unknown argument: ${s}`);
+        }
+    } else {
+        switch (currOption) {
+            case "output":
+                buildOutputPath = resolve(yarnRoot, s);
+                break;
+            default:
+                console.error(`Unknown option: ${currOption}`);
+        }
+        currOption = "";
+    }
+}
+if (currOption) {
+    throw "Invalid arguments.";
+}
+
+console.log("");
+console.log(`buildOutputPath = ${buildOutputPath}`);
+console.log();
+
+/*** Build ***/
+
+let exitCode = 0;
+
+await execute(`rm -r ${buildOutputPath}`);
+exitCode ||= await execute(`mkdir ${buildOutputPath}`);
+exitCode ||= await execute(`cp -r ${tclContentsPath} ${buildOutputPath}`);
+
+const output3dLsystemsExplorer = resolve(buildOutputPath, "3d-lsystems-explorer");
+
+exitCode ||= await execute(`yarn workspace 3d-lsystems-explorer build -o ${output3dLsystemsExplorer}`);
+
+console.log();
+console.log(`Returning with exit code: ${exitCode}`);
+process.exit(exitCode);
 

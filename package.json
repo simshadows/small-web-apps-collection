@@ -8,8 +8,10 @@
   "packageManager": "yarn@3.1.1",
   "type": "module",
   "scripts": {
-    "build": "node ./scripts/build.js",
-    "serve": "python3 -m http.server --directory ./dist"
+    "build": "node ./scripts/build.js -o ./dist",
+    "serve": "python3 -m http.server --directory ./dist",
+    "ghpages-build": "node ./scripts/build.js -o ./docs",
+    "ghpages-serve": "python3 -m http.server --directory ./docs"
   },
   "workspaces": [
     "apps-compiled/*"

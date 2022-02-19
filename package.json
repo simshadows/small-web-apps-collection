@@ -1,0 +1,23 @@
+{
+  "name": "small-web-apps-collection",
+  "author": "simshadows <contact@simshadows.com>",
+  "version": "0.0.1",
+  "license": "AGPLv3",
+  "description": "A collection of various small web apps.",
+  "keywords": [],
+  "packageManager": "yarn@3.1.1",
+  "type": "module",
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "serve": "python3 -m http.server --directory ./dist"
+  },
+  "workspaces": [
+    "apps-compiled/*"
+  ],
+  "dependencies": {
+    "3d-lsystems-explorer": "workspace:*"
+  },
+  "devDependencies": {
+    "@yarnpkg/shell": "^3.2.0-rc.13"
+  }
+}

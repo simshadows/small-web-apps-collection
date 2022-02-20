@@ -23,8 +23,8 @@ function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3, thickness: numb
 // Doesn't do anything yet, but we'll use it soon!
 const rules: Map<string, string> = new Map([
     ["F", "FF"],
-    ["X", "F*-[[Y]/+Y]*+F[/+FX]*-X"],
-    ["Y", "F/-[[X]*+X]/+F[*+FX]/-Y"],
+    ["X", "Frb[[Y]laY]raF[laFX]rbX"],
+    ["Y", "Flb[[X]raX]laF[raFX]lbY"],
 ]);
 const sequence = processLSystem("X", rules, 6);
 console.log(`Sequence: ${sequence}`);
@@ -62,6 +62,14 @@ export function generateMeshes() {
         thickness *= 0.95;
         radialSegments = Math.max(3, radialSegments - 1);
     }
+    function verticalRotate(angleDeg: number): void {
+        let axis = (new THREE.Vector3(0, 1, 0)).cross(direction);
+        if (axis.equals(new THREE.Vector3(0, 0, 0))) axis = new THREE.Vector3(1, 0, 0);
+        axis.normalize();
+        direction.applyAxisAngle(axis, degToRad(angleDeg));
+        thickness *= 0.95;
+        radialSegments = Math.max(3, radialSegments - 1);
+    }
 
     let currSegmentLength = 0;
     for (const s of sequence) {
@@ -78,10 +86,12 @@ export function generateMeshes() {
         switch (s) {
             case "[": push(); break;
             case "]": pop();  break;
-            case "+": rotate(30, new THREE.Vector3(1, 0, 0)); break;
-            case "-": rotate(-30, new THREE.Vector3(1, 0, 0)); break;
-            case "*": rotate(30, new THREE.Vector3(0, 1, 0)); break;
-            case "/": rotate(-30, new THREE.Vector3(0, 1, 0)); break;
+            case "+": verticalRotate(30); break;
+            case "-": verticalRotate(-30); break;
+            case "a": rotate(30, new THREE.Vector3(1, 0, 0)); break;
+            case "b": rotate(-30, new THREE.Vector3(1, 0, 0)); break;
+            case "r": rotate(30, new THREE.Vector3(0, 1, 0)); break;
+            case "l": rotate(-30, new THREE.Vector3(0, 1, 0)); break;
 
             //case "F": draw(1); break; // Use this if you want to try removing the optimization
             default: // No operation

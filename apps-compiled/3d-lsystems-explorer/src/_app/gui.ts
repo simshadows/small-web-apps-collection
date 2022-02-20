@@ -18,10 +18,11 @@ function getDefaultExposedVariables() {
         "Vertical Rotation": 30,
         "Thickness Init.":   1.2,
         "Thickness Mod.":    0.95,
-
         "Base Width": 16,
+        "Sequence Max.": 500000,
 
         "Axiom": "X",
+        "Depth": 6,
         "Start Direction X": 0,
         "Start Direction Y": 1,
         "Start Direction Z": 0,
@@ -78,10 +79,14 @@ function getGUIObject() {
         .onFinishChange(onFinish);
     rendering.add(exposedVariables, "Base Width", 0, 100, 1)
         .onFinishChange(onFinish);
+    rendering.add(exposedVariables, "Sequence Max.", 50)
+        .onFinishChange(onFinish);
 
     const lsBasics = gui.addFolder("L-System Basic Parameters");
     lsBasics.open();
     lsBasics.add(exposedVariables, "Axiom")
+        .onFinishChange(onFinish);
+    lsBasics.add(exposedVariables, "Depth", 0, 100, 1)
         .onFinishChange(onFinish);
     lsBasics.add(exposedVariables, "Start Direction X", -1, 1, 0.01)
         .onFinishChange(onFinish);

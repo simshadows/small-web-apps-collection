@@ -33,8 +33,9 @@ function resizeCanvas() {
 function setScene() {
     const gv = guiValues();
 
-    const sequence = processLSystem(gv["Axiom"], gv.rules, 6);
-    console.log(`Sequence: ${sequence}`);
+    let sequence = processLSystem(gv["Axiom"], gv.rules, gv["Depth"], Math.floor(gv["Sequence Max."]));
+    console.log(`Final Sequence: ${sequence}`);
+    console.log(`Final Sequence Length: ${sequence.length}`);
 
     scene = new THREE.Scene();
     const meshes = generateMeshes({
@@ -71,7 +72,7 @@ renderer.setAnimationLoop(animation);
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.autoRotateSpeed = 5;
+controls.autoRotateSpeed = 2;
 controls.target = new THREE.Vector3(0, 80, 0);
 
 setScene();

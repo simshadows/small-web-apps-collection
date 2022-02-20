@@ -10,6 +10,12 @@ import * as dat from "dat.gui";
 
 import "./index.css";
 
+function reset() {
+    exposedVariables = getDefaultExposedVariables();
+    gui.destroy();
+    gui = getGUIObject();
+}
+
 function getDefaultExposedVariables() {
     return {
         "Auto-Rotate": true,
@@ -30,15 +36,15 @@ function getDefaultExposedVariables() {
         rules: {
             "A": "",
             "B": "",
-            "C": "",
-            "D": "",
             "F": "FF",
-            "X": "Frb[[Y]laY]raF[laFX]rbX",
-            "Y": "Flb[[X]raX]laF[raFX]lbY",
+            "X": "F>-[[Y]<+Y]>+F[<+FX]<-X",
+            "Y": "F<-[[X]>+X]<+F[>+FX]<-Y",
             "Z": "",
         },
 
         moreRules: {
+            "C": "",
+            "D": "",
             "E": "",
             "G": "",
             "H": "",
@@ -57,6 +63,20 @@ function getDefaultExposedVariables() {
             "U": "",
             "V": "",
             "W": "",
+        },
+
+        presets: {
+            "Tree #1": () => {
+                reset();
+                // No operations since it's just the default values
+                sceneResetHandler();
+            },
+            "Tree #2": () => {
+                reset();
+                exposedVariables.rules.X = "F*-[[Y]/+Y]*+F[/+FX]*-X";
+                exposedVariables.rules.Y = "F/-[[X]*+X]/+F[*+FX]/-Y";
+                sceneResetHandler();
+            },
         },
     };
 }
@@ -108,6 +128,12 @@ function getGUIObject() {
             .onFinishChange(onFinish);
     }
 
+    const presets = gui.addFolder("Presets");
+    presets.open();
+    for (const key of Object.keys(exposedVariables.presets)) {
+        presets.add(exposedVariables.presets, key);
+    }
+
     return gui;
 }
 
@@ -123,10 +149,8 @@ let exposedVariables = getDefaultExposedVariables();
 const resetVariable = {
     "Reset": () => {
         if (!confirm("Are you sure you want to reset all values?")) return;
-        exposedVariables = getDefaultExposedVariables();
+        reset();
         sceneResetHandler();
-        gui.destroy();
-        gui = getGUIObject();
     },
 }
 

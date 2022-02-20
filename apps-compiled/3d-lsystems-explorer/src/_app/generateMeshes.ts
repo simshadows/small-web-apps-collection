@@ -98,14 +98,16 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
         }
 
         switch (s) {
-            case "[": push(); break;
-            case "]": pop();  break;
-            case "+": verticalRotate( opts.verticalRotationAngleDeg); break;
-            case "-": verticalRotate(-opts.verticalRotationAngleDeg); break;
-            case "a": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case "b": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case "r": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
-            case "l": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "[":  push(); break;
+            case "]":  pop();  break;
+            case "^":  verticalRotate( opts.verticalRotationAngleDeg); break;
+            case "v":  verticalRotate(-opts.verticalRotationAngleDeg); break;
+            case "+":  rotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "-":  rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case ">":  rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "<":  rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "/":  rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
+            case "\\": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
 
             //case "F": draw(1); break; // Use this if you want to try removing the optimization
             default: // No operation

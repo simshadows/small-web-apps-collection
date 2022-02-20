@@ -39,7 +39,7 @@ export function processLSystem(
     }
 
     if (displaySeqSizeWarning) {
-        window.confirm(`WARNING: L-system sequence too big. Truncated to ${sequenceMax} characters.`);
+        console.error(`L-system sequence too big. Truncated to ${sequenceMax} characters.`);
     }
 
     return current;

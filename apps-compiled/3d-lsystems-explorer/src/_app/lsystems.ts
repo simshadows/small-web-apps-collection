@@ -5,12 +5,14 @@
  */
 
 function validateRules(rules: Map<string, string>) {
-    for (const [variable, _] of rules.entries()) {
+    for (const [variable, result] of rules.entries()) {
         console.assert(variable.length === 1);
+        console.assert(result.length > 0);
     }
 }
 
 export function processLSystem(axiom: string, rules: Map<string, string>, maxDepth: number): string {
+    console.assert(axiom.length > 0);
     validateRules(rules);
     console.assert((maxDepth % 1 === 0) && (maxDepth > 0));
 

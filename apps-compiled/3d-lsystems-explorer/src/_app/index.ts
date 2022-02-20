@@ -9,24 +9,13 @@ import "regenerator-runtime/runtime";
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
-import {processLSystem} from "./lsystems";
+import {generateMeshes} from "./generateMeshes";
 
 import "./index.css";
 
 function getSimpleBox() {
     return new THREE.Mesh(
         new THREE.BoxGeometry(2.0, 0.8, 0.8),
-        new THREE.MeshNormalMaterial(),
-    );
-}
-
-function getSimpleLine() {
-    const path = new THREE.LineCurve3(
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(2, 2, 2),
-    );
-    return new THREE.Mesh(
-        new THREE.TubeGeometry(path, 1, 0.2, 8, false), // I have no idea why I can't set closed to true
         new THREE.MeshNormalMaterial(),
     );
 }
@@ -46,8 +35,8 @@ function animation() {
 }
 
 const meshes = [
-    getSimpleBox(),
-    getSimpleLine(),
+    getSimpleBox(), // Drawing a simple box to indicate the origin
+    ...generateMeshes(),
 ];
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 100);
@@ -63,10 +52,4 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.autoRotate = true;
 controls.autoRotateSpeed = 5;
-
-const rules: Map<string, string> = new Map([
-    ["F", "FF"],
-    ["X", "F-[[X]+X]+F[+FX]-X"],
-]);
-console.log(processLSystem("X", rules, 5));
 

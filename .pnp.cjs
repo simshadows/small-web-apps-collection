@@ -54,11 +54,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@babel/core", "npm:7.17.5"],
             ["@babel/preset-env", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:7.16.11"],
             ["@babel/preset-typescript", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:7.16.7"],
+            ["@types/dat.gui", "npm:0.7.7"],
             ["@types/three", "npm:0.137.0"],
             ["babel-loader", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:8.2.3"],
             ["browserslist", "npm:4.19.3"],
             ["css-loader", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:6.6.0"],
             ["css-minimizer-webpack-plugin", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:3.4.1"],
+            ["dat.gui", "npm:0.7.9"],
             ["fork-ts-checker-webpack-plugin", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:7.2.1"],
             ["html-webpack-plugin", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:5.5.0"],
             ["mini-css-extract-plugin", "virtual:a158290148a7c143b80be4ffa63aad9d618c4b36aab073bbeeb81e5dc0f0c69b40f69dc8e5a847ba536538fc6a67ee5186dc8b2ca892661ad9d2da72b13f320e#npm:2.5.3"],
@@ -2405,6 +2407,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD",
         }]
       ]],
+      ["@types/dat.gui", [
+        ["npm:0.7.7", {
+          "packageLocation": "./.yarn/cache/@types-dat.gui-npm-0.7.7-9c1e9a2558-0a20c10013.zip/node_modules/@types/dat.gui/",
+          "packageDependencies": [
+            ["@types/dat.gui", "npm:0.7.7"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
       ["@types/emscripten", [
         ["npm:1.39.6", {
           "packageLocation": "./.yarn/cache/@types-emscripten-npm-1.39.6-c9c4021365-437f2f9cdf.zip/node_modules/@types/emscripten/",
@@ -4149,6 +4160,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["csso", "npm:4.2.0"],
             ["css-tree", "npm:1.1.3"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["dat.gui", [
+        ["npm:0.7.9", {
+          "packageLocation": "./.yarn/cache/dat.gui-npm-0.7.9-8b75a80db8-b5b7016065.zip/node_modules/dat.gui/",
+          "packageDependencies": [
+            ["dat.gui", "npm:0.7.9"]
           ],
           "linkType": "HARD",
         }]

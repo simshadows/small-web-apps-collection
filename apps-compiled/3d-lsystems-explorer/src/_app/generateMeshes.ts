@@ -30,7 +30,12 @@ const sequence = processLSystem("X", rules, 6);
 console.log(`Sequence: ${sequence}`);
 
 export function generateMeshes() {
-    const meshes: THREE.Mesh[] = [];
+    const meshes: THREE.Mesh[] = [
+        new THREE.Mesh( // Drawing a simple box for the base
+            new THREE.BoxGeometry(8.0, 0.8, 8.0),
+            new THREE.MeshNormalMaterial(),
+        ),
+    ];
 
     let base = new THREE.Vector3(0, 0, 0);
     let direction = new THREE.Vector3(0, 1, 0);

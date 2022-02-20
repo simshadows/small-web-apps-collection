@@ -12,11 +12,13 @@ __metadata:
     "@babel/core": ^7.17.0
     "@babel/preset-env": ^7.16.11
     "@babel/preset-typescript": ^7.16.7
+    "@types/dat.gui": ^0.7.7
     "@types/three": ^0.137.0
     babel-loader: ^8.2.3
     browserslist: ^4.19.1
     css-loader: ^6.6.0
     css-minimizer-webpack-plugin: ^3.4.1
+    dat.gui: ^0.7.9
     fork-ts-checker-webpack-plugin: ^7.0.0
     html-webpack-plugin: ^5.5.0
     mini-css-extract-plugin: ^2.5.3
@@ -1439,6 +1441,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dat.gui@npm:^0.7.7":
+  version: 0.7.7
+  resolution: "@types/dat.gui@npm:0.7.7"
+  checksum: 0a20c10013c5d8595593b9d258f48c070a09601382e9cb0a4d03b98821a8373430747b31935f73434bf0c59122c43276c6763ca1e493eaeb05a9d74bf37a7b81
+  languageName: node
+  linkType: hard
+
 "@types/emscripten@npm:^1.38.0":
   version: 1.39.6
   resolution: "@types/emscripten@npm:1.39.6"
@@ -2813,6 +2822,13 @@ __metadata:
   dependencies:
     css-tree: ^1.1.2
   checksum: 380ba9663da3bcea58dee358a0d8c4468bb6539be3c439dc266ac41c047217f52fd698fb7e4b6b6ccdfb8cf53ef4ceed8cc8ceccb8dfca2aa628319826b5b998
+  languageName: node
+  linkType: hard
+
+"dat.gui@npm:^0.7.9":
+  version: 0.7.9
+  resolution: "dat.gui@npm:0.7.9"
+  checksum: b5b70160657224eacdb8e0a8d76376e6e59adcc654db577531c7bebce854c4f774d1511df6f064e8246a88cf9a3abe489e4d647cf9e53d26a26141a1b5d31e68
   languageName: node
   linkType: hard
 

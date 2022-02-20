@@ -29,7 +29,11 @@ const rules: Map<string, string> = new Map([
 const sequence = processLSystem("X", rules, 6);
 console.log(`Sequence: ${sequence}`);
 
-export function generateMeshes() {
+interface GenerateMeshesOptions {
+    axisRotationAngleDeg: number;
+}
+
+export function generateMeshes(options: GenerateMeshesOptions) {
     const meshes: THREE.Mesh[] = [
         new THREE.Mesh( // Drawing a simple box for the base
             new THREE.BoxGeometry(8.0, 0.8, 8.0),
@@ -93,10 +97,10 @@ export function generateMeshes() {
             case "]": pop();  break;
             case "+": verticalRotate(30); break;
             case "-": verticalRotate(-30); break;
-            case "a": rotate(30, new THREE.Vector3(1, 0, 0)); break;
-            case "b": rotate(-30, new THREE.Vector3(1, 0, 0)); break;
-            case "r": rotate(30, new THREE.Vector3(0, 1, 0)); break;
-            case "l": rotate(-30, new THREE.Vector3(0, 1, 0)); break;
+            case "a": rotate( options.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "b": rotate(-options.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "r": rotate( options.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "l": rotate(-options.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
 
             //case "F": draw(1); break; // Use this if you want to try removing the optimization
             default: // No operation

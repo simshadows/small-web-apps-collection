@@ -14,12 +14,38 @@ import {generateMeshes} from "./generateMeshes";
 
 import "./index.css";
 
-const controlledVariables = {
-    "Auto Rotate": true,
+let gui: dat.GUI;
+
+function setUpGUI() {
+    gui = new dat.GUI({name: "L-Systems Controller"});
+    gui.add(guiVariables, "Auto Rotate");
+    gui.add(guiVariables, "Axis Rot. Angle", 0, 180, 1)
+        .onFinishChange(() => {rerender = true;});
+    gui.add(guiResetVariable, "Reset");
 }
 
-function updateControlledVariables() {
-    controls.autoRotate = controlledVariables["Auto Rotate"];
+let rerender = true;
+let guiVariables = getDefaultGUIVariables();
+const guiResetVariable = {
+    "Reset": () => {
+        if (!confirm("Are you sure you want to reset the app?")) return;
+        guiVariables = getDefaultGUIVariables();
+        setScene();
+        gui.destroy();
+        setUpGUI();
+    },
+}
+
+let scene: THREE.Scene;
+
+function getDefaultGUIVariables() {
+    return {
+        "Auto Rotate": true,
+        "Axis Rot. Angle": 30,
+    };
+}
+function updateGUIVariables() {
+    controls.autoRotate = guiVariables["Auto Rotate"];
 }
 
 function resizeCanvas() {
@@ -30,8 +56,20 @@ function resizeCanvas() {
     camera.updateProjectionMatrix();
 }
 
+function setScene() {
+    scene = new THREE.Scene();
+    const meshes = generateMeshes({
+        axisRotationAngleDeg: guiVariables["Axis Rot. Angle"],
+    });
+    for (const mesh of meshes) scene.add(mesh);
+}
+
 function animation() {
-    updateControlledVariables();
+    if (rerender) {
+        setScene();
+        rerender = false;
+    }
+    updateGUIVariables();
     controls.update();
     resizeCanvas();
     renderer.render(scene, camera);
@@ -41,10 +79,6 @@ const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHei
 camera.position.z = 120;
 camera.position.y = 100;
 
-const scene = new THREE.Scene();
-const meshes = generateMeshes();
-for (const mesh of meshes) scene.add(mesh);
-
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setAnimationLoop(animation);
 document.body.appendChild(renderer.domElement);
@@ -53,6 +87,5 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.autoRotateSpeed = 5;
 controls.target = new THREE.Vector3(0, 80, 0);
 
-const gui = new dat.GUI({name: "L-Systems Controller"});
-gui.add(controlledVariables, "Auto Rotate");
+setUpGUI();
 

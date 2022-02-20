@@ -1,7 +1,15 @@
+/*
+ * Filename: index.ts
+ * Author:   simshadows <contact@simshadows.com>
+ * License:  GNU Affero General Public License v3 (AGPL-3.0)
+ */
+
 import "regenerator-runtime/runtime";
 
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+
+import {processLSystem} from "./lsystems";
 
 import "./index.css";
 
@@ -55,4 +63,10 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.autoRotate = true;
 controls.autoRotateSpeed = 5;
+
+const rules: Map<string, string> = new Map([
+    ["F", "FF"],
+    ["X", "F-[[X]+X]+F[+FX]-X"],
+]);
+console.log(processLSystem("X", rules, 5));
 

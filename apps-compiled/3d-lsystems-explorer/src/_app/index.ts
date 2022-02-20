@@ -43,6 +43,8 @@ function setScene() {
     const meshes = generateMeshes({
         specString:               sequence,
 
+        segmentLength:            gv["Segment Length"],
+
         initialDirectionX:        gv["Start Direction X"],
         initialDirectionY:        gv["Start Direction Y"],
         initialDirectionZ:        gv["Start Direction Z"],

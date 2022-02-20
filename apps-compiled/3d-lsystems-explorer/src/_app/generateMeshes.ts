@@ -21,6 +21,8 @@ function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3, thickness: numb
 interface GenerateMeshesOptions {
     specString: string;
 
+    segmentLength: number;
+
     initialDirectionX: number;
     initialDirectionY: number;
     initialDirectionZ: number;
@@ -67,7 +69,7 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
     }
 
     function draw(length: number): void {
-        const end = direction.clone().multiplyScalar(length).add(base);
+        const end = direction.clone().multiplyScalar(length * opts.segmentLength).add(base);
         meshes.push(getSimpleLine(base, end, thickness, radialSegments));
         base = end;
     }

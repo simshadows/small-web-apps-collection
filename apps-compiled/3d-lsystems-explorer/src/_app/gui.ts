@@ -14,6 +14,7 @@ function getDefaultExposedVariables() {
     return {
         "Auto-Rotate": true,
 
+        "Segment Length":    1,
         "Axis Rotation":     30,
         "Vertical Rotation": 30,
         "Thickness Init.":   1.2,
@@ -89,6 +90,8 @@ function getGUIObject() {
 
     const rendering = gui.addFolder("Rendering");
     rendering.open();
+    rendering.add(exposedVariables, "Segment Length", 1, 100, 1)
+        .onFinishChange(onFinish);
     rendering.add(exposedVariables, "Axis Rotation", 0, 180, 1)
         .onFinishChange(onFinish);
     rendering.add(exposedVariables, "Vertical Rotation", -180, 180, 1)

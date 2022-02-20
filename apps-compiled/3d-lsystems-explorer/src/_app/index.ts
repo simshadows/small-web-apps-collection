@@ -35,7 +35,7 @@ function resizeCanvas() {
 function setScene(resetCamera: boolean = false) {
     const gv = guiValues();
 
-    let sequence = processLSystem(gv["Axiom"], gv.rules, gv["Depth"], Math.floor(gv["Sequence Max."]));
+    let sequence = processLSystem(gv["Axiom"], {...gv.rules, ...gv.moreRules}, gv["Depth"], Math.floor(gv["Sequence Max."]));
     console.log(`Final Sequence: ${sequence}`);
     console.log(`Final Sequence Length: ${sequence.length}`);
 

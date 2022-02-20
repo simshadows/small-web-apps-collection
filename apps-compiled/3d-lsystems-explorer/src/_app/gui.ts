@@ -29,17 +29,17 @@ function getDefaultExposedVariables() {
         "Start Direction Z": 0,
 
         rules: {
-            "A": "",
-            "B": "",
             "F": "FF",
             "X": "F>-[[Y]<+Y]>+F[<+FX]<-X",
             "Y": "F<-[[X]>+X]<+F[>+FX]<-Y",
             "Z": "",
+            "A": "",
+            "B": "",
+            "C": "",
+            "D": "",
         },
 
         moreRules: {
-            "C": "",
-            "D": "",
             "E": "",
             "G": "",
             "H": "",
@@ -79,6 +79,7 @@ function getDefaultExposedVariables() {
             "\\": "zrotate(-)",
 
             "&": "",
+            "|": "",
         },
 
         presets: {

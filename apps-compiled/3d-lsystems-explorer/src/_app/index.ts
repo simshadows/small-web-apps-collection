@@ -32,7 +32,7 @@ function resizeCanvas() {
     camera.updateProjectionMatrix();
 }
 
-function setScene() {
+function setScene(resetCamera: boolean = false) {
     const gv = guiValues();
 
     let sequence = processLSystem(gv["Axiom"], gv.rules, gv["Depth"], Math.floor(gv["Sequence Max."]));
@@ -59,14 +59,16 @@ function setScene() {
     });
     for (const mesh of meshes) scene.add(mesh);
 
-    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 10000);
-    camera.position.z = 120;
-    camera.position.y = 100;
+    if (resetCamera) {
+        camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 10000);
+        camera.position.z = 120;
+        camera.position.y = 100;
 
-    if (controls) controls.dispose();
-    controls = new OrbitControls(camera, renderer.domElement);
-    controls.autoRotateSpeed = 2;
-    controls.target = new THREE.Vector3(0, 80, 0);
+        if (controls) controls.dispose();
+        controls = new OrbitControls(camera, renderer.domElement);
+        controls.autoRotateSpeed = 2;
+        controls.target = new THREE.Vector3(0, 80, 0);
+    }
 }
 
 function animation() {
@@ -80,5 +82,5 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setAnimationLoop(animation);
 document.body.appendChild(renderer.domElement);
 
-setScene();
+setScene(true);
 

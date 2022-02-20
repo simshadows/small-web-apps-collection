@@ -15,7 +15,7 @@ import "./index.css";
 
 function getSimpleBox() {
     return new THREE.Mesh(
-        new THREE.BoxGeometry(2.0, 0.8, 0.8),
+        new THREE.BoxGeometry(4.0, 0.8, 4.0),
         new THREE.MeshNormalMaterial(),
     );
 }
@@ -40,7 +40,8 @@ const meshes = [
 ];
 
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 100);
-camera.position.z = 10;
+camera.position.z = 40;
+camera.position.y = 30;
 
 const scene = new THREE.Scene();
 for (const mesh of meshes) scene.add(mesh);
@@ -52,4 +53,5 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.autoRotate = true;
 controls.autoRotateSpeed = 5;
+controls.target = new THREE.Vector3(0, 10, 0);
 

@@ -21,6 +21,8 @@ import "./index.css";
 setSceneResetHandler(setScene);
 
 let scene: THREE.Scene;
+let camera: THREE.PerspectiveCamera;
+let controls: OrbitControls;
 
 function resizeCanvas() {
     const width = window.innerWidth;
@@ -54,26 +56,27 @@ function setScene() {
         baseWidth:                gv["Base Width"],
     });
     for (const mesh of meshes) scene.add(mesh);
+
+    camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 10000);
+    camera.position.z = 120;
+    camera.position.y = 100;
+
+    if (controls) controls.dispose();
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.autoRotateSpeed = 2;
+    controls.target = new THREE.Vector3(0, 80, 0);
 }
 
 function animation() {
-    controls.autoRotate = guiValues()["Auto Rotate"];
+    controls.autoRotate = guiValues()["Auto-Rotate"];
     controls.update();
     resizeCanvas();
     renderer.render(scene, camera);
 }
 
-const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 1000);
-camera.position.z = 120;
-camera.position.y = 100;
-
 const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setAnimationLoop(animation);
 document.body.appendChild(renderer.domElement);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.autoRotateSpeed = 2;
-controls.target = new THREE.Vector3(0, 80, 0);
 
 setScene();
 

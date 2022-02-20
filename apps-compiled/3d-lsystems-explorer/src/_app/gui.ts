@@ -12,7 +12,7 @@ import "./index.css";
 
 function getDefaultExposedVariables() {
     return {
-        "Auto Rotate": true,
+        "Auto-Rotate": true,
 
         "Axis Rotation":     30,
         "Vertical Rotation": 30,
@@ -66,7 +66,7 @@ function getGUIObject() {
 
     const gui = new dat.GUI({name: "L-Systems Controller"});
     gui.add(resetVariable, "Reset");
-    gui.add(exposedVariables, "Auto Rotate");
+    gui.add(exposedVariables, "Auto-Rotate");
 
     const rendering = gui.addFolder("Rendering");
     rendering.add(exposedVariables, "Axis Rotation", 0, 180, 1)
@@ -78,8 +78,6 @@ function getGUIObject() {
     rendering.add(exposedVariables, "Thickness Mod.", 0.8, 1, 0.01)
         .onFinishChange(onFinish);
     rendering.add(exposedVariables, "Base Width", 0, 100, 1)
-        .onFinishChange(onFinish);
-    rendering.add(exposedVariables, "Sequence Max.", 50)
         .onFinishChange(onFinish);
 
     const lsBasics = gui.addFolder("L-System Basic Parameters");
@@ -93,6 +91,8 @@ function getGUIObject() {
     lsBasics.add(exposedVariables, "Start Direction Y", -1, 1, 0.01)
         .onFinishChange(onFinish);
     lsBasics.add(exposedVariables, "Start Direction Z", -1, 1, 0.01)
+        .onFinishChange(onFinish);
+    lsBasics.add(exposedVariables, "Sequence Max.", 50)
         .onFinishChange(onFinish);
 
     const lsRules = gui.addFolder("L-System Rules");

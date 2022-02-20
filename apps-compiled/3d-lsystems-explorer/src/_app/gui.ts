@@ -10,12 +10,6 @@ import * as dat from "dat.gui";
 
 import "./index.css";
 
-function reset() {
-    exposedVariables = getDefaultExposedVariables();
-    gui.destroy();
-    gui = getGUIObject();
-}
-
 function getDefaultExposedVariables() {
     return {
         "Auto-Rotate": true,
@@ -67,14 +61,18 @@ function getDefaultExposedVariables() {
 
         presets: {
             "Tree #1": () => {
-                reset();
+                exposedVariables = getDefaultExposedVariables();
                 // No operations since it's just the default values
+                gui.destroy();
+                gui = getGUIObject();
                 sceneResetHandler();
             },
             "Tree #2": () => {
-                reset();
+                exposedVariables = getDefaultExposedVariables();
                 exposedVariables.rules.X = "F*-[[Y]/+Y]*+F[/+FX]*-X";
                 exposedVariables.rules.Y = "F/-[[X]*+X]/+F[*+FX]/-Y";
+                gui.destroy();
+                gui = getGUIObject();
                 sceneResetHandler();
             },
         },
@@ -85,10 +83,12 @@ function getGUIObject() {
     const onFinish = () => {sceneResetHandler();};
 
     const gui = new dat.GUI({name: "L-Systems Controller"});
+    gui.width = 320;
     gui.add(resetVariable, "Reset");
     gui.add(exposedVariables, "Auto-Rotate");
 
     const rendering = gui.addFolder("Rendering");
+    rendering.open();
     rendering.add(exposedVariables, "Axis Rotation", 0, 180, 1)
         .onFinishChange(onFinish);
     rendering.add(exposedVariables, "Vertical Rotation", -180, 180, 1)
@@ -149,7 +149,9 @@ let exposedVariables = getDefaultExposedVariables();
 const resetVariable = {
     "Reset": () => {
         if (!confirm("Are you sure you want to reset all values?")) return;
-        reset();
+        exposedVariables = getDefaultExposedVariables();
+        gui.destroy();
+        gui = getGUIObject();
         sceneResetHandler();
     },
 }

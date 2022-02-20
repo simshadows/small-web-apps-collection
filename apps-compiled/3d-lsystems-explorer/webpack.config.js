@@ -14,9 +14,9 @@ function htmlWebpackPluginCommon(configArgs, mergeIn) {
 
         minify: (configArgs.mode === "production"),
 
-        title: "l-systems-experiment",
+        title: "3D L-Systems Explorer",
         author: "simshadows",
-        description: "Experimenting with L-systems to procedurally generate plant-like models.",
+        description: "Set up L-system rules to render fracticals in 3D!",
         keywords: "l-systems, plants",
         //favicon: path.resolve(__dirname, "src", "favicon.png"),
     }, mergeIn);

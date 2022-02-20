@@ -20,6 +20,7 @@ function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3, thickness: numb
 
 interface GenerateMeshesOptions {
     specString: string;
+    interpreterRules: {[Key in string]: string;};
 
     segmentLength: number;
 
@@ -89,9 +90,11 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
 
     let currSegmentLength = 0;
     for (const s of opts.specString) {
+        const rule = opts.interpreterRules[s];
+        if (rule === undefined) continue;
 
         // Optimization to lump multiple consecutive draw commands into one straight mesh.
-        if (s === "F") {
+        if (rule === "draw()") {
             ++currSegmentLength;
             continue;
         } else if (currSegmentLength > 0) {
@@ -99,19 +102,18 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
             currSegmentLength = 0;
         }
 
-        switch (s) {
-            case "[":  push(); break;
-            case "]":  pop();  break;
-            case "^":  verticalRotate( opts.verticalRotationAngleDeg); break;
-            case "v":  verticalRotate(-opts.verticalRotationAngleDeg); break;
-            case "+":  rotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case "-":  rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case ">":  rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
-            case "<":  rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
-            case "/":  rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
-            case "\\": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
+        switch (rule) {
+            case "push()": push(); break;
+            case "pop()":  pop();  break;
+            case "vrotate(+)": verticalRotate( opts.verticalRotationAngleDeg); break;
+            case "vrotate(-)": verticalRotate(-opts.verticalRotationAngleDeg); break;
+            case "xrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "xrotate(-)": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "yrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "yrotate(-)": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "zrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
+            case "zrotate(-)": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
 
-            //case "F": draw(1); break; // Use this if you want to try removing the optimization
             default: // No operation
         }
     }

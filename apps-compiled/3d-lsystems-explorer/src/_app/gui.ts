@@ -60,6 +60,27 @@ function getDefaultExposedVariables() {
             "W": "",
         },
 
+        interpreterRules: {
+            "F": "draw()",
+            "f": "",
+            "[": "push()",
+            "]": "pop()",
+
+            "^": "vrotate(+)",
+            "v": "vrotate(-)",
+
+            "+": "xrotate(+)",
+            "-": "xrotate(-)",
+
+            ">": "yrotate(+)",
+            "<": "yrotate(-)",
+
+            "/":  "zrotate(+)",
+            "\\": "zrotate(-)",
+
+            "&": "",
+        },
+
         presets: {
             "Tree #1": () => {
                 exposedVariables = getDefaultExposedVariables();
@@ -128,6 +149,12 @@ function getGUIObject() {
     const lsMoreRules = gui.addFolder("L-System Rules (Extended)");
     for (const key of Object.keys(exposedVariables.moreRules)) {
         lsMoreRules.add(exposedVariables.moreRules, key)
+            .onFinishChange(onFinish);
+    }
+
+    const interpreter = gui.addFolder("Interpreter");
+    for (const key of Object.keys(exposedVariables.interpreterRules)) {
+        interpreter.add(exposedVariables.interpreterRules, key)
             .onFinishChange(onFinish);
     }
 

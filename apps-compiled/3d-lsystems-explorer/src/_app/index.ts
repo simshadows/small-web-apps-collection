@@ -42,6 +42,7 @@ function setScene(resetCamera: boolean = false) {
     scene = new THREE.Scene();
     const meshes = generateMeshes({
         specString:               sequence,
+        interpreterRules:         gv.interpreterRules,
 
         segmentLength:            gv["Segment Length"],
 

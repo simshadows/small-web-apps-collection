@@ -8,44 +8,21 @@ import "regenerator-runtime/runtime";
 
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import * as dat from "dat.gui";
 
+import {
+    guiValues,
+    setSceneResetHandler,
+} from "./gui";
 import {generateMeshes} from "./generateMeshes";
 
 import "./index.css";
 
-let gui: dat.GUI;
-
-function setUpGUI() {
-    gui = new dat.GUI({name: "L-Systems Controller"});
-    gui.add(guiVariables, "Auto Rotate");
-    gui.add(guiVariables, "Axis Rot. Angle", 0, 180, 1)
-        .onFinishChange(() => {rerender = true;});
-    gui.add(guiResetVariable, "Reset");
-}
-
-let rerender = true;
-let guiVariables = getDefaultGUIVariables();
-const guiResetVariable = {
-    "Reset": () => {
-        if (!confirm("Are you sure you want to reset the app?")) return;
-        guiVariables = getDefaultGUIVariables();
-        setScene();
-        gui.destroy();
-        setUpGUI();
-    },
-}
+setSceneResetHandler(setScene);
 
 let scene: THREE.Scene;
 
-function getDefaultGUIVariables() {
-    return {
-        "Auto Rotate": true,
-        "Axis Rot. Angle": 30,
-    };
-}
 function updateGUIVariables() {
-    controls.autoRotate = guiVariables["Auto Rotate"];
+    controls.autoRotate = guiValues()["Auto Rotate"];
 }
 
 function resizeCanvas() {
@@ -59,16 +36,12 @@ function resizeCanvas() {
 function setScene() {
     scene = new THREE.Scene();
     const meshes = generateMeshes({
-        axisRotationAngleDeg: guiVariables["Axis Rot. Angle"],
+        axisRotationAngleDeg: guiValues()["Axis Rot. Angle"],
     });
     for (const mesh of meshes) scene.add(mesh);
 }
 
 function animation() {
-    if (rerender) {
-        setScene();
-        rerender = false;
-    }
     updateGUIVariables();
     controls.update();
     resizeCanvas();
@@ -87,5 +60,5 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.autoRotateSpeed = 5;
 controls.target = new THREE.Vector3(0, 80, 0);
 
-setUpGUI();
+setScene();
 

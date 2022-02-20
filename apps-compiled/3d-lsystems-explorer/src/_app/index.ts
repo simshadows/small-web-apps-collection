@@ -21,10 +21,6 @@ setSceneResetHandler(setScene);
 
 let scene: THREE.Scene;
 
-function updateGUIVariables() {
-    controls.autoRotate = guiValues()["Auto Rotate"];
-}
-
 function resizeCanvas() {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -34,15 +30,21 @@ function resizeCanvas() {
 }
 
 function setScene() {
+    const gv = guiValues();
+
     scene = new THREE.Scene();
     const meshes = generateMeshes({
-        axisRotationAngleDeg: guiValues()["Axis Rot. Angle"],
+        axisRotationAngleDeg:     gv["Axis Rotation"],
+        verticalRotationAngleDeg: gv["Vertical Rotation"],
+        initialThickness:         gv["Thickness Init."],
+        thicknessModifier:        gv["Thickness Mod."],
+        baseWidth:                gv["Base Width"],
     });
     for (const mesh of meshes) scene.add(mesh);
 }
 
 function animation() {
-    updateGUIVariables();
+    controls.autoRotate = guiValues()["Auto Rotate"];
     controls.update();
     resizeCanvas();
     renderer.render(scene, camera);

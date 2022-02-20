@@ -13,7 +13,13 @@ import "./index.css";
 function getDefaultExposedVariables() {
     return {
         "Auto Rotate": true,
-        "Axis Rot. Angle": 30,
+
+        "Axis Rotation": 30,
+        "Vertical Rotation": 30,
+        "Thickness Init.": 1.2,
+        "Thickness Mod.": 0.95,
+
+        "Base Width": 16,
     };
 }
 
@@ -21,11 +27,21 @@ function getGUIObject() {
     const onFinish = () => {sceneResetHandler();};
 
     const gui = new dat.GUI({name: "L-Systems Controller"});
+    gui.add(resetVariable, "Reset");
     gui.add(exposedVariables, "Auto Rotate");
-    gui.add(exposedVariables, "Axis Rot. Angle", 0, 180, 1)
+
+    const rendering = gui.addFolder("Rendering");
+    rendering.add(exposedVariables, "Axis Rotation", 0, 180, 1)
+        .onFinishChange(onFinish);
+    rendering.add(exposedVariables, "Vertical Rotation", -180, 180, 1)
+        .onFinishChange(onFinish);
+    rendering.add(exposedVariables, "Thickness Init.", 0.1, 10, 0.1)
+        .onFinishChange(onFinish);
+    rendering.add(exposedVariables, "Thickness Mod.", 0.8, 1, 0.01)
+        .onFinishChange(onFinish);
+    rendering.add(exposedVariables, "Base Width", 0, 100, 1)
         .onFinishChange(onFinish);
 
-    gui.add(resetVariable, "Reset");
     return gui;
 }
 
@@ -40,7 +56,7 @@ export function setSceneResetHandler(fn: () => void) {
 let exposedVariables = getDefaultExposedVariables();
 const resetVariable = {
     "Reset": () => {
-        if (!confirm("Are you sure you want to reset the app?")) return;
+        if (!confirm("Are you sure you want to reset all values?")) return;
         exposedVariables = getDefaultExposedVariables();
         sceneResetHandler();
         gui.destroy();

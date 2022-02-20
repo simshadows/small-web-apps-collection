@@ -31,19 +31,29 @@ console.log(`Sequence: ${sequence}`);
 
 interface GenerateMeshesOptions {
     axisRotationAngleDeg: number;
+    verticalRotationAngleDeg: number;
+
+    initialThickness: number;
+    thicknessModifier: number;
+
+    baseWidth: number;
 }
 
 export function generateMeshes(options: GenerateMeshesOptions) {
-    const meshes: THREE.Mesh[] = [
-        new THREE.Mesh( // Drawing a simple box for the base
-            new THREE.BoxGeometry(8.0, 0.8, 8.0),
-            new THREE.MeshNormalMaterial(),
-        ),
-    ];
+    const meshes: THREE.Mesh[] = [];
+
+    if (options.baseWidth > 0) {
+        meshes.push(
+            new THREE.Mesh(
+                new THREE.BoxGeometry(options.baseWidth, 0.5, options.baseWidth),
+                new THREE.MeshNormalMaterial(),
+            )
+        );
+    }
 
     let base = new THREE.Vector3(0, 0, 0);
     let direction = new THREE.Vector3(0, 1, 0);
-    let thickness = 1.2;
+    let thickness = options.initialThickness;
     let radialSegments = 10;
     let stack: {base: THREE.Vector3; direction: THREE.Vector3, thickness: number}[] = [];
 
@@ -68,7 +78,7 @@ export function generateMeshes(options: GenerateMeshesOptions) {
     }
     function rotate(angleDeg: number, axis: THREE.Vector3): void {
         direction.applyAxisAngle(axis, degToRad(angleDeg));
-        thickness *= 0.95;
+        thickness *= options.thicknessModifier;
         radialSegments = Math.max(3, radialSegments - 1);
     }
     function verticalRotate(angleDeg: number): void {
@@ -76,7 +86,7 @@ export function generateMeshes(options: GenerateMeshesOptions) {
         if (axis.equals(new THREE.Vector3(0, 0, 0))) axis = new THREE.Vector3(1, 0, 0);
         axis.normalize();
         direction.applyAxisAngle(axis, degToRad(angleDeg));
-        thickness *= 0.95;
+        thickness *= options.thicknessModifier;
         radialSegments = Math.max(3, radialSegments - 1);
     }
 
@@ -95,8 +105,8 @@ export function generateMeshes(options: GenerateMeshesOptions) {
         switch (s) {
             case "[": push(); break;
             case "]": pop();  break;
-            case "+": verticalRotate(30); break;
-            case "-": verticalRotate(-30); break;
+            case "+": verticalRotate( options.verticalRotationAngleDeg); break;
+            case "-": verticalRotate(-options.verticalRotationAngleDeg); break;
             case "a": rotate( options.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
             case "b": rotate(-options.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
             case "r": rotate( options.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;

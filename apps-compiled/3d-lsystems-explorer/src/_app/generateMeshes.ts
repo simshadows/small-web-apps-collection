@@ -6,8 +6,6 @@
 
 import * as THREE from "three";
 
-import {processLSystem} from "./lsystems";
-
 function degToRad(deg: number): number {
     return deg * (Math.PI/180);
 }
@@ -20,16 +18,13 @@ function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3, thickness: numb
     );
 }
 
-// Doesn't do anything yet, but we'll use it soon!
-const rules: Map<string, string> = new Map([
-    ["F", "FF"],
-    ["X", "Frb[[Y]laY]raF[laFX]rbX"],
-    ["Y", "Flb[[X]raX]laF[raFX]lbY"],
-]);
-const sequence = processLSystem("X", rules, 6);
-console.log(`Sequence: ${sequence}`);
-
 interface GenerateMeshesOptions {
+    specString: string;
+
+    initialDirectionX: number;
+    initialDirectionY: number;
+    initialDirectionZ: number;
+
     axisRotationAngleDeg: number;
     verticalRotationAngleDeg: number;
 
@@ -39,21 +34,21 @@ interface GenerateMeshesOptions {
     baseWidth: number;
 }
 
-export function generateMeshes(options: GenerateMeshesOptions) {
+export function generateMeshes(opts: GenerateMeshesOptions) {
     const meshes: THREE.Mesh[] = [];
 
-    if (options.baseWidth > 0) {
+    if (opts.baseWidth > 0) {
         meshes.push(
             new THREE.Mesh(
-                new THREE.BoxGeometry(options.baseWidth, 0.5, options.baseWidth),
+                new THREE.BoxGeometry(opts.baseWidth, 0.5, opts.baseWidth),
                 new THREE.MeshNormalMaterial(),
             )
         );
     }
 
     let base = new THREE.Vector3(0, 0, 0);
-    let direction = new THREE.Vector3(0, 1, 0);
-    let thickness = options.initialThickness;
+    let direction = (new THREE.Vector3(opts.initialDirectionX, opts.initialDirectionY, opts.initialDirectionZ)).normalize();
+    let thickness = opts.initialThickness;
     let radialSegments = 10;
     let stack: {base: THREE.Vector3; direction: THREE.Vector3, thickness: number}[] = [];
 
@@ -63,7 +58,7 @@ export function generateMeshes(options: GenerateMeshesOptions) {
     function pop(): void {
         const popped = stack.pop();
         if (popped === undefined) {
-            console.error("Unmatched pop.");
+            console.error("Unmatched popts.");
             return;
         }
         base = popped.base;
@@ -78,7 +73,7 @@ export function generateMeshes(options: GenerateMeshesOptions) {
     }
     function rotate(angleDeg: number, axis: THREE.Vector3): void {
         direction.applyAxisAngle(axis, degToRad(angleDeg));
-        thickness *= options.thicknessModifier;
+        thickness *= opts.thicknessModifier;
         radialSegments = Math.max(3, radialSegments - 1);
     }
     function verticalRotate(angleDeg: number): void {
@@ -86,12 +81,12 @@ export function generateMeshes(options: GenerateMeshesOptions) {
         if (axis.equals(new THREE.Vector3(0, 0, 0))) axis = new THREE.Vector3(1, 0, 0);
         axis.normalize();
         direction.applyAxisAngle(axis, degToRad(angleDeg));
-        thickness *= options.thicknessModifier;
+        thickness *= opts.thicknessModifier;
         radialSegments = Math.max(3, radialSegments - 1);
     }
 
     let currSegmentLength = 0;
-    for (const s of sequence) {
+    for (const s of opts.specString) {
 
         // Optimization to lump multiple consecutive draw commands into one straight mesh.
         if (s === "F") {
@@ -105,12 +100,12 @@ export function generateMeshes(options: GenerateMeshesOptions) {
         switch (s) {
             case "[": push(); break;
             case "]": pop();  break;
-            case "+": verticalRotate( options.verticalRotationAngleDeg); break;
-            case "-": verticalRotate(-options.verticalRotationAngleDeg); break;
-            case "a": rotate( options.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case "b": rotate(-options.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case "r": rotate( options.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
-            case "l": rotate(-options.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "+": verticalRotate( opts.verticalRotationAngleDeg); break;
+            case "-": verticalRotate(-opts.verticalRotationAngleDeg); break;
+            case "a": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "b": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "r": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "l": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
 
             //case "F": draw(1); break; // Use this if you want to try removing the optimization
             default: // No operation

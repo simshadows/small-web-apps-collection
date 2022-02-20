@@ -14,12 +14,49 @@ function getDefaultExposedVariables() {
     return {
         "Auto Rotate": true,
 
-        "Axis Rotation": 30,
+        "Axis Rotation":     30,
         "Vertical Rotation": 30,
-        "Thickness Init.": 1.2,
-        "Thickness Mod.": 0.95,
+        "Thickness Init.":   1.2,
+        "Thickness Mod.":    0.95,
 
         "Base Width": 16,
+
+        "Axiom": "X",
+        "Start Direction X": 0,
+        "Start Direction Y": 1,
+        "Start Direction Z": 0,
+
+        rules: {
+            "A": "",
+            "B": "",
+            "C": "",
+            "D": "",
+            "F": "FF",
+            "X": "Frb[[Y]laY]raF[laFX]rbX",
+            "Y": "Flb[[X]raX]laF[raFX]lbY",
+            "Z": "",
+        },
+
+        moreRules: {
+            "E": "",
+            "G": "",
+            "H": "",
+            "I": "",
+            "J": "",
+            "K": "",
+            "L": "",
+            "M": "",
+            "N": "",
+            "O": "",
+            "P": "",
+            "Q": "",
+            "R": "",
+            "S": "",
+            "T": "",
+            "U": "",
+            "V": "",
+            "W": "",
+        },
     };
 }
 
@@ -41,6 +78,30 @@ function getGUIObject() {
         .onFinishChange(onFinish);
     rendering.add(exposedVariables, "Base Width", 0, 100, 1)
         .onFinishChange(onFinish);
+
+    const lsBasics = gui.addFolder("L-System Basic Parameters");
+    lsBasics.open();
+    lsBasics.add(exposedVariables, "Axiom")
+        .onFinishChange(onFinish);
+    lsBasics.add(exposedVariables, "Start Direction X", -1, 1, 0.01)
+        .onFinishChange(onFinish);
+    lsBasics.add(exposedVariables, "Start Direction Y", -1, 1, 0.01)
+        .onFinishChange(onFinish);
+    lsBasics.add(exposedVariables, "Start Direction Z", -1, 1, 0.01)
+        .onFinishChange(onFinish);
+
+    const lsRules = gui.addFolder("L-System Rules");
+    lsRules.open();
+    for (const key of Object.keys(exposedVariables.rules)) {
+        lsRules.add(exposedVariables.rules, key)
+            .onFinishChange(onFinish);
+    }
+
+    const lsMoreRules = gui.addFolder("L-System Rules (Extended)");
+    for (const key of Object.keys(exposedVariables.moreRules)) {
+        lsMoreRules.add(exposedVariables.moreRules, key)
+            .onFinishChange(onFinish);
+    }
 
     return gui;
 }

@@ -13,6 +13,7 @@ import {
     guiValues,
     setSceneResetHandler,
 } from "./gui";
+import {processLSystem} from "./lsystems";
 import {generateMeshes} from "./generateMeshes";
 
 import "./index.css";
@@ -32,12 +33,23 @@ function resizeCanvas() {
 function setScene() {
     const gv = guiValues();
 
+    const sequence = processLSystem(gv["Axiom"], gv.rules, 6);
+    console.log(`Sequence: ${sequence}`);
+
     scene = new THREE.Scene();
     const meshes = generateMeshes({
+        specString:               sequence,
+
+        initialDirectionX:        gv["Start Direction X"],
+        initialDirectionY:        gv["Start Direction Y"],
+        initialDirectionZ:        gv["Start Direction Z"],
+
         axisRotationAngleDeg:     gv["Axis Rotation"],
         verticalRotationAngleDeg: gv["Vertical Rotation"],
+
         initialThickness:         gv["Thickness Init."],
         thicknessModifier:        gv["Thickness Mod."],
+
         baseWidth:                gv["Base Width"],
     });
     for (const mesh of meshes) scene.add(mesh);

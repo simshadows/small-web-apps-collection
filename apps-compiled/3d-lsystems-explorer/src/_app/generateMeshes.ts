@@ -15,7 +15,7 @@ function degToRad(deg: number): number {
 function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3) {
     const path = new THREE.LineCurve3(start, end);
     return new THREE.Mesh(
-        new THREE.TubeGeometry(path, 1, 0.2, 8, false), // I have no idea why I can't set closed to true
+        new THREE.TubeGeometry(path, 1, 0.2, 3, false), // I have no idea why I can't set closed to true
         new THREE.MeshNormalMaterial(),
     );
 }
@@ -23,7 +23,8 @@ function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3) {
 // Doesn't do anything yet, but we'll use it soon!
 const rules: Map<string, string> = new Map([
     ["F", "FF"],
-    ["X", "F-[[X]+X]+F[+FX]-X"],
+    ["X", "F*-[[Y]/+Y]*+F[/+FX]*-X"],
+    ["Y", "F/-[[X]*+X]/+F[*+FX]/-Y"],
 ]);
 const sequence = processLSystem("X", rules, 5);
 console.log(`Sequence: ${sequence}`);
@@ -62,8 +63,10 @@ export function generateMeshes() {
             case "[": push(); break;
             case "]": pop();  break;
             case "F": draw(); break;
-            case "+": rotate(15, new THREE.Vector3(1, 0, 0)); break;
-            case "-": rotate(15, new THREE.Vector3(0, 0, 1)); break;
+            case "+": rotate(30, new THREE.Vector3(1, 0, 0)); break;
+            case "-": rotate(-30, new THREE.Vector3(1, 0, 0)); break;
+            case "*": rotate(30, new THREE.Vector3(0, 1, 0)); break;
+            case "/": rotate(-30, new THREE.Vector3(0, 1, 0)); break;
             default: // No operation
         }
     }

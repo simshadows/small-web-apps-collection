@@ -15,7 +15,7 @@ import "./index.css";
 
 function getSimpleBox() {
     return new THREE.Mesh(
-        new THREE.BoxGeometry(4.0, 0.8, 4.0),
+        new THREE.BoxGeometry(8.0, 0.8, 8.0),
         new THREE.MeshNormalMaterial(),
     );
 }

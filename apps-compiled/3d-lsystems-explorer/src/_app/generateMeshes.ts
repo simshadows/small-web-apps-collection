@@ -15,7 +15,7 @@ function degToRad(deg: number): number {
 function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3) {
     const path = new THREE.LineCurve3(start, end);
     return new THREE.Mesh(
-        new THREE.TubeGeometry(path, 1, 0.1, 8, false), // I have no idea why I can't set closed to true
+        new THREE.TubeGeometry(path, 1, 0.2, 8, false), // I have no idea why I can't set closed to true
         new THREE.MeshNormalMaterial(),
     );
 }
@@ -62,8 +62,8 @@ export function generateMeshes() {
             case "[": push(); break;
             case "]": pop();  break;
             case "F": draw(); break;
-            case "+": rotate(60, new THREE.Vector3(1, 0, 0));  break;
-            case "-": rotate(-60, new THREE.Vector3(0, 0, 1)); break;
+            case "+": rotate(15, new THREE.Vector3(1, 0, 0)); break;
+            case "-": rotate(15, new THREE.Vector3(0, 0, 1)); break;
             default: // No operation
         }
     }

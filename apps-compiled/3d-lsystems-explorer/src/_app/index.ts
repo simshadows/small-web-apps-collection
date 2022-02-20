@@ -39,9 +39,9 @@ const meshes = [
     ...generateMeshes(),
 ];
 
-const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 100);
-camera.position.z = 40;
-camera.position.y = 30;
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.01, 1000);
+camera.position.z = 75;
+camera.position.y = 40;
 
 const scene = new THREE.Scene();
 for (const mesh of meshes) scene.add(mesh);
@@ -53,5 +53,5 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.autoRotate = true;
 controls.autoRotateSpeed = 5;
-controls.target = new THREE.Vector3(0, 10, 0);
+controls.target = new THREE.Vector3(0, 40, 0);
 

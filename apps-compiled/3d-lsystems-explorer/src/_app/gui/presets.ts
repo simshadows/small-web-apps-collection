@@ -158,6 +158,36 @@ export function getHilbertCurve2Preset(dst: any) {
     });
 }
 
+export function getSpiralPreset(dst: any) {
+    return mergeExposedVariables(dst, {
+        "Segment Length":  1,
+        "Axis Rotation":   89,
+        "Thickness Init.": 1.0,
+
+        "Axiom": "A",
+        "Depth": 500,
+        "Start Direction X": 1,
+        "Start Direction Y": 0,
+        "Start Direction Z": 0.001,
+
+        rules: {
+            "A": "A+X",
+            "X": "XF",
+        },
+
+        interpreterRules: {
+            "+": "xrotate(+)",
+            "-": "xrotate(-)",
+
+            ">": "yrotate(+)",
+            "<": "yrotate(-)",
+
+            "^": "zrotate(+)",
+            "v": "zrotate(-)",
+        },
+    });
+}
+
 export function getDebuggingPreset(dst: any) {
     return mergeExposedVariables(dst, {
         "Segment Length":  30,

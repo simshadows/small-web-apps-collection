@@ -12,6 +12,7 @@ import {
     getTree3Preset,
     getHilbertCurve1Preset,
     getHilbertCurve2Preset,
+    getSpiralPreset,
     getDebuggingPreset,
 } from "./presets";
 getDebuggingPreset; // Bypass static check
@@ -134,6 +135,13 @@ function getDefaultExposedVariables() {
                 gui = getGUIObject();
                 sceneResetHandler();
             },
+            "Spiral (Original Work)": () => {
+                exposedVariables = getDefaultExposedVariables();
+                getSpiralPreset(exposedVariables);
+                gui.destroy();
+                gui = getGUIObject();
+                sceneResetHandler();
+            },
         },
     };
 }
@@ -167,11 +175,11 @@ function getGUIObject() {
         .onFinishChange(onFinish);
     lsBasics.add(exposedVariables, "Depth", 0, 100, 1)
         .onFinishChange(onFinish);
-    lsBasics.add(exposedVariables, "Start Direction X", -1, 1, 0.01)
+    lsBasics.add(exposedVariables, "Start Direction X", -1, 1, 0.001)
         .onFinishChange(onFinish);
-    lsBasics.add(exposedVariables, "Start Direction Y", -1, 1, 0.01)
+    lsBasics.add(exposedVariables, "Start Direction Y", -1, 1, 0.001)
         .onFinishChange(onFinish);
-    lsBasics.add(exposedVariables, "Start Direction Z", -1, 1, 0.01)
+    lsBasics.add(exposedVariables, "Start Direction Z", -1, 1, 0.001)
         .onFinishChange(onFinish);
     lsBasics.add(exposedVariables, "Sequence Max.", 50)
         .onFinishChange(onFinish);

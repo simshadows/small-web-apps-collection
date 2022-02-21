@@ -94,13 +94,13 @@ export function getHilbertCurve1Preset(dst: any) {
         },
 
         interpreterRules: {
-            "&":  "xmrotate(+)",
-            "^":  "xmrotate(-)",
-            "+":  "ymrotate(+)",
-            "-":  "ymrotate(-)",
-            "/":  "zmrotate(+)",
-            "\\": "zmrotate(-)",
-            "|":  "ymrotate(+180)",
+            "&":  "xrotate(+)",
+            "^":  "xrotate(-)",
+            "+":  "yrotate(+)",
+            "-":  "yrotate(-)",
+            "/":  "zrotate(+)",
+            "\\": "zrotate(-)",
+            "|":  "yrotate(+180)",
         },
     });
 }
@@ -117,16 +117,16 @@ export function getHilbertCurve2Preset(dst: any) {
             "X": "^<XF^<XFX-F^>>XFX&F+>>XFX-F>X->",
         },
         interpreterRules: {
-            "&":  "xmrotate(-)",
-            "^":  "xmrotate(+)",
-            "+":  "ymrotate(+)",
-            "-":  "ymrotate(-)",
+            "&":  "xrotate(-)",
+            "^":  "xrotate(+)",
+            "+":  "yrotate(+)",
+            "-":  "yrotate(-)",
             "/":  "",
             "\\": "",
             "|":  "",
 
-            ">":  "zmrotate(+)",
-            "<":  "zmrotate(-)",
+            ">":  "zrotate(+)",
+            "<":  "zrotate(-)",
         },
     });
 }

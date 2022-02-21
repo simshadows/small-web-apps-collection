@@ -97,12 +97,12 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
         if (!phantom) meshes.push(getSimpleLine(state.position, end, state.thickness, state.radialSegments));
         state.position = end;
     }
-    function rotate(angleDeg: number, axis: THREE.Vector3): void {
+    function bRotate(angleDeg: number, axis: THREE.Vector3): void {
         state.base.applyAxisAngle(axis, degToRad(angleDeg));
         state.thickness *= opts.thicknessModifier;
         state.radialSegments = Math.max(4, state.radialSegments - 1);
     }
-    function verticalRotate(angleDeg: number): void {
+    function verticalBRotate(angleDeg: number): void {
         let axis = (new THREE.Vector3(0, 1, 0)).cross(state.base);
         if (axis.equals(new THREE.Vector3(0, 0, 0))) axis = new THREE.Vector3(1, 0, 0);
         axis.normalize();
@@ -110,7 +110,7 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
         state.thickness *= opts.thicknessModifier;
         state.radialSegments = Math.max(4, state.radialSegments - 1);
     }
-    function matrixMultiplyDirection(matrix: THREE.Matrix3): void {
+    function matMulOrientation(matrix: THREE.Matrix3): void {
         state.orientation.multiply(matrix);
         //state.base.normalize();
         state.thickness *= opts.thicknessModifier;
@@ -118,11 +118,11 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
     }
 
     const rad = degToRad(opts.axisRotationAngleDeg);
-    const rmXPos = getXAxisRotationMatrix(rad);
+    const rmXPos = getXAxisRotationMatrix( rad);
     const rmXNeg = getXAxisRotationMatrix(-rad);
-    const rmYPos = getYAxisRotationMatrix(rad);
+    const rmYPos = getYAxisRotationMatrix( rad);
     const rmYNeg = getYAxisRotationMatrix(-rad);
-    const rmZPos = getZAxisRotationMatrix(rad);
+    const rmZPos = getZAxisRotationMatrix( rad);
     const rmZNeg = getZAxisRotationMatrix(-rad);
     const rmXTurn = getXAxisRotationMatrix(degToRad(180));
     const rmYTurn = getYAxisRotationMatrix(degToRad(180));
@@ -147,24 +147,25 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
             case "move(-1)": draw(-1, true); break;
             case "push()": push(); break;
             case "pop()":  pop(); break;
-            case "vrotate(+)": verticalRotate( opts.verticalRotationAngleDeg); break;
-            case "vrotate(-)": verticalRotate(-opts.verticalRotationAngleDeg); break;
-            case "xrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case "xrotate(-)": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
-            case "yrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
-            case "yrotate(-)": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
-            case "zrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
-            case "zrotate(-)": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
 
-            case "xmrotate(+)": matrixMultiplyDirection(rmXPos); break;
-            case "xmrotate(-)": matrixMultiplyDirection(rmXNeg); break;
-            case "ymrotate(+)": matrixMultiplyDirection(rmYPos); break;
-            case "ymrotate(-)": matrixMultiplyDirection(rmYNeg); break;
-            case "zmrotate(+)": matrixMultiplyDirection(rmZPos); break;
-            case "zmrotate(-)": matrixMultiplyDirection(rmZNeg); break;
-            case "xmrotate(+180)": matrixMultiplyDirection(rmXTurn); break;
-            case "ymrotate(+180)": matrixMultiplyDirection(rmYTurn); break;
-            case "zmrotate(+180)": matrixMultiplyDirection(rmZTurn); break;
+            case "xrotate(+)": matMulOrientation(rmXPos); break;
+            case "xrotate(-)": matMulOrientation(rmXNeg); break;
+            case "yrotate(+)": matMulOrientation(rmYPos); break;
+            case "yrotate(-)": matMulOrientation(rmYNeg); break;
+            case "zrotate(+)": matMulOrientation(rmZPos); break;
+            case "zrotate(-)": matMulOrientation(rmZNeg); break;
+            case "xrotate(+180)": matMulOrientation(rmXTurn); break;
+            case "yrotate(+180)": matMulOrientation(rmYTurn); break;
+            case "zrotate(+180)": matMulOrientation(rmZTurn); break;
+
+            case "vbrotate(+)": verticalBRotate( opts.verticalRotationAngleDeg); break;
+            case "vbrotate(-)": verticalBRotate(-opts.verticalRotationAngleDeg); break;
+            case "xbrotate(+)": bRotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "xbrotate(-)": bRotate(-opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
+            case "ybrotate(+)": bRotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "ybrotate(-)": bRotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 1, 0)); break;
+            case "zbrotate(+)": bRotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
+            case "zbrotate(-)": bRotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
 
             default: // No operation
         }

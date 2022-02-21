@@ -73,12 +73,39 @@ export function getTree2Preset(dst: any) {
     });
 }
 
+export function getTree3Preset(dst: any) {
+    return mergeExposedVariables(dst, {
+        "Segment Length":  3,
+        "Axis Rotation":   23,
+        "Thickness Init.": 0.2,
+        "Thickness Mod.":  1,
+        "Base Width":      16,
+
+        "Axiom": "F",
+        "Depth": 4,
+
+        rules: {
+            "F": "FF-[-F+F+F]+[+F-F-F]",
+        },
+
+        interpreterRules: {
+            "+": "xrotate(+)",
+            "-": "xrotate(-)",
+
+            ">": "yrotate(+)",
+            "<": "yrotate(-)",
+
+            "^": "zrotate(+)",
+            "v": "zrotate(-)",
+        },
+    });
+}
+
 export function getHilbertCurve1Preset(dst: any) {
     return mergeExposedVariables(dst, {
         "Segment Length":  10,
         "Axis Rotation":   90,
         "Thickness Init.": 1.2,
-        "Thickness Mod.":  1,
 
         "Axiom": "A",
         "Depth": 3,
@@ -127,6 +154,38 @@ export function getHilbertCurve2Preset(dst: any) {
 
             ">":  "zrotate(+)",
             "<":  "zrotate(-)",
+        },
+    });
+}
+
+export function getDebuggingPreset(dst: any) {
+    return mergeExposedVariables(dst, {
+        "Segment Length":  30,
+        "Thickness Init.": 1.2,
+        "Thickness Mod.":  1,
+        "Base Width":      16,
+
+        "Axiom": "F-\\F&F",
+        "Depth": 6,
+        "Start Direction X": 0,
+        "Start Direction Y": 1,
+        "Start Direction Z": 0,
+
+        rules: {
+            "X": "F>-[[Y]<+Y]>+F[<+FX]<-X",
+        },
+
+        interpreterRules: {
+            "&": "vrotate(+)",
+
+            "+": "xrotate(+)",
+            "-": "xrotate(-)",
+
+            ">": "yrotate(+)",
+            "<": "yrotate(-)",
+
+            "/":  "zrotate(+)",
+            "\\": "zrotate(-)",
         },
     });
 }

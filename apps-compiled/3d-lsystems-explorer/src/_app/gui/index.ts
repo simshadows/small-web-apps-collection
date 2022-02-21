@@ -9,9 +9,12 @@ import * as dat from "dat.gui";
 import {
     getTree1Preset,
     getTree2Preset,
+    getTree3Preset,
     getHilbertCurve1Preset,
     getHilbertCurve2Preset,
+    getDebuggingPreset,
 } from "./presets";
+getDebuggingPreset; // Bypass static check
 
 function getDefaultExposedVariables() {
     return {
@@ -21,7 +24,7 @@ function getDefaultExposedVariables() {
         "Axis Rotation":     30,
         "Vertical Rotation": 30,
         "Thickness Init.":   1.2,
-        "Thickness Mod.":    0.95,
+        "Thickness Mod.":    1,
         "Base Width":        0,
         "Sequence Max.":     500000,
 
@@ -89,28 +92,42 @@ function getDefaultExposedVariables() {
         },
 
         presets: {
-            "Tree #1": () => {
+            //"Debugging Preset": () => {
+            //    exposedVariables = getDefaultExposedVariables();
+            //    getDebuggingPreset(exposedVariables);
+            //    gui.destroy();
+            //    gui = getGUIObject();
+            //    sceneResetHandler();
+            //},
+            "Tree 1 (Derived from Wikipedia user Sakurambo's work)": () => {
                 exposedVariables = getDefaultExposedVariables();
                 getTree1Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
-            "Tree #2": () => {
+            "Tree 2 (Variant of Tree 1)": () => {
                 exposedVariables = getDefaultExposedVariables();
                 getTree2Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
-            "Hilbert Curve, v1": () => {
+            "2D Tree (From ABOP Fig. 1.24c, pg. 25)": () => {
+                exposedVariables = getDefaultExposedVariables();
+                getTree3Preset(exposedVariables);
+                gui.destroy();
+                gui = getGUIObject();
+                sceneResetHandler();
+            },
+            "Hilbert Curve (From ABOP Fig. 1.19, pg. 20)": () => {
                 exposedVariables = getDefaultExposedVariables();
                 getHilbertCurve1Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
-            "Hilbert Curve, v2": () => {
+            "Hilbert Curve (From http://malsys.cz/g/Rrl8LtQx)": () => {
                 exposedVariables = getDefaultExposedVariables();
                 getHilbertCurve2Preset(exposedVariables);
                 gui.destroy();
@@ -197,6 +214,7 @@ export function setSceneResetHandler(fn: () => void) {
 }
 
 let exposedVariables = getTree1Preset(getDefaultExposedVariables());
+//let exposedVariables = getTree1Preset(getDefaultExposedVariables());
 const resetVariable = {
     "Reset": () => {
         if (!confirm("Are you sure you want to reset all values?")) return;

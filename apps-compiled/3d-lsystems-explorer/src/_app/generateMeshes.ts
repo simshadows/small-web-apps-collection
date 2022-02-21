@@ -92,27 +92,33 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
     }
 
     function draw(length: number, phantom: boolean): void {
-        const trueDirection = state.base.clone().applyMatrix3(state.orientation);
-        const end = trueDirection.multiplyScalar(length * opts.segmentLength).add(state.position);
+        const direction = state.base.clone().applyMatrix3(state.orientation);
+        const end = direction.multiplyScalar(length * opts.segmentLength).add(state.position);
         if (!phantom) meshes.push(getSimpleLine(state.position, end, state.thickness, state.radialSegments));
         state.position = end;
     }
     function bRotate(angleDeg: number, axis: THREE.Vector3): void {
         state.base.applyAxisAngle(axis, degToRad(angleDeg));
-        state.thickness *= opts.thicknessModifier;
-        state.radialSegments = Math.max(4, state.radialSegments - 1);
+        afterRotate();
     }
     function verticalBRotate(angleDeg: number): void {
         let axis = (new THREE.Vector3(0, 1, 0)).cross(state.base);
         if (axis.equals(new THREE.Vector3(0, 0, 0))) axis = new THREE.Vector3(1, 0, 0);
         axis.normalize();
         state.base.applyAxisAngle(axis, degToRad(angleDeg));
-        state.thickness *= opts.thicknessModifier;
-        state.radialSegments = Math.max(4, state.radialSegments - 1);
+        afterRotate();
     }
     function matMulOrientation(matrix: THREE.Matrix3): void {
         state.orientation.multiply(matrix);
         //state.base.normalize();
+        afterRotate();
+    }
+    //function orientationVerticalRotate(angleDeg: number): void {
+    //    // TODO
+    //    afterRotate();
+    //}
+
+    function afterRotate(): void {
         state.thickness *= opts.thicknessModifier;
         state.radialSegments = Math.max(4, state.radialSegments - 1);
     }
@@ -148,6 +154,8 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
             case "push()": push(); break;
             case "pop()":  pop(); break;
 
+            //case "vrotate(+)": orientationVerticalRotate( opts.verticalRotationAngleDeg); break;
+            //case "vrotate(-)": orientationVerticalRotate(-opts.verticalRotationAngleDeg); break;
             case "xrotate(+)": matMulOrientation(rmXPos); break;
             case "xrotate(-)": matMulOrientation(rmXNeg); break;
             case "yrotate(+)": matMulOrientation(rmYPos); break;

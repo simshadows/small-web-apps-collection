@@ -54,6 +54,7 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
 
     let base = new THREE.Vector3(0, 0, 0);
     let direction = (new THREE.Vector3(opts.initialDirectionX, opts.initialDirectionY, opts.initialDirectionZ)).normalize();
+    let turtle = new THREE.Matrix3();
     let thickness = opts.initialThickness;
     let radialSegments = 10;
     let stack: {base: THREE.Vector3; direction: THREE.Vector3, thickness: number}[] = [];
@@ -73,7 +74,8 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
     }
 
     function draw(length: number, phantom: boolean): void {
-        const end = direction.clone().multiplyScalar(length * opts.segmentLength).add(base);
+        const trueDirection = direction.clone().applyMatrix3(turtle);
+        const end = trueDirection.multiplyScalar(length * opts.segmentLength).add(base);
         if (!phantom) meshes.push(getSimpleLine(base, end, thickness, radialSegments));
         base = end;
     }
@@ -91,7 +93,7 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
         radialSegments = Math.max(3, radialSegments - 1);
     }
     function matrixMultiplyDirection(matrix: THREE.Matrix3): void {
-        direction.applyMatrix3(matrix);
+        turtle.multiply(matrix);
         //direction.normalize();
         thickness *= opts.thicknessModifier;
         radialSegments = Math.max(3, radialSegments - 1);

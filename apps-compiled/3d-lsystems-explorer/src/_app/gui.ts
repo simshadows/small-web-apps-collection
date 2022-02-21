@@ -133,14 +133,14 @@ function getDefaultExposedVariables() {
                 gui = getGUIObject();
                 sceneResetHandler();
             },
-            "WIP: 3D Hilbert Curve, v1": () => {
+            "Hilbert Curve, v1": () => {
                 exposedVariables = getDefaultExposedVariables();
                 setUpHilbertCurveVariables();
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
-            "WIP: 3D Hilbert Curve, v2": () => {
+            "Hilbert Curve, v2": () => {
                 exposedVariables = getDefaultExposedVariables();
                 setUpHilbertCurveVariables();
                 exposedVariables["Axiom"] = "X";

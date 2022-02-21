@@ -40,6 +40,24 @@ interface GenerateMeshesOptions {
     baseWidth: number;
 }
 
+interface TurtleState {
+    position:       THREE.Vector3;
+    base:           THREE.Vector3;
+    orientation:    THREE.Matrix3;
+    thickness:      number;
+    radialSegments: number;
+}
+
+function cloneTurtleState(obj: TurtleState): TurtleState {
+    return {
+        position:       obj.position.clone(),
+        base:           obj.base.clone(),
+        orientation:    obj.orientation.clone(),
+        thickness:      obj.thickness,
+        radialSegments: obj.radialSegments,
+    };
+}
+
 export function generateMeshes(opts: GenerateMeshesOptions) {
     const meshes: THREE.Mesh[] = [];
 
@@ -52,51 +70,51 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
         );
     }
 
-    let base = new THREE.Vector3(0, 0, 0);
-    let direction = (new THREE.Vector3(opts.initialDirectionX, opts.initialDirectionY, opts.initialDirectionZ)).normalize();
-    let turtle = new THREE.Matrix3();
-    let thickness = opts.initialThickness;
-    let radialSegments = 10;
-    let stack: {base: THREE.Vector3; direction: THREE.Vector3, thickness: number}[] = [];
+    let state: TurtleState = {
+        position:    new THREE.Vector3(0, 0, 0),
+        base:        (new THREE.Vector3(opts.initialDirectionX, opts.initialDirectionY, opts.initialDirectionZ)).normalize(),
+        orientation: new THREE.Matrix3(),
+        thickness:   opts.initialThickness,
+        radialSegments: 10,
+    };
+    let stack: TurtleState[] = [];
 
     function push(): void {
-        stack.push({base: base.clone(), direction: direction.clone(), thickness: thickness});
+        stack.push(cloneTurtleState(state));
     }
     function pop(): void {
         const popped = stack.pop();
         if (popped === undefined) {
-            console.error("Unmatched popts.");
+            console.error("Unmatched pop.");
             return;
         }
-        base = popped.base;
-        direction = popped.direction;
-        thickness = popped.thickness;
+        state = popped;
     }
 
     function draw(length: number, phantom: boolean): void {
-        const trueDirection = direction.clone().applyMatrix3(turtle);
-        const end = trueDirection.multiplyScalar(length * opts.segmentLength).add(base);
-        if (!phantom) meshes.push(getSimpleLine(base, end, thickness, radialSegments));
-        base = end;
+        const trueDirection = state.base.clone().applyMatrix3(state.orientation);
+        const end = trueDirection.multiplyScalar(length * opts.segmentLength).add(state.position);
+        if (!phantom) meshes.push(getSimpleLine(state.position, end, state.thickness, state.radialSegments));
+        state.position = end;
     }
     function rotate(angleDeg: number, axis: THREE.Vector3): void {
-        direction.applyAxisAngle(axis, degToRad(angleDeg));
-        thickness *= opts.thicknessModifier;
-        radialSegments = Math.max(3, radialSegments - 1);
+        state.base.applyAxisAngle(axis, degToRad(angleDeg));
+        state.thickness *= opts.thicknessModifier;
+        state.radialSegments = Math.max(4, state.radialSegments - 1);
     }
     function verticalRotate(angleDeg: number): void {
-        let axis = (new THREE.Vector3(0, 1, 0)).cross(direction);
+        let axis = (new THREE.Vector3(0, 1, 0)).cross(state.base);
         if (axis.equals(new THREE.Vector3(0, 0, 0))) axis = new THREE.Vector3(1, 0, 0);
         axis.normalize();
-        direction.applyAxisAngle(axis, degToRad(angleDeg));
-        thickness *= opts.thicknessModifier;
-        radialSegments = Math.max(3, radialSegments - 1);
+        state.base.applyAxisAngle(axis, degToRad(angleDeg));
+        state.thickness *= opts.thicknessModifier;
+        state.radialSegments = Math.max(4, state.radialSegments - 1);
     }
     function matrixMultiplyDirection(matrix: THREE.Matrix3): void {
-        turtle.multiply(matrix);
-        //direction.normalize();
-        thickness *= opts.thicknessModifier;
-        radialSegments = Math.max(3, radialSegments - 1);
+        state.orientation.multiply(matrix);
+        //state.base.normalize();
+        state.thickness *= opts.thicknessModifier;
+        state.radialSegments = Math.max(4, state.radialSegments - 1);
     }
 
     const rad = degToRad(opts.axisRotationAngleDeg);

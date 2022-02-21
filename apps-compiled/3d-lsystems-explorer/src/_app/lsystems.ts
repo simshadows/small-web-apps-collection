@@ -27,7 +27,7 @@ export function processLSystem(
         let next = "";
         for (const character of current) {
             const substitution = rules[character];
-            next += (substitution === undefined) ? character : substitution;
+            next += (substitution === undefined || substitution === "") ? character : substitution;
             if (next.length > sequenceMax) {
                 displaySeqSizeWarning = true;
                 next = next.slice(0, sequenceMax);

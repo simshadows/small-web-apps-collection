@@ -6,9 +6,12 @@
 
 import * as THREE from "three";
 
-function degToRad(deg: number): number {
-    return deg * (Math.PI/180);
-}
+import {
+    degToRad,
+    getXAxisRotationMatrix,
+    getYAxisRotationMatrix,
+    getZAxisRotationMatrix,
+} from "./threeMath";
 
 function getSimpleLine(start: THREE.Vector3, end: THREE.Vector3, thickness: number, radialSegments: number) {
     const path = new THREE.LineCurve3(start, end);
@@ -69,9 +72,9 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
         thickness = popped.thickness;
     }
 
-    function draw(length: number): void {
+    function draw(length: number, phantom: boolean): void {
         const end = direction.clone().multiplyScalar(length * opts.segmentLength).add(base);
-        meshes.push(getSimpleLine(base, end, thickness, radialSegments));
+        if (!phantom) meshes.push(getSimpleLine(base, end, thickness, radialSegments));
         base = end;
     }
     function rotate(angleDeg: number, axis: THREE.Vector3): void {
@@ -87,24 +90,43 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
         thickness *= opts.thicknessModifier;
         radialSegments = Math.max(3, radialSegments - 1);
     }
+    function matrixMultiplyDirection(matrix: THREE.Matrix3): void {
+        direction.applyMatrix3(matrix);
+        //direction.normalize();
+        thickness *= opts.thicknessModifier;
+        radialSegments = Math.max(3, radialSegments - 1);
+    }
+
+    const rad = degToRad(opts.axisRotationAngleDeg);
+    const rmXPos = getXAxisRotationMatrix(rad);
+    const rmXNeg = getXAxisRotationMatrix(-rad);
+    const rmYPos = getYAxisRotationMatrix(rad);
+    const rmYNeg = getYAxisRotationMatrix(-rad);
+    const rmZPos = getZAxisRotationMatrix(rad);
+    const rmZNeg = getZAxisRotationMatrix(-rad);
+    const rmXTurn = getXAxisRotationMatrix(degToRad(180));
+    const rmYTurn = getYAxisRotationMatrix(degToRad(180));
+    const rmZTurn = getZAxisRotationMatrix(degToRad(180));
 
     let currSegmentLength = 0;
     for (const s of opts.specString) {
         const rule = opts.interpreterRules[s];
-        if (rule === undefined) continue;
+        if (rule === undefined || rule === "") continue;
 
         // Optimization to lump multiple consecutive draw commands into one straight mesh.
         if (rule === "draw()") {
             ++currSegmentLength;
             continue;
         } else if (currSegmentLength > 0) {
-            draw(currSegmentLength);
+            draw(currSegmentLength, false);
             currSegmentLength = 0;
         }
 
         switch (rule) {
+            case "move()": draw(1, true); break;
+            case "move(-1)": draw(-1, true); break;
             case "push()": push(); break;
-            case "pop()":  pop();  break;
+            case "pop()":  pop(); break;
             case "vrotate(+)": verticalRotate( opts.verticalRotationAngleDeg); break;
             case "vrotate(-)": verticalRotate(-opts.verticalRotationAngleDeg); break;
             case "xrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(1, 0, 0)); break;
@@ -114,12 +136,22 @@ export function generateMeshes(opts: GenerateMeshesOptions) {
             case "zrotate(+)": rotate( opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
             case "zrotate(-)": rotate(-opts.axisRotationAngleDeg, new THREE.Vector3(0, 0, 1)); break;
 
+            case "xmrotate(+)": matrixMultiplyDirection(rmXPos); break;
+            case "xmrotate(-)": matrixMultiplyDirection(rmXNeg); break;
+            case "ymrotate(+)": matrixMultiplyDirection(rmYPos); break;
+            case "ymrotate(-)": matrixMultiplyDirection(rmYNeg); break;
+            case "zmrotate(+)": matrixMultiplyDirection(rmZPos); break;
+            case "zmrotate(-)": matrixMultiplyDirection(rmZNeg); break;
+            case "xmrotate(+180)": matrixMultiplyDirection(rmXTurn); break;
+            case "ymrotate(+180)": matrixMultiplyDirection(rmYTurn); break;
+            case "zmrotate(+180)": matrixMultiplyDirection(rmZTurn); break;
+
             default: // No operation
         }
     }
     // Finish rendering the last segment if needed
     if (currSegmentLength > 0) {
-        draw(currSegmentLength);
+        draw(currSegmentLength, false);
     }
 
     console.log(`Generated ${meshes.length} meshes.`);

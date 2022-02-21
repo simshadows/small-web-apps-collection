@@ -10,6 +10,38 @@ import * as dat from "dat.gui";
 
 import "./index.css";
 
+function setUpHilbertCurveVariables() {
+    exposedVariables["Auto-Rotate"] = false;
+    exposedVariables["Segment Length"] = 10;
+    exposedVariables["Axis Rotation"] = 90;
+    exposedVariables["Thickness Mod."] = 1;
+    exposedVariables["Base Width"] = 0;
+    exposedVariables["Axiom"] = "A";
+    exposedVariables["Depth"] = 3;
+    exposedVariables["Start Direction X"] = 1;
+    exposedVariables["Start Direction Y"] = 0;
+    exposedVariables["Start Direction Z"] = 0;
+    exposedVariables.rules.F = "";
+    exposedVariables.rules.X = "";
+    exposedVariables.rules.Y = "";
+    exposedVariables.rules.A = "B-F+CFC+F-D&F^D-F+&&CFC+F+B//";
+    exposedVariables.rules.B = "A&F^CFB^F^D^^-F-D^|F^B|FC^F^A//";
+    exposedVariables.rules.C = "|D^|F^B-F+C^F^A&&FA&F^C+F+B^F^D//";
+    exposedVariables.rules.D = "|CFB-F+B|FA&F^A&&FB-F+B|FC//";
+    exposedVariables.interpreterRules["[" ] = "";
+    exposedVariables.interpreterRules["]" ] = "";
+    exposedVariables.interpreterRules["^" ] = "xmrotate(-)";
+    exposedVariables.interpreterRules["v" ] = "";
+    exposedVariables.interpreterRules["+" ] = "ymrotate(+)";
+    exposedVariables.interpreterRules["-" ] = "ymrotate(-)";
+    exposedVariables.interpreterRules[">" ] = "";
+    exposedVariables.interpreterRules["<" ] = "";
+    exposedVariables.interpreterRules["/" ] = "zmrotate(+)";
+    exposedVariables.interpreterRules["\\"] = "zmrotate(-)";
+    exposedVariables.interpreterRules["&" ] = "xmrotate(+)";
+    exposedVariables.interpreterRules["|" ] = "ymrotate(+180)";
+}
+
 function getDefaultExposedVariables() {
     return {
         "Auto-Rotate": true,
@@ -62,10 +94,14 @@ function getDefaultExposedVariables() {
 
         interpreterRules: {
             "F": "draw()",
-            "f": "",
+            "f": "move()",
+            "x": "",
+            "y": "",
+            "z": "",
             "[": "push()",
             "]": "pop()",
 
+            "&": "",
             "^": "vrotate(+)",
             "v": "vrotate(-)",
 
@@ -78,7 +114,6 @@ function getDefaultExposedVariables() {
             "/":  "zrotate(+)",
             "\\": "zrotate(-)",
 
-            "&": "",
             "|": "",
         },
 
@@ -94,6 +129,32 @@ function getDefaultExposedVariables() {
                 exposedVariables = getDefaultExposedVariables();
                 exposedVariables.rules.X = "F*-[[Y]/+Y]*+F[/+FX]*-X";
                 exposedVariables.rules.Y = "F/-[[X]*+X]/+F[*+FX]/-Y";
+                gui.destroy();
+                gui = getGUIObject();
+                sceneResetHandler();
+            },
+            "WIP: 3D Hilbert Curve, v1": () => {
+                exposedVariables = getDefaultExposedVariables();
+                setUpHilbertCurveVariables();
+                gui.destroy();
+                gui = getGUIObject();
+                sceneResetHandler();
+            },
+            "WIP: 3D Hilbert Curve, v2": () => {
+                exposedVariables = getDefaultExposedVariables();
+                setUpHilbertCurveVariables();
+                exposedVariables["Axiom"] = "X";
+                exposedVariables.rules.X = "^<XF^<XFX-F^>>XFX&F+>>XFX-F>X->";
+                exposedVariables.interpreterRules["^" ] = "xmrotate(+)";
+                exposedVariables.interpreterRules["v" ] = "";
+                exposedVariables.interpreterRules["+" ] = "ymrotate(+)";
+                exposedVariables.interpreterRules["-" ] = "ymrotate(-)";
+                exposedVariables.interpreterRules[">" ] = "zmrotate(+)";
+                exposedVariables.interpreterRules["<" ] = "zmrotate(-)";
+                exposedVariables.interpreterRules["/" ] = "";
+                exposedVariables.interpreterRules["\\"] = "";
+                exposedVariables.interpreterRules["&" ] = "xmrotate(-)";
+                exposedVariables.interpreterRules["|" ] = "";
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
@@ -154,6 +215,7 @@ function getGUIObject() {
     }
 
     const interpreter = gui.addFolder("Interpreter");
+    interpreter.open();
     for (const key of Object.keys(exposedVariables.interpreterRules)) {
         interpreter.add(exposedVariables.interpreterRules, key)
             .onFinishChange(onFinish);

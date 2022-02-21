@@ -8,3 +8,7 @@ body {
     background: black;
 }
 
+input {
+    font-family: monospace;
+}
+

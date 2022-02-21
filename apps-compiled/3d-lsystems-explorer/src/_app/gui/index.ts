@@ -4,43 +4,14 @@
  * License:  GNU Affero General Public License v3 (AGPL-3.0)
  */
 
-import "regenerator-runtime/runtime";
-
 import * as dat from "dat.gui";
 
-import "./index.css";
-
-function setUpHilbertCurveVariables() {
-    exposedVariables["Auto-Rotate"] = false;
-    exposedVariables["Segment Length"] = 10;
-    exposedVariables["Axis Rotation"] = 90;
-    exposedVariables["Thickness Mod."] = 1;
-    exposedVariables["Base Width"] = 0;
-    exposedVariables["Axiom"] = "A";
-    exposedVariables["Depth"] = 3;
-    exposedVariables["Start Direction X"] = 1;
-    exposedVariables["Start Direction Y"] = 0;
-    exposedVariables["Start Direction Z"] = 0;
-    exposedVariables.rules.F = "";
-    exposedVariables.rules.X = "";
-    exposedVariables.rules.Y = "";
-    exposedVariables.rules.A = "B-F+CFC+F-D&F^D-F+&&CFC+F+B//";
-    exposedVariables.rules.B = "A&F^CFB^F^D^^-F-D^|F^B|FC^F^A//";
-    exposedVariables.rules.C = "|D^|F^B-F+C^F^A&&FA&F^C+F+B^F^D//";
-    exposedVariables.rules.D = "|CFB-F+B|FA&F^A&&FB-F+B|FC//";
-    exposedVariables.interpreterRules["[" ] = "";
-    exposedVariables.interpreterRules["]" ] = "";
-    exposedVariables.interpreterRules["^" ] = "xmrotate(-)";
-    exposedVariables.interpreterRules["v" ] = "";
-    exposedVariables.interpreterRules["+" ] = "ymrotate(+)";
-    exposedVariables.interpreterRules["-" ] = "ymrotate(-)";
-    exposedVariables.interpreterRules[">" ] = "";
-    exposedVariables.interpreterRules["<" ] = "";
-    exposedVariables.interpreterRules["/" ] = "zmrotate(+)";
-    exposedVariables.interpreterRules["\\"] = "zmrotate(-)";
-    exposedVariables.interpreterRules["&" ] = "xmrotate(+)";
-    exposedVariables.interpreterRules["|" ] = "ymrotate(+180)";
-}
+import {
+    getTree1Preset,
+    getTree2Preset,
+    getHilbertCurve1Preset,
+    getHilbertCurve2Preset,
+} from "./presets";
 
 function getDefaultExposedVariables() {
     return {
@@ -51,8 +22,8 @@ function getDefaultExposedVariables() {
         "Vertical Rotation": 30,
         "Thickness Init.":   1.2,
         "Thickness Mod.":    0.95,
-        "Base Width": 16,
-        "Sequence Max.": 500000,
+        "Base Width":        0,
+        "Sequence Max.":     500000,
 
         "Axiom": "X",
         "Depth": 6,
@@ -61,9 +32,9 @@ function getDefaultExposedVariables() {
         "Start Direction Z": 0,
 
         rules: {
-            "F": "FF",
-            "X": "F>-[[Y]<+Y]>+F[<+FX]<-X",
-            "Y": "F<-[[X]>+X]<+F[>+FX]<-Y",
+            "F": "",
+            "X": "",
+            "Y": "",
             "Z": "",
             "A": "",
             "B": "",
@@ -102,17 +73,17 @@ function getDefaultExposedVariables() {
             "]": "pop()",
 
             "&": "",
-            "^": "vrotate(+)",
-            "v": "vrotate(-)",
+            "^": "",
+            "v": "",
 
-            "+": "xrotate(+)",
-            "-": "xrotate(-)",
+            "+": "",
+            "-": "",
 
-            ">": "yrotate(+)",
-            "<": "yrotate(-)",
+            ">": "",
+            "<": "",
 
-            "/":  "zrotate(+)",
-            "\\": "zrotate(-)",
+            "/":  "",
+            "\\": "",
 
             "|": "",
         },
@@ -120,41 +91,28 @@ function getDefaultExposedVariables() {
         presets: {
             "Tree #1": () => {
                 exposedVariables = getDefaultExposedVariables();
-                // No operations since it's just the default values
+                getTree1Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
             "Tree #2": () => {
                 exposedVariables = getDefaultExposedVariables();
-                exposedVariables.rules.X = "F*-[[Y]/+Y]*+F[/+FX]*-X";
-                exposedVariables.rules.Y = "F/-[[X]*+X]/+F[*+FX]/-Y";
+                getTree2Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
             "Hilbert Curve, v1": () => {
                 exposedVariables = getDefaultExposedVariables();
-                setUpHilbertCurveVariables();
+                getHilbertCurve1Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
             "Hilbert Curve, v2": () => {
                 exposedVariables = getDefaultExposedVariables();
-                setUpHilbertCurveVariables();
-                exposedVariables["Axiom"] = "X";
-                exposedVariables.rules.X = "^<XF^<XFX-F^>>XFX&F+>>XFX-F>X->";
-                exposedVariables.interpreterRules["^" ] = "xmrotate(+)";
-                exposedVariables.interpreterRules["v" ] = "";
-                exposedVariables.interpreterRules["+" ] = "ymrotate(+)";
-                exposedVariables.interpreterRules["-" ] = "ymrotate(-)";
-                exposedVariables.interpreterRules[">" ] = "zmrotate(+)";
-                exposedVariables.interpreterRules["<" ] = "zmrotate(-)";
-                exposedVariables.interpreterRules["/" ] = "";
-                exposedVariables.interpreterRules["\\"] = "";
-                exposedVariables.interpreterRules["&" ] = "xmrotate(-)";
-                exposedVariables.interpreterRules["|" ] = "";
+                getHilbertCurve2Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
@@ -238,11 +196,11 @@ export function setSceneResetHandler(fn: () => void) {
     sceneResetHandler = fn;
 }
 
-let exposedVariables = getDefaultExposedVariables();
+let exposedVariables = getTree1Preset(getDefaultExposedVariables());
 const resetVariable = {
     "Reset": () => {
         if (!confirm("Are you sure you want to reset all values?")) return;
-        exposedVariables = getDefaultExposedVariables();
+        exposedVariables = getTree1Preset(getDefaultExposedVariables());
         gui.destroy();
         gui = getGUIObject();
         sceneResetHandler();

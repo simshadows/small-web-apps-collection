@@ -10,6 +10,7 @@ import {
     getTree1Preset,
     getTree2Preset,
     getTree3Preset,
+    getTree4Preset,
     getHilbertCurve1Preset,
     getHilbertCurve2Preset,
     getSpiralPreset,
@@ -100,23 +101,30 @@ function getDefaultExposedVariables() {
             //    gui = getGUIObject();
             //    sceneResetHandler();
             //},
-            "Tree 1 (Derived from Wikipedia user Sakurambo's work)": () => {
+            "Tree 1 (Derived from ABOP Fig. 1.24d, pg. 25)": () => {
                 exposedVariables = getDefaultExposedVariables();
                 getTree1Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
-            "Tree 2 (Variant of Tree 1)": () => {
+            "Tree 2 (Derived from ABOP Fig. 1.24f, pg. 25)": () => {
                 exposedVariables = getDefaultExposedVariables();
                 getTree2Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
             },
-            "2D Tree (From ABOP Fig. 1.24c, pg. 25)": () => {
+            "Tree 3 (Variant of Tree 2)": () => {
                 exposedVariables = getDefaultExposedVariables();
                 getTree3Preset(exposedVariables);
+                gui.destroy();
+                gui = getGUIObject();
+                sceneResetHandler();
+            },
+            "2D Tree (From ABOP Fig. 1.24c, pg. 25)": () => {
+                exposedVariables = getDefaultExposedVariables();
+                getTree4Preset(exposedVariables);
                 gui.destroy();
                 gui = getGUIObject();
                 sceneResetHandler();
@@ -156,7 +164,7 @@ function getGUIObject() {
 
     const rendering = gui.addFolder("Rendering");
     rendering.open();
-    rendering.add(exposedVariables, "Segment Length", 1, 100, 1)
+    rendering.add(exposedVariables, "Segment Length", 0.1, 100, 0.1)
         .onFinishChange(onFinish);
     rendering.add(exposedVariables, "Axis Rotation", 0, 180, 1)
         .onFinishChange(onFinish);

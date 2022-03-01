@@ -29,22 +29,21 @@ export function mergeExposedVariables(dst: any, src: any) {
 
 export function getTree1Preset(dst: any) {
     return mergeExposedVariables(dst, {
-        "Segment Length":  1,
+        "Segment Length":  0.4,
         "Axis Rotation":   30,
-        "Thickness Init.": 1.2,
-        "Thickness Mod.":  0.95,
+        "Thickness Init.": 0.8,
+        "Thickness Mod.":  0.94,
         "Base Width":      16,
 
         "Axiom": "X",
-        "Depth": 6,
+        "Depth": 7,
         "Start Direction X": 0,
         "Start Direction Y": 1,
         "Start Direction Z": 0,
 
         rules: {
             "F": "FF",
-            "X": "F>-[[Y]<+Y]>+F[<+FX]<-X",
-            "Y": "F<-[[X]>+X]<+F[>+FX]<-Y",
+            "X": "F[>>+X]F[>>>>-X]F[>>>>>+X]+X",
         },
 
         interpreterRules: {
@@ -66,6 +65,21 @@ export function getTree1Preset(dst: any) {
 export function getTree2Preset(dst: any) {
     getTree1Preset(dst);
     return mergeExposedVariables(dst, {
+        "Segment Length":  1,
+        "Thickness Init.": 1.2,
+        "Thickness Mod.":  0.95,
+
+        "Depth": 6,
+        rules: {
+            "X": "F>-[[Y]<+Y]>+F[<+FX]<-X",
+            "Y": "F<-[[X]>+X]<+F[>+FX]<-Y",
+        },
+    });
+}
+
+export function getTree3Preset(dst: any) {
+    getTree2Preset(dst);
+    return mergeExposedVariables(dst, {
         rules: {
             "X": "F*-[[Y]/+Y]*+F[/+FX]*-X",
             "Y": "F/-[[X]*+X]/+F[*+FX]/-Y",
@@ -73,7 +87,7 @@ export function getTree2Preset(dst: any) {
     });
 }
 
-export function getTree3Preset(dst: any) {
+export function getTree4Preset(dst: any) {
     return mergeExposedVariables(dst, {
         "Segment Length":  3,
         "Axis Rotation":   23,

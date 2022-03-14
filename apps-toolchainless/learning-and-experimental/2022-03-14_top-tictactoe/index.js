@@ -96,6 +96,7 @@ function GameBoard() {
                 [6, 7, 8],
             ];
             const winningLines = [];
+            const winningCells = new Set();
             let winner = 0;
             for (const [lineIndex, cellIndices] of winningLinesTests.entries()) {
                 const sum = arraySum(cellIndices.map((e) => this.grid[e]));
@@ -103,11 +104,13 @@ function GameBoard() {
                     if (winner === 0) winner = sum / 3;
                     if (winner !== (sum / 3)) throw "There should never be two winners.";
                     winningLines.push(lineIndex);
+                    for (const cellIndex of cellIndices) winningCells.add(cellIndex);
                 }
             }
             return {
                 player: winner,
                 winningLines: winningLines,
+                winningCells: winningCells,
             };
         },
     };
@@ -126,11 +129,11 @@ const render = (()=>{
         return elem;
     }
 
-    function makeBoardElement(gameIsFinished) {
+    function makeBoardElement(winState) {
         const elem = element("div", {id: "board"});
         for (const [i, cellValue] of state.getBoard().entries()) {
             const cellElem = elem.appendChild(element("div", {"data-cell-index": String(i)}));
-            if ((cellValue === 0) && !gameIsFinished) {
+            if ((cellValue === 0) && (winState.player === 0)) {
                 cellElem.classList.add("button");
                 cellElem.addEventListener("click", (e) => {
                     const position = parseInt(e.target.dataset.cellIndex);
@@ -138,6 +141,7 @@ const render = (()=>{
                 });
             } else {
                 cellElem.classList.add("marked-cell");
+                if (winState.winningCells.has(i)) cellElem.classList.add("winning-cell");
                 const symbol = (()=>{
                     if (cellValue === 0) return "";
                     const renderX = (cellValue === -1) !== (state.player1isX);
@@ -151,17 +155,16 @@ const render = (()=>{
     }
 
     function renderPlaying() {
-        const winner = state.calculateWinConditions();
-        console.log(winner);
+        const winState = state.calculateWinConditions();
 
         /*** Play Area ***/
-        const gameIsFinished = (winner.player !== 0);
+        const gameIsFinished = (winState.player !== 0);
         const message = (()=>{
             if (gameIsFinished) {
-                const playerName = (winner.player === 1) ? state.player1.name : state.player2.name;
-                const symbol = ((winner.player === 1) === state.player1isX) ? "X" : "O";
+                const playerName = (winState.player === 1) ? state.player1.name : state.player2.name;
+                const symbol = ((winState.player === 1) === state.player1isX) ? "X" : "O";
                 return {
-                    forPlayer1: (winner.player === 1),
+                    forPlayer1: (winState.player === 1),
                     contents: `${playerName} wins! Their symbol is ${symbol}.`,
                 };
             } else {
@@ -175,7 +178,7 @@ const render = (()=>{
         })();
         playAreaElement.classList.add("playing");
         playAreaElement.appendChild(makeSideElement(message.forPlayer1 ? message.contents : ""))
-        playAreaElement.appendChild(makeBoardElement(gameIsFinished))
+        playAreaElement.appendChild(makeBoardElement(winState))
         playAreaElement.appendChild(makeSideElement(message.forPlayer1 ? "" : message.contents))
 
         /*** Bottom Bar ***/

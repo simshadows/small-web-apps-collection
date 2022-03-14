@@ -80,6 +80,10 @@ div.button:active {
     background: #fff;
     cursor: default;
 }
+#board > div.winning-cell {
+    background: #67cf67;
+    cursor: default;
+}
 #board > div > span {
     font-size: 3em;
 }

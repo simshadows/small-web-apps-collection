@@ -13,12 +13,17 @@ function element(tagName, attributes={}) {
     return elem;
 }
 
-// IMPORTANT: Never modify state directly. Only modify using functions.
+// IMPORTANT: Never directly assign fields directly outside of the state definition.
+//            Never directly access fields leading with an underscore.
+//            (We could create field getter methods, but that would be unnecessary complication here.)
 const state = {
     reset: function() {
+        /*** Core State ***/
         this.mode = "start"; // "start" | "playing"
-        this.gb = new GameBoard();
+        this.player1turn = true;
+        this._gameBoard = new GameBoard();
 
+        /*** Player Data ***/
         // Note for Odin Project: Player data is too simple to necessitate a factory right now.
         this.player1isX = true;
         this.player1 = {
@@ -32,15 +37,39 @@ const state = {
         console.assert(this.mode === "start");
         this.mode = "playing";
     },
+    closeGame: function() {
+        this.mode = "start";
+        this._gameBoard = new GameBoard();
+    },
+
+    getBoard: function() {
+        return [...this._gameBoard.grid];
+    },
+    setMarker: function(position) {
+        this._gameBoard.setMarker(position, (this.player1turn) ? 1 : -1);
+        this.player1turn = !this.player1turn;
+    },
 };
 
+// IMPORTANT: Never directly assign fields directly outside of the constructor definition.
+// TODO: Put methods in prototype instead?
 function GameBoard() {
     return {
         // grid represents a 3x3 board in row-major:
         //      [ 0, 1, 2,
         //        3, 4, 5,
         //        6, 7, 8 ]
-        grid: new Array(9).fill(null),
+        // Each element is either:
+        //      0 = no marker
+        //      1 = player 1's marker
+        //      -1 = player 2's marker
+        grid: new Array(9).fill(0),
+        setMarker: function(position, player) {
+            console.assert((position >= 0) && (position < 9));
+            console.assert(this.grid[position] === 0);
+            console.assert((player === -1) || (player === 1));
+            this.grid[position] = player;
+        }
     };
 }
 
@@ -51,8 +80,26 @@ const render = (()=>{
     function renderPlaying() {
         /*** Play Area ***/
         playAreaElement.classList.add("playing");
+        const boardElem = playAreaElement.appendChild(element("div", {id: "board"}));
+        for (const [i, cellValue] of state.getBoard().entries()) {
+            const cellElem = boardElem.appendChild(element("div", {"data-cell-index": String(i)}));
+            if (cellValue === 0) {
+                cellElem.classList.add("button");
+                cellElem.addEventListener("click", (e) => {
+                    const position = parseInt(e.target.dataset.cellIndex);
+                    state.setMarker(position);
+                });
+            } else {
+                cellElem.classList.add("marked-cell");
+                const renderX = (cellValue === 1) !== (state.player1isX);
+                cellElem.appendChild(txt(renderX ? "X" : "O"))
+            }
+        }
 
-        console.log("UNIMPLEMENTED");
+        /*** Bottom Bar ***/
+        const restartButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));
+        restartButtonElem.appendChild(txt("Restart"))
+        restartButtonElem.addEventListener("click", () => state.closeGame());
     }
 
     function renderStart() {

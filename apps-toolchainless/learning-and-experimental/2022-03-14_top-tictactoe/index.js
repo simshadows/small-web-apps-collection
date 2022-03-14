@@ -13,13 +13,17 @@ function element(tagName, attributes={}) {
     return elem;
 }
 
+function arraySum(arr) {
+    return arr.reduce(((partialSum, x) => partialSum + x), 0);
+}
+
 // IMPORTANT: Never directly assign fields directly outside of the state definition.
 //            Never directly access fields leading with an underscore. Those are private fields.
 //            (We could create field getter methods, but that would be unnecessary complication here.)
 const state = {
     reset: function() {
         /*** Core State ***/
-        this.mode = "playing"; // "start" | "playing"
+        this.mode = "start"; // "start" | "playing"
         this.player1turn = true;
         this._gameBoard = new GameBoard();
 
@@ -36,10 +40,11 @@ const state = {
     startGame: function() {
         console.assert(this.mode === "start");
         this.mode = "playing";
+        this.player1turn = true;
+        this._gameBoard = new GameBoard();
     },
     closeGame: function() {
         this.mode = "start";
-        this._gameBoard = new GameBoard();
     },
 
     getBoard: function() {
@@ -49,6 +54,9 @@ const state = {
         this._gameBoard.setMarker(position, (this.player1turn) ? 1 : -1);
         this.player1turn = !this.player1turn;
     },
+    calculateWinConditions: function() {
+        return this._gameBoard.calculateWinConditions();
+    }
 };
 
 // IMPORTANT: Never directly assign fields directly outside of the constructor definition.
@@ -70,9 +78,38 @@ function GameBoard() {
             console.assert((player === -1) || (player === 1));
             this.grid[position] = player;
         },
-        //calculateWinConditions: function() {
-        //    
-        //},
+        // calculateWinConditions returns line indices in the following scheme:
+        //      0    1  2  3    4
+        //           _______
+        //      5   |X  X  X|
+        //      6   |X  X  X|
+        //      7   |X  X  X|
+        calculateWinConditions: function() {
+            const winningLinesTests = [
+                [0, 4, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [2, 4, 6],
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+            ];
+            const winningLines = [];
+            let winner = 0;
+            for (const [lineIndex, cellIndices] of winningLinesTests.entries()) {
+                const sum = arraySum(cellIndices.map((e) => this.grid[e]));
+                if ((sum === 3) || (sum === -3)) {
+                    if (winner === 0) winner = sum / 3;
+                    if (winner !== (sum / 3)) throw "There should never be two winners.";
+                    winningLines.push(lineIndex);
+                }
+            }
+            return {
+                player: winner,
+                winningLines: winningLines,
+            };
+        },
     };
 }
 
@@ -89,11 +126,11 @@ const render = (()=>{
         return elem;
     }
 
-    function makeBoardElement() {
+    function makeBoardElement(gameIsFinished) {
         const elem = element("div", {id: "board"});
         for (const [i, cellValue] of state.getBoard().entries()) {
             const cellElem = elem.appendChild(element("div", {"data-cell-index": String(i)}));
-            if (cellValue === 0) {
+            if ((cellValue === 0) && !gameIsFinished) {
                 cellElem.classList.add("button");
                 cellElem.addEventListener("click", (e) => {
                     const position = parseInt(e.target.dataset.cellIndex);
@@ -101,23 +138,45 @@ const render = (()=>{
                 });
             } else {
                 cellElem.classList.add("marked-cell");
-                const renderX = (cellValue === -1) !== (state.player1isX);
+                const symbol = (()=>{
+                    if (cellValue === 0) return "";
+                    const renderX = (cellValue === -1) !== (state.player1isX);
+                    return (renderX) ? "X" : "O";
+                })();
                 const contentElem = cellElem.appendChild(element("span"));
-                contentElem.appendChild(txt(renderX ? "X" : "O"))
+                contentElem.appendChild(txt(symbol))
             }
         }
         return elem;
     }
 
     function renderPlaying() {
+        const winner = state.calculateWinConditions();
+        console.log(winner);
+
         /*** Play Area ***/
-        const playerName = state.player1turn ? state.player1.name : state.player2.name;
-        const symbol = (state.player1turn === state.player1isX) ? "X" : "O";
-        const message = `${playerName}'s turn! Your symbol is ${symbol}.`;
+        const gameIsFinished = (winner.player !== 0);
+        const message = (()=>{
+            if (gameIsFinished) {
+                const playerName = (winner.player === 1) ? state.player1.name : state.player2.name;
+                const symbol = ((winner.player === 1) === state.player1isX) ? "X" : "O";
+                return {
+                    forPlayer1: (winner.player === 1),
+                    contents: `${playerName} wins! Their symbol is ${symbol}.`,
+                };
+            } else {
+                const playerName = state.player1turn ? state.player1.name : state.player2.name;
+                const symbol = (state.player1turn === state.player1isX) ? "X" : "O";
+                return {
+                    forPlayer1: state.player1turn,
+                    contents: `${playerName}'s turn! Your symbol is ${symbol}.`,
+                };
+            } 
+        })();
         playAreaElement.classList.add("playing");
-        playAreaElement.appendChild(makeSideElement(state.player1turn ? message : ""))
-        playAreaElement.appendChild(makeBoardElement())
-        playAreaElement.appendChild(makeSideElement(state.player1turn ? "" : message))
+        playAreaElement.appendChild(makeSideElement(message.forPlayer1 ? message.contents : ""))
+        playAreaElement.appendChild(makeBoardElement(gameIsFinished))
+        playAreaElement.appendChild(makeSideElement(message.forPlayer1 ? "" : message.contents))
 
         /*** Bottom Bar ***/
         const restartButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));

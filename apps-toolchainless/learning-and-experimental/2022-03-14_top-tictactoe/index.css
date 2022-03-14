@@ -1,0 +1,33 @@
+* {
+    box-sizing: border-box;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+
+    margin: auto;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    padding: 1em;
+    background: #666;
+    width: 25em;
+    height: 14em;
+
+    font-family: monospace;
+    font-size: 4.5vh;
+}
+#app > div {
+    width: 100%;
+}
+
+#play-area {
+    flex: 1 0 0;
+    background: green;
+}
+
+#bottom-bar {
+    height: 3em;
+    background: red;
+}
+

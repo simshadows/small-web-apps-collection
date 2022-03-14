@@ -51,13 +51,25 @@ const state = {
     getBoard: function() {
         return [...this._gameBoard.grid];
     },
+    calculateWinner: function() {
+        return this._gameBoard.calculateWinner();
+    },
+
+    setName: function(player, newName) {
+        if (player === 1) {
+            this.player1.name = newName;
+        } else {
+            console.assert(player === -1);
+            this.player2.name = newName;
+        }
+    },
+    swapSymbols: function() {
+        [this.player1.symbol, this.player2.symbol] = [this.player2.symbol, this.player1.symbol];
+    },
     setMarker: function(position) {
         this._gameBoard.setMarker(position, (this.player1turn) ? 1 : -1);
         this.player1turn = !this.player1turn;
     },
-    calculateWinConditions: function() {
-        return this._gameBoard.calculateWinConditions();
-    }
 };
 
 // IMPORTANT: Never directly assign fields directly outside of the constructor definition.
@@ -79,13 +91,13 @@ function GameBoard() {
             console.assert((player === -1) || (player === 1));
             this.grid[position] = player;
         },
-        // calculateWinConditions returns line indices in the following scheme:
+        // calculateWinner returns line indices in the following scheme:
         //      0    1  2  3    4
         //           _______
         //      5   |X  X  X|
         //      6   |X  X  X|
         //      7   |X  X  X|
-        calculateWinConditions: function() {
+        calculateWinner: function() {
             const winningLinesTests = [
                 [0, 4, 8],
                 [0, 3, 6],
@@ -155,7 +167,7 @@ const render = (()=>{
     }
 
     function renderPlaying() {
-        const winState = state.calculateWinConditions();
+        const winState = state.calculateWinner();
 
         /*** Play Area ***/
         const gameIsFinished = (winState.player !== 0);
@@ -188,14 +200,20 @@ const render = (()=>{
     function renderStart() {
         /*** Play Area ***/
         playAreaElement.classList.add("start");
-        for (const playerData of [state.player1, state.player2]) {
+        for (const [i, playerData] of [[1, state.player1], [-1, state.player2]]) {
             const sectionElem = playAreaElement.appendChild(element("div"));
 
-            const nameBoxElem = sectionElem.appendChild(element("div"));
-            nameBoxElem.appendChild(txt(playerData.name));
+            const nameBoxElem = sectionElem.appendChild(element("input"));
+            nameBoxElem.addEventListener("click", (e) => e.stopPropagation()); // Don't rerender
+            nameBoxElem.addEventListener("change", (e) => {
+                const newName = e.target.value;
+                state.setName(i, newName);
+            });
+            nameBoxElem.value = playerData.name;
 
-            const symbolBoxElem = sectionElem.appendChild(element("div"));
+            const symbolBoxElem = sectionElem.appendChild(element("div", {class: "button"}));
             symbolBoxElem.appendChild(txt(playerData.symbol));
+            symbolBoxElem.addEventListener("click", () => state.swapSymbols());
         }
 
         /*** Bottom Bar ***/

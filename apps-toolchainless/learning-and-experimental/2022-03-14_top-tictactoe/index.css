@@ -35,8 +35,24 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    row-gap: 0.5em;
 
     margin: 0.5em;
+}
+#play-area.start > div > input {
+    height: 1.8em;
+    width: 80%;
+    padding: 0.4em;
+    font-family: inherit;
+    font-size: inherit;
+}
+#play-area.start > div > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 1.8em;
+    width: 1.8em;
 }
 
 #bottom-bar {

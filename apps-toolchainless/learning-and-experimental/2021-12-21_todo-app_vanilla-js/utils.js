@@ -1,3 +1,9 @@
+/*
+ * Filename: utils.js
+ * Author:   simshadows <contact@simshadows.com>
+ * License:  GNU Affero General Public License v3 (AGPL-3.0)
+ */
+
 export const millisecondsInADay = 1000 * 60 * 60 * 24;
 
 export function deepcopy(obj) {

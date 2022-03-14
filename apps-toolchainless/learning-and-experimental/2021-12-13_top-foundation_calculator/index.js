@@ -1,3 +1,9 @@
+/*
+ * Filename: index.js
+ * Author:   simshadows <contact@simshadows.com>
+ * License:  GNU Affero General Public License v3 (AGPL-3.0)
+ */
+
 const display = document.querySelector("#display");
 const buttons = document.querySelectorAll(".button");
 

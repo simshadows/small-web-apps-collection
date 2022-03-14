@@ -56,13 +56,8 @@
     font-size: inherit;
     text-align: center;
 }
-#play-area.start > div > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    height: 1.8em;
-    width: 1.8em;
+#play-area.start > div > div.symbol {
+    font-size: 2em;
 }
 
 #bottom-bar {
@@ -107,6 +102,9 @@ div.button:active {
 #board > div.marked-cell {
     background: #fff;
     cursor: default;
+}
+#board > div.unmarked-cell {
+    color: #fff;
 }
 #board > div.winning-cell {
     background: #93c47d;

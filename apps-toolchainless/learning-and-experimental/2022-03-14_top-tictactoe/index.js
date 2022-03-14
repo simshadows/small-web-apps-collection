@@ -156,16 +156,16 @@ const render = (()=>{
         return elem;
     }
 
-    function makeBoardElement(winState) {
+    function makeBoardElement(currPlayer, winState) {
         const elem = element("div", {id: "board"});
         for (const [i, cellValue] of state.getBoard().entries()) {
-            const cellElem = elem.appendChild(element("div", {"data-cell-index": String(i)}));
+            const cellElem = elem.appendChild(element("div"));
             if ((cellValue === 0) && (winState.player === 0)) {
+                cellElem.classList.add("unmarked-cell");
                 cellElem.classList.add("button");
-                cellElem.addEventListener("click", (e) => {
-                    const position = parseInt(e.target.dataset.cellIndex);
-                    state.setMarker(position);
-                });
+                cellElem.addEventListener("click", () => state.setMarker(i));
+                const contentElem = cellElem.appendChild(element("span"));
+                contentElem.appendChild(txt(currPlayer.symbol))
             } else {
                 cellElem.classList.add("marked-cell");
                 if (winState.winningCells.has(i)) cellElem.classList.add("winning-cell");
@@ -182,11 +182,12 @@ const render = (()=>{
 
     function renderPlaying() {
         const winState = state.calculateWinner();
+        const currPlayer = state.player1turn ? state.player1 : state.player2;
 
         /*** Play Area ***/
         playAreaElement.classList.add("playing");
         playAreaElement.appendChild(makeSideElement(state.player1, (state.player1turn && !winState.player), (winState.player === 1)))
-        playAreaElement.appendChild(makeBoardElement(winState))
+        playAreaElement.appendChild(makeBoardElement(currPlayer, winState))
         playAreaElement.appendChild(makeSideElement(state.player2, (!state.player1turn && !winState.player), (winState.player === -1)))
 
         /*** Bottom Bar ***/
@@ -201,7 +202,7 @@ const render = (()=>{
         for (const [i, playerData] of [[1, state.player1], [-1, state.player2]]) {
             const sectionElem = playAreaElement.appendChild(element("div"));
 
-            const symbolBoxElem = sectionElem.appendChild(element("div", {class: "button"}));
+            const symbolBoxElem = sectionElem.appendChild(element("div", {class: ["button", "symbol"]}));
             symbolBoxElem.appendChild(txt(playerData.symbol));
             symbolBoxElem.addEventListener("click", () => state.swapSymbols());
 

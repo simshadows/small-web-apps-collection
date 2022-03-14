@@ -9,7 +9,7 @@
     margin: auto;
     margin-top: 1em;
     margin-bottom: 1em;
-    padding: 1em;
+    padding: 0.5em;
     background: #666;
     width: 25em;
     height: 14em;
@@ -23,7 +23,18 @@
 
 #play-area {
     flex: 1 0 0;
-    background: green;
+
+    display: flex;
+}
+#play-area.start > div {
+    flex: 1 0 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    margin: 0.5em;
 }
 
 #bottom-bar {

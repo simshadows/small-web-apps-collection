@@ -29,12 +29,13 @@ const state = {
 
         /*** Player Data ***/
         // Note for Odin Project: Player data is too simple to necessitate a factory right now.
-        this.player1isX = true;
         this.player1 = {
             name: "Player 1",
+            symbol: "X",
         };
         this.player2 = {
             name: "Player 2",
+            symbol: "O",
         };
     },
     startGame: function() {
@@ -144,8 +145,7 @@ const render = (()=>{
                 if (winState.winningCells.has(i)) cellElem.classList.add("winning-cell");
                 const symbol = (()=>{
                     if (cellValue === 0) return "";
-                    const renderX = (cellValue === -1) !== (state.player1isX);
-                    return (renderX) ? "X" : "O";
+                    return (cellValue === 1) ? state.player1.symbol : state.player2.symbol;
                 })();
                 const contentElem = cellElem.appendChild(element("span"));
                 contentElem.appendChild(txt(symbol))
@@ -161,18 +161,16 @@ const render = (()=>{
         const gameIsFinished = (winState.player !== 0);
         const message = (()=>{
             if (gameIsFinished) {
-                const playerName = (winState.player === 1) ? state.player1.name : state.player2.name;
-                const symbol = ((winState.player === 1) === state.player1isX) ? "X" : "O";
+                const playerData = (winState.player === 1) ? state.player1 : state.player2;
                 return {
                     forPlayer1: (winState.player === 1),
-                    contents: `${playerName} wins! Their symbol is ${symbol}.`,
+                    contents: `${playerData.name} wins! Their symbol is ${playerData.symbol}.`,
                 };
             } else {
-                const playerName = state.player1turn ? state.player1.name : state.player2.name;
-                const symbol = (state.player1turn === state.player1isX) ? "X" : "O";
+                const playerData = (state.player1turn) ? state.player1 : state.player2;
                 return {
                     forPlayer1: state.player1turn,
-                    contents: `${playerName}'s turn! Your symbol is ${symbol}.`,
+                    contents: `${playerData.name}'s turn! Your symbol is ${playerData.symbol}.`,
                 };
             } 
         })();
@@ -190,16 +188,14 @@ const render = (()=>{
     function renderStart() {
         /*** Play Area ***/
         playAreaElement.classList.add("start");
-        for (const [i, playerData] of [state.player1, state.player2].entries()) {
+        for (const playerData of [state.player1, state.player2]) {
             const sectionElem = playAreaElement.appendChild(element("div"));
 
             const nameBoxElem = sectionElem.appendChild(element("div"));
             nameBoxElem.appendChild(txt(playerData.name));
 
-            const isO = (!i) !== state.player1isX;
-
             const symbolBoxElem = sectionElem.appendChild(element("div"));
-            symbolBoxElem.appendChild(txt(isO ? "O" : "X"));
+            symbolBoxElem.appendChild(txt(playerData.symbol));
         }
 
         /*** Bottom Bar ***/

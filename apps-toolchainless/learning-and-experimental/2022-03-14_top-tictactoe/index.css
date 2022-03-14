@@ -2,6 +2,15 @@
     box-sizing: border-box;
 }
 
+/* Makes single lines of text clip gracefully to prevent breaking the layout */
+/* Intended for both div and p */
+.clipsafe {
+    display: inline;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 #app {
     display: flex;
     flex-direction: column;
@@ -11,7 +20,7 @@
     margin-bottom: 1em;
     padding: 0.5em;
     background: #666;
-    width: 25em;
+    width: 26em;
     height: 14em;
 
     font-family: monospace;
@@ -45,6 +54,7 @@
     padding: 0.4em;
     font-family: inherit;
     font-size: inherit;
+    text-align: center;
 }
 #play-area.start > div > div {
     display: flex;
@@ -83,6 +93,8 @@ div.button:active {
     gap: 0.3em;
     grid-template-columns: repeat(3, 1fr);
     grid-auto-flow: row;
+
+    padding: 0 0.5em 0 0.5em;
 }
 #board > div {
     display: flex;
@@ -97,7 +109,7 @@ div.button:active {
     cursor: default;
 }
 #board > div.winning-cell {
-    background: #67cf67;
+    background: #93c47d;
     cursor: default;
 }
 #board > div > span {
@@ -110,11 +122,45 @@ div.button:active {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+    row-gap: 0.5em;
 
     height: 100%;
     padding: 0.4em;
+    cursor: default;
+    text-align: center;
+}
+.side > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    height: 4em;
+    background: #aaa;
+    width: 100%;
 }
 .side > span {
-    text-align: center;
+    height: 1.5em;
+    font-weight: bold;
+}
+.side.is-turn > span {
+    color: #ffd966;
+}
+.side.is-winner > span {
+    color: #93c47d;
+}
+.side > div > span.name {
+    font-size: 0.6em;
+    font-weight: bold;
+}
+.side > div> span.symbol {
+    font-size: 2em;
+}
+.side.is-turn > div {
+    background: #ffd966;
+}
+.side.is-winner > div {
+    background: #93c47d;
 }
 

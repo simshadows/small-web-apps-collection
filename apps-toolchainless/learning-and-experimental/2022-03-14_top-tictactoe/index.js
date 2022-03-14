@@ -133,12 +133,26 @@ const render = (()=>{
     const playAreaElement = document.querySelector("#play-area");
     const bottomBarElement = document.querySelector("#bottom-bar");
 
-    function makeSideElement(message) {
-        const elem = element("div", {class: "side"});
-        if (message) {
-            const msgElem = elem.appendChild(element("span"));
-            msgElem.appendChild(txt(message))
+    function makeSideElement(playerData, isTurn, isWinner) {
+        const elem = element("div", {class: ["side", "clipsafe"]});
+        let message = "";
+        if (isTurn) {
+            elem.classList.add("is-turn");
+            message = "Your turn!";
+        } else if (isWinner) {
+            elem.classList.add("is-winner");
+            message = "Winner!";
         }
+
+        const msgElem = elem.appendChild(element("span"));
+        msgElem.appendChild(txt(message))
+
+        const playerCardElem = elem.appendChild(element("div", {class: "clipsafe"}));
+        const symbolElem = playerCardElem.appendChild(element("span", {class: "symbol"}));
+        symbolElem.appendChild(txt(playerData.symbol))
+        const nameElem = playerCardElem.appendChild(element("span", {class: ["name", "clipsafe"]}));
+        nameElem.appendChild(txt(playerData.name))
+
         return elem;
     }
 
@@ -170,26 +184,10 @@ const render = (()=>{
         const winState = state.calculateWinner();
 
         /*** Play Area ***/
-        const gameIsFinished = (winState.player !== 0);
-        const message = (()=>{
-            if (gameIsFinished) {
-                const playerData = (winState.player === 1) ? state.player1 : state.player2;
-                return {
-                    forPlayer1: (winState.player === 1),
-                    contents: `${playerData.name} wins! Their symbol is ${playerData.symbol}.`,
-                };
-            } else {
-                const playerData = (state.player1turn) ? state.player1 : state.player2;
-                return {
-                    forPlayer1: state.player1turn,
-                    contents: `${playerData.name}'s turn! Your symbol is ${playerData.symbol}.`,
-                };
-            } 
-        })();
         playAreaElement.classList.add("playing");
-        playAreaElement.appendChild(makeSideElement(message.forPlayer1 ? message.contents : ""))
+        playAreaElement.appendChild(makeSideElement(state.player1, (state.player1turn && !winState.player), (winState.player === 1)))
         playAreaElement.appendChild(makeBoardElement(winState))
-        playAreaElement.appendChild(makeSideElement(message.forPlayer1 ? "" : message.contents))
+        playAreaElement.appendChild(makeSideElement(state.player2, (!state.player1turn && !winState.player), (winState.player === -1)))
 
         /*** Bottom Bar ***/
         const restartButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));
@@ -203,6 +201,10 @@ const render = (()=>{
         for (const [i, playerData] of [[1, state.player1], [-1, state.player2]]) {
             const sectionElem = playAreaElement.appendChild(element("div"));
 
+            const symbolBoxElem = sectionElem.appendChild(element("div", {class: "button"}));
+            symbolBoxElem.appendChild(txt(playerData.symbol));
+            symbolBoxElem.addEventListener("click", () => state.swapSymbols());
+
             const nameBoxElem = sectionElem.appendChild(element("input"));
             nameBoxElem.addEventListener("click", (e) => e.stopPropagation()); // Don't rerender
             nameBoxElem.addEventListener("change", (e) => {
@@ -210,10 +212,6 @@ const render = (()=>{
                 state.setName(i, newName);
             });
             nameBoxElem.value = playerData.name;
-
-            const symbolBoxElem = sectionElem.appendChild(element("div", {class: "button"}));
-            symbolBoxElem.appendChild(txt(playerData.symbol));
-            symbolBoxElem.addEventListener("click", () => state.swapSymbols());
         }
 
         /*** Bottom Bar ***/

@@ -78,5 +78,23 @@ div.button:active {
 }
 #board > div.marked-cell {
     background: #fff;
+    cursor: default;
+}
+#board > div > span {
+    font-size: 3em;
+}
+
+.side {
+    flex: 1 0 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 100%;
+    padding: 0.4em;
+}
+.side > span {
+    text-align: center;
 }
 

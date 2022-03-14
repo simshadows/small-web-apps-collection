@@ -14,12 +14,12 @@ function element(tagName, attributes={}) {
 }
 
 // IMPORTANT: Never directly assign fields directly outside of the state definition.
-//            Never directly access fields leading with an underscore.
+//            Never directly access fields leading with an underscore. Those are private fields.
 //            (We could create field getter methods, but that would be unnecessary complication here.)
 const state = {
     reset: function() {
         /*** Core State ***/
-        this.mode = "start"; // "start" | "playing"
+        this.mode = "playing"; // "start" | "playing"
         this.player1turn = true;
         this._gameBoard = new GameBoard();
 
@@ -69,7 +69,10 @@ function GameBoard() {
             console.assert(this.grid[position] === 0);
             console.assert((player === -1) || (player === 1));
             this.grid[position] = player;
-        }
+        },
+        //calculateWinConditions: function() {
+        //    
+        //},
     };
 }
 
@@ -77,12 +80,19 @@ const render = (()=>{
     const playAreaElement = document.querySelector("#play-area");
     const bottomBarElement = document.querySelector("#bottom-bar");
 
-    function renderPlaying() {
-        /*** Play Area ***/
-        playAreaElement.classList.add("playing");
-        const boardElem = playAreaElement.appendChild(element("div", {id: "board"}));
+    function makeSideElement(message) {
+        const elem = element("div", {class: "side"});
+        if (message) {
+            const msgElem = elem.appendChild(element("span"));
+            msgElem.appendChild(txt(message))
+        }
+        return elem;
+    }
+
+    function makeBoardElement() {
+        const elem = element("div", {id: "board"});
         for (const [i, cellValue] of state.getBoard().entries()) {
-            const cellElem = boardElem.appendChild(element("div", {"data-cell-index": String(i)}));
+            const cellElem = elem.appendChild(element("div", {"data-cell-index": String(i)}));
             if (cellValue === 0) {
                 cellElem.classList.add("button");
                 cellElem.addEventListener("click", (e) => {
@@ -91,10 +101,23 @@ const render = (()=>{
                 });
             } else {
                 cellElem.classList.add("marked-cell");
-                const renderX = (cellValue === 1) !== (state.player1isX);
-                cellElem.appendChild(txt(renderX ? "X" : "O"))
+                const renderX = (cellValue === -1) !== (state.player1isX);
+                const contentElem = cellElem.appendChild(element("span"));
+                contentElem.appendChild(txt(renderX ? "X" : "O"))
             }
         }
+        return elem;
+    }
+
+    function renderPlaying() {
+        /*** Play Area ***/
+        const playerName = state.player1turn ? state.player1.name : state.player2.name;
+        const symbol = (state.player1turn === state.player1isX) ? "X" : "O";
+        const message = `${playerName}'s turn! Your symbol is ${symbol}.`;
+        playAreaElement.classList.add("playing");
+        playAreaElement.appendChild(makeSideElement(state.player1turn ? message : ""))
+        playAreaElement.appendChild(makeBoardElement())
+        playAreaElement.appendChild(makeSideElement(state.player1turn ? "" : message))
 
         /*** Bottom Bar ***/
         const restartButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));

@@ -58,11 +58,8 @@ const state = {
         this.mode = "start";
     },
 
-    getBoard: function() {
-        return [...this._gameBoard.grid];
-    },
-    calculateWinner: function() {
-        return this._gameBoard.calculateWinner();
+    getGameBoard: function() {
+        return this._gameBoard.clone();
     },
 
     setName: function(player, newName) {
@@ -85,7 +82,7 @@ const state = {
 
     _tryExecuteComputerMove: function() {
         const playerObj = (this.player1turn) ? this.player1 : this.player2;
-        if ((playerObj.type === "Human") || (this.calculateWinner() !== null)) return;
+        if ((playerObj.type === "Human") || (this._gameBoard.calculateWinner() !== null)) return;
         this.setMarker(playSuggestors[playerObj.type](this._gameBoard, (this.player1turn ? 1 : -1)));
     },
 };
@@ -104,18 +101,11 @@ function GameBoard() {
     this.grid = new Array(9).fill(0);
 
     this.setMarker = function(position, player) {
-        console.assert((position >= 0) && (position < 9));
-        console.assert(this.grid[position] === 0);
+        console.assert((position >= 0) && (position < 9) && (this.grid[position] === 0));
         console.assert((player === -1) || (player === 1));
         this.grid[position] = player;
     };
 
-    // calculateWinner returns line indices in the following scheme:
-    //      0    1  2  3    4
-    //           _______
-    //      5   |X  X  X|
-    //      6   |X  X  X|
-    //      7   |X  X  X|
     this.calculateWinner = function() {
         const winningLinesTests = [
             [0, 4, 8],
@@ -127,28 +117,21 @@ function GameBoard() {
             [3, 4, 5],
             [6, 7, 8],
         ];
-        const winningLines = [];
         const winningCells = new Set();
         let winner = 0;
         for (const [lineIndex, cellIndices] of winningLinesTests.entries()) {
             const sum = arraySum(cellIndices.map((e) => this.grid[e]));
             if ((sum === 3) || (sum === -3)) {
-                if (winner === 0) winner = sum / 3;
-                if (winner !== (sum / 3)) throw "There should never be two winners.";
-                winningLines.push(lineIndex);
+                console.assert((winner === 0) || (winner === (sum / 3)));
+                winner = sum / 3;
                 for (const cellIndex of cellIndices) winningCells.add(cellIndex);
             }
         }
 
         // If we have no winner, we check if it's a draw.
-        if (winner === 0) {
-            for (const gridValue of this.grid) {
-                if (gridValue === 0) return null; // Not a draw, so we return null to indicate the game hasn't ended yet.
-            }
-        }
+        if ((winner === 0) && this.grid.some((v) => (v === 0))) return null;
         return {
             player: winner, // This is 0 if it's a draw, 1 if player 1 won, -1 if player 2 won.
-            winningLines: winningLines,
             winningCells: winningCells,
         };
     };
@@ -189,7 +172,7 @@ const render = (()=>{
 
     function makeBoardElement(currPlayer, winState) {
         const elem = element("div", {id: "board"});
-        for (const [i, cellValue] of state.getBoard().entries()) {
+        for (const [i, cellValue] of state.getGameBoard().grid.entries()) {
             const cellElem = elem.appendChild(element("div"));
             if ((winState === null) && (cellValue === 0)) {
                 cellElem.classList.add("unmarked-cell");
@@ -212,18 +195,13 @@ const render = (()=>{
     }
 
     function renderPlaying() {
-        const winState = state.calculateWinner();
+        const winState = state.getGameBoard().calculateWinner();
         const currPlayer = state.player1turn ? state.player1 : state.player2;
 
         const [p1messageType, p2messageType] = (()=>{
-            if (winState === null) { // Check if game is continuing
-                return (state.player1turn) ? ["turn", "none"] : ["none", "turn"];
-            } else if (winState.player === 0) { // Check if game is drawn
-                return ["draw", "draw"];
-            } else { // We have a winner
-                console.assert((winState.player === 1) || (winState.player === -1));
-                return (winState.player === 1) ? ["winner", "loser"] : ["loser", "winner"];
-            }
+            if (winState === null) return (state.player1turn) ? ["turn", "none"] : ["none", "turn"];
+            if (winState.player === 0) return ["draw", "draw"];
+            return (winState.player === 1) ? ["winner", "loser"] : ["loser", "winner"];
         })();
 
         /*** Play Area ***/

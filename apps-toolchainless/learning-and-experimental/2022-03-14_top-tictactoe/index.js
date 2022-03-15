@@ -31,17 +31,17 @@ const state = {
     reset: function() {
         /*** Core State ***/
         this.mode = "start"; // "start" | "playing"
-        this.player1turn = true;
+        this.whoseTurn = 1; // 1 | -1, where 1 is Player 1, and -1 is Player 2
         this._gameBoard = new GameBoard();
 
         /*** Player Data ***/
         // Note for Odin Project: Player data is too simple to necessitate a factory here.
-        this.player1 = {
+        this._player1 = {
             name: "Player 1",
             symbol: "X", // "X" | "O"
-            type: "Human",  // "Human" | "Computer (Random)"
+            type: "Human",  // "Human", or one of the AI names
         };
-        this.player2 = {
+        this._player2 = {
             name: "Player 2",
             symbol: "O",
             type: "AI (Hard)",
@@ -50,7 +50,7 @@ const state = {
     startGame: function() {
         console.assert(this.mode === "start");
         this.mode = "playing";
-        this.player1turn = true;
+        this.whoseTurn = 1;
         this._gameBoard = new GameBoard();
         this._tryExecuteComputerMove();
     },
@@ -61,29 +61,35 @@ const state = {
     getGameBoard: function() {
         return this._gameBoard.clone();
     },
+    _getPlayer: function(playerID) {
+        console.assert((playerID === 1) || (playerID === -1));
+        return (playerID === 1) ? this._player1 : this._player2;
+    },
+    getPlayer: function(playerID) {
+        return {...this._getPlayer(playerID)};
+    },
 
-    setName: function(player, newName) {
-        const playerObj = (player === 1) ? this.player1 : this.player2;
-        playerObj.name = newName;
+    setName: function(playerID, newName) {
+        this._getPlayer(playerID).name = newName;
     },
     swapSymbols: function() {
-        [this.player1.symbol, this.player2.symbol] = [this.player2.symbol, this.player1.symbol];
+        [this._player1.symbol, this._player2.symbol] = [this._player2.symbol, this._player1.symbol];
     },
-    changePlayerType: function(player) {
-        const playerObj = (player === 1) ? this.player1 : this.player2;
+    changePlayerType: function(playerID) {
+        const playerObj = this._getPlayer(playerID);
         const typesList = ["Human", "AI (Loser)", "AI (Easy)", "AI (Medium)", "AI (Hard)", "Human"];
         playerObj.type = typesList[typesList.indexOf(playerObj.type) + 1];
     },
     setMarker: function(position) {
-        this._gameBoard.setMarker(position, (this.player1turn) ? 1 : -1);
-        this.player1turn = !this.player1turn;
+        this._gameBoard.setMarker(position, this.whoseTurn);
+        this.whoseTurn = this.whoseTurn * -1;
         this._tryExecuteComputerMove();
     },
 
     _tryExecuteComputerMove: function() {
-        const playerObj = (this.player1turn) ? this.player1 : this.player2;
+        const playerObj = this._getPlayer(this.whoseTurn);
         if ((playerObj.type === "Human") || (this._gameBoard.calculateWinner() !== null)) return;
-        this.setMarker(playSuggestors[playerObj.type](this._gameBoard, (this.player1turn ? 1 : -1)));
+        this.setMarker(playSuggestors[playerObj.type](this._gameBoard, this.whoseTurn));
     },
 };
 
@@ -183,12 +189,8 @@ const render = (()=>{
             } else {
                 cellElem.classList.add("marked-cell");
                 if (winState?.winningCells.has(i)) cellElem.classList.add("winning-cell");
-                const symbol = (()=>{
-                    if (cellValue === 0) return "";
-                    return (cellValue === 1) ? state.player1.symbol : state.player2.symbol;
-                })();
                 const contentElem = cellElem.appendChild(element("span"));
-                contentElem.appendChild(txt(symbol))
+                contentElem.appendChild(txt((cellValue === 0) ? "" : state.getPlayer(cellValue).symbol))
             }
         }
         return elem;
@@ -196,46 +198,42 @@ const render = (()=>{
 
     function renderPlaying() {
         const winState = state.getGameBoard().calculateWinner();
-        const currPlayer = state.player1turn ? state.player1 : state.player2;
-
         const [p1messageType, p2messageType] = (()=>{
-            if (winState === null) return (state.player1turn) ? ["turn", "none"] : ["none", "turn"];
+            if (winState === null) return (state.whoseTurn === 1) ? ["turn", "none"] : ["none", "turn"];
             if (winState.player === 0) return ["draw", "draw"];
             return (winState.player === 1) ? ["winner", "loser"] : ["loser", "winner"];
         })();
 
-        /*** Play Area ***/
         playAreaElement.classList.add("playing");
-        playAreaElement.appendChild(makeSideElement(state.player1, p1messageType));
-        playAreaElement.appendChild(makeBoardElement(currPlayer, winState))
-        playAreaElement.appendChild(makeSideElement(state.player2, p2messageType));
+        playAreaElement.appendChild(makeSideElement(state.getPlayer(1), p1messageType));
+        playAreaElement.appendChild(makeBoardElement(state.getPlayer(state.whoseTurn), winState))
+        playAreaElement.appendChild(makeSideElement(state.getPlayer(-1), p2messageType));
 
-        /*** Bottom Bar ***/
         const restartButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));
         restartButtonElem.appendChild(txt("Restart"))
         restartButtonElem.addEventListener("click", () => state.closeGame());
     }
 
     function renderStart() {
-        /*** Play Area ***/
         playAreaElement.classList.add("start");
-        for (const [i, playerData] of [[1, state.player1], [-1, state.player2]]) {
+        for (const playerID of [1, -1]) {
+            const playerObj = state.getPlayer(playerID);
+
             const sectionElem = playAreaElement.appendChild(element("div"));
 
             const symbolBoxElem = sectionElem.appendChild(element("div", {class: ["button", "symbol"]}));
-            symbolBoxElem.appendChild(txt(playerData.symbol));
+            symbolBoxElem.appendChild(txt(playerObj.symbol));
             symbolBoxElem.addEventListener("click", () => state.swapSymbols());
 
-            const nameBoxElem = sectionElem.appendChild(element("input", {value: playerData.name}));
+            const nameBoxElem = sectionElem.appendChild(element("input", {value: playerObj.name}));
             nameBoxElem.addEventListener("click", (e) => e.stopPropagation()); // Avoid rerender
-            nameBoxElem.addEventListener("change", (e) => state.setName(i, e.target.value));
+            nameBoxElem.addEventListener("change", (e) => state.setName(playerID, e.target.value));
 
             const typeElem = sectionElem.appendChild(element("div", {class: ["button", "player-type"]}));
-            typeElem.appendChild(txt(playerData.type));
-            typeElem.addEventListener("click", () => state.changePlayerType(i));
+            typeElem.appendChild(txt(playerObj.type));
+            typeElem.addEventListener("click", () => state.changePlayerType(playerID));
         }
 
-        /*** Bottom Bar ***/
         const startButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));
         startButtonElem.appendChild(txt("Start Game!"))
         startButtonElem.addEventListener("click", () => state.startGame());

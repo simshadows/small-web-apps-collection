@@ -76,7 +76,7 @@ const state = {
     },
     changePlayerType: function(player) {
         const playerObj = (player === 1) ? this.player1 : this.player2;
-        const typesList = ["Human", "AI (Smart)", "AI (Dumb)", "Human"];
+        const typesList = ["Human", "AI (Dumb)", "AI (Loser)", "AI (Smart)", "Human"];
         playerObj.type = typesList[typesList.indexOf(playerObj.type) + 1];
     },
     setMarker: function(position) {
@@ -322,8 +322,12 @@ const playSuggestors = (()=>{
         "AI (Smart)": (gameBoard, asPlayer) => {
             const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
             console.assert(emptyCells.length > 0);
-            const suggestedMove = minimax(gameBoard, emptyCells, asPlayer, asPlayer, true).suggestedMove;
-            return suggestedMove;
+            return minimax(gameBoard, emptyCells, asPlayer, asPlayer, true).suggestedMove;
+        },
+        "AI (Loser)": (gameBoard, asPlayer) => {
+            const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
+            console.assert(emptyCells.length > 0);
+            return minimax(gameBoard, emptyCells, asPlayer, asPlayer, false).suggestedMove;
         },
         "AI (Dumb)": (gameBoard, asPlayer) => {
             const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0));

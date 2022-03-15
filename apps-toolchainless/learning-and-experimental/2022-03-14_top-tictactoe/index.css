@@ -54,7 +54,12 @@
 
     margin: 0.5em;
 }
-#play-area.start > div > input {
+#play-area.start > div > input,
+#play-area.start > div > div.player-type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     height: 1.8em;
     width: 80%;
     padding: 0.4em;

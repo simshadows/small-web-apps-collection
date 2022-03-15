@@ -22,9 +22,12 @@ function element(tagName, attributes={}) {
 function arraySum(arr) {
     return arr.reduce(((partialSum, x) => partialSum + x), 0);
 }
+function randomElement(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
 
 // IMPORTANT: Never directly assign fields directly outside of the state definition.
-//            Never directly access fields leading with an underscore. Those are private fields.
+//            Never directly access fields or call methods leading with an underscore. Those are private fields.
 //            (We could create field getter methods, but that would be unnecessary complication here.)
 const state = {
     reset: function() {
@@ -37,11 +40,13 @@ const state = {
         // Note for Odin Project: Player data is too simple to necessitate a factory right now.
         this.player1 = {
             name: "Player 1",
-            symbol: "X",
+            symbol: "X", // "X" | "O"
+            type: "Human",  // "Human" | "Computer (Random)"
         };
         this.player2 = {
             name: "Player 2",
             symbol: "O",
+            type: "AI (Random)",
         };
     },
     startGame: function() {
@@ -49,6 +54,7 @@ const state = {
         this.mode = "playing";
         this.player1turn = true;
         this._gameBoard = new GameBoard();
+        this._tryExecuteComputerMove();
     },
     closeGame: function() {
         this.mode = "start";
@@ -62,19 +68,26 @@ const state = {
     },
 
     setName: function(player, newName) {
-        if (player === 1) {
-            this.player1.name = newName;
-        } else {
-            console.assert(player === -1);
-            this.player2.name = newName;
-        }
+        const playerObj = (player === 1) ? this.player1 : this.player2;
+        playerObj.name = newName;
     },
     swapSymbols: function() {
         [this.player1.symbol, this.player2.symbol] = [this.player2.symbol, this.player1.symbol];
     },
+    changePlayerType: function(player) {
+        const playerObj = (player === 1) ? this.player1 : this.player2;
+        playerObj.type = (playerObj.type === "Human") ? "AI (Random)" : "Human";
+    },
     setMarker: function(position) {
         this._gameBoard.setMarker(position, (this.player1turn) ? 1 : -1);
         this.player1turn = !this.player1turn;
+        this._tryExecuteComputerMove();
+    },
+
+    _tryExecuteComputerMove: function() {
+        const playerObj = (this.player1turn) ? this.player1 : this.player2;
+        if ((playerObj.type === "Human") || (this.calculateWinner() !== null)) return;
+        this.setMarker(playSuggestors[playerObj.type](this._gameBoard, (this.player1turn ? 1 : -1)));
     },
 };
 
@@ -250,6 +263,10 @@ const render = (()=>{
                 state.setName(i, newName);
             });
             nameBoxElem.value = playerData.name;
+
+            const typeElem = sectionElem.appendChild(element("div", {class: ["button", "player-type"]}));
+            typeElem.appendChild(txt(playerData.type));
+            typeElem.addEventListener("click", () => state.changePlayerType(i));
         }
 
         /*** Bottom Bar ***/
@@ -270,6 +287,16 @@ const render = (()=>{
             default: throw `Unknown state ${state.mode}`;
         }
     }
+})();
+
+const playSuggestors = (()=>{
+    return {
+        "AI (Random)": (gameBoard, asPlayer) => {
+            const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0));
+            console.assert(emptyCells.length > 0);
+            return randomElement(emptyCells)[0];
+        },
+    };
 })();
 
 document.addEventListener("click", render);

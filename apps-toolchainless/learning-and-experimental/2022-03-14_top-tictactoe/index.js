@@ -46,7 +46,7 @@ const state = {
         this.player2 = {
             name: "Player 2",
             symbol: "O",
-            type: "AI (Random)",
+            type: "AI (Smart)",
         };
     },
     startGame: function() {
@@ -76,7 +76,8 @@ const state = {
     },
     changePlayerType: function(player) {
         const playerObj = (player === 1) ? this.player1 : this.player2;
-        playerObj.type = (playerObj.type === "Human") ? "AI (Random)" : "Human";
+        const typesList = ["Human", "AI (Smart)", "AI (Dumb)", "Human"];
+        playerObj.type = typesList[typesList.indexOf(playerObj.type) + 1];
     },
     setMarker: function(position) {
         this._gameBoard.setMarker(position, (this.player1turn) ? 1 : -1);
@@ -94,64 +95,67 @@ const state = {
 // IMPORTANT: Never directly assign fields directly outside of the constructor definition.
 // TODO: Put methods in prototype instead?
 function GameBoard() {
-    return {
-        // grid represents a 3x3 board in row-major:
-        //      [ 0, 1, 2,
-        //        3, 4, 5,
-        //        6, 7, 8 ]
-        // Each element is either:
-        //      0 = no marker
-        //      1 = player 1's marker
-        //      -1 = player 2's marker
-        grid: new Array(9).fill(0),
-        setMarker: function(position, player) {
-            console.assert((position >= 0) && (position < 9));
-            console.assert(this.grid[position] === 0);
-            console.assert((player === -1) || (player === 1));
-            this.grid[position] = player;
-        },
-        // calculateWinner returns line indices in the following scheme:
-        //      0    1  2  3    4
-        //           _______
-        //      5   |X  X  X|
-        //      6   |X  X  X|
-        //      7   |X  X  X|
-        calculateWinner: function() {
-            const winningLinesTests = [
-                [0, 4, 8],
-                [0, 3, 6],
-                [1, 4, 7],
-                [2, 5, 8],
-                [2, 4, 6],
-                [0, 1, 2],
-                [3, 4, 5],
-                [6, 7, 8],
-            ];
-            const winningLines = [];
-            const winningCells = new Set();
-            let winner = 0;
-            for (const [lineIndex, cellIndices] of winningLinesTests.entries()) {
-                const sum = arraySum(cellIndices.map((e) => this.grid[e]));
-                if ((sum === 3) || (sum === -3)) {
-                    if (winner === 0) winner = sum / 3;
-                    if (winner !== (sum / 3)) throw "There should never be two winners.";
-                    winningLines.push(lineIndex);
-                    for (const cellIndex of cellIndices) winningCells.add(cellIndex);
-                }
+    // grid represents a 3x3 board in row-major:
+    //      [ 0, 1, 2,
+    //        3, 4, 5,
+    //        6, 7, 8 ]
+    // Each element is either:
+    //      0 = no marker
+    //      1 = player 1's marker
+    //      -1 = player 2's marker
+    this.grid = new Array(9).fill(0);
+    this.setMarker = function(position, player) {
+        console.assert((position >= 0) && (position < 9));
+        console.assert(this.grid[position] === 0);
+        console.assert((player === -1) || (player === 1));
+        this.grid[position] = player;
+    };
+    // calculateWinner returns line indices in the following scheme:
+    //      0    1  2  3    4
+    //           _______
+    //      5   |X  X  X|
+    //      6   |X  X  X|
+    //      7   |X  X  X|
+    this.calculateWinner = function() {
+        const winningLinesTests = [
+            [0, 4, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [2, 4, 6],
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+        ];
+        const winningLines = [];
+        const winningCells = new Set();
+        let winner = 0;
+        for (const [lineIndex, cellIndices] of winningLinesTests.entries()) {
+            const sum = arraySum(cellIndices.map((e) => this.grid[e]));
+            if ((sum === 3) || (sum === -3)) {
+                if (winner === 0) winner = sum / 3;
+                if (winner !== (sum / 3)) throw "There should never be two winners.";
+                winningLines.push(lineIndex);
+                for (const cellIndex of cellIndices) winningCells.add(cellIndex);
             }
+        }
 
-            // If we have no winner, we check if it's a draw.
-            if (winner === 0) {
-                for (const gridValue of this.grid) {
-                    if (gridValue === 0) return null; // Not a draw, so we return null to indicate the game hasn't ended yet.
-                }
+        // If we have no winner, we check if it's a draw.
+        if (winner === 0) {
+            for (const gridValue of this.grid) {
+                if (gridValue === 0) return null; // Not a draw, so we return null to indicate the game hasn't ended yet.
             }
-            return {
-                player: winner, // This is 0 if it's a draw, 1 if player 1 won, -1 if player 2 won.
-                winningLines: winningLines,
-                winningCells: winningCells,
-            };
-        },
+        }
+        return {
+            player: winner, // This is 0 if it's a draw, 1 if player 1 won, -1 if player 2 won.
+            winningLines: winningLines,
+            winningCells: winningCells,
+        };
+    };
+    this.clone = function() {
+        const obj = new (Object.getPrototypeOf(this).constructor)();
+        obj.grid = [...this.grid];
+        return obj;
     };
 }
 
@@ -290,8 +294,38 @@ const render = (()=>{
 })();
 
 const playSuggestors = (()=>{
+    function minimax(gameBoard, emptyCells, asPlayer, currPlayer, doMaximize) {
+        const ret = {
+            suggestedMove: null,
+            score: doMaximize ? -2 : 2,
+        };
+        const winState = gameBoard.calculateWinner();
+        if (winState === null) {
+            for (const [i, cellIndex] of emptyCells.entries()) {
+                const newEmptyCells = [...emptyCells];
+                const newGameBoard = gameBoard.clone();
+                newEmptyCells.splice(i, 1); // Remove element at i
+                newGameBoard.setMarker(cellIndex, currPlayer);
+                const result = minimax(newGameBoard, newEmptyCells, asPlayer, (currPlayer * -1), !doMaximize);
+                if ((doMaximize && (result.score > ret.score)) || (!doMaximize && (result.score < ret.score))) {
+                    ret.suggestedMove = cellIndex;
+                    ret.score = result.score;
+                }
+            }
+        } else {
+            ret.score = asPlayer * winState.player; // 1 if asPlayer matches winner, 0 if winner is 0 (i.e. it's a draw)
+        }
+        return ret;
+    }
+
     return {
-        "AI (Random)": (gameBoard, asPlayer) => {
+        "AI (Smart)": (gameBoard, asPlayer) => {
+            const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
+            console.assert(emptyCells.length > 0);
+            const suggestedMove = minimax(gameBoard, emptyCells, asPlayer, asPlayer, true).suggestedMove;
+            return suggestedMove;
+        },
+        "AI (Dumb)": (gameBoard, asPlayer) => {
             const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0));
             console.assert(emptyCells.length > 0);
             return randomElement(emptyCells)[0];

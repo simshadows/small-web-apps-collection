@@ -24,7 +24,22 @@ See the root page for a link to the source code.
 </div>
 
 <p>
-    This web app follows <a href="https://www.theodinproject.com/paths/full-stack-javascript/courses/javascript/lessons/tic-tac-toe">Project: Tic Tac Toe</a> from <a href="https://www.theodinproject.com/">The Odin Project</a>, excluding the AI extension criteria (for now).
+    This web app follows <a href="https://www.theodinproject.com/paths/full-stack-javascript/courses/javascript/lessons/tic-tac-toe">Project: Tic Tac Toe</a> from <a href="https://www.theodinproject.com/">The Odin Project</a>, including the AI extension criteria.
+</p>
+<p>
+    This app doesn't use asynchronous programming (i.e. Promises) since Odin Project doesn't introduce the concept until later in the course.
+</p>
+<p>
+    Four different AI players are implemented:
+    <ul>
+        <li><b>Hard:</b> Plays perfectly by taking advantage of openings for guaranteed wins, or forcing a draw if there isn't one. Implemented using the Minimax algorithm.</li>
+        <ul>
+            <li><i>This AI may sometimes choose not to take a win on the next turn, but (I believe) it will only do so if it can guarantee a win in subsequent turns anyway.</i></li>
+        </ul>
+        <li><b>Medium:</b> During each turn, there's a 60% chance of playing like Hard mode, and a 40% chance of playing like Easy mode.</li>
+        <li><b>Easy:</b> Picks any square at random. All empty squares have equal probabilities of being chosen.</li>
+        <li><b>Loser:</b> Tries to lose. Similar to Hard mode, it will take advantage of openings for guaranteed losses, or forcing a draw if there isn't one. Also implemented using the Minimax algorithm.</li>
+    </ul>
 </p>
 
 <script src="./index.js"></script>

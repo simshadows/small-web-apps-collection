@@ -26,8 +26,8 @@ function randomElement(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// IMPORTANT: Never directly assign fields directly outside of the state definition.
-//            Never directly access fields or call methods leading with an underscore. Those are private fields.
+// IMPORTANT: Never directly assign fields from outside of the state definition.
+//            Never directly access fields/methods that lead with an underscore from outside of the state definition.
 //            (We could create field getter methods, but that would be unnecessary complication here.)
 const state = {
     reset: function() {
@@ -46,7 +46,7 @@ const state = {
         this.player2 = {
             name: "Player 2",
             symbol: "O",
-            type: "AI (Smart)",
+            type: "AI (Hard)",
         };
     },
     startGame: function() {
@@ -76,7 +76,7 @@ const state = {
     },
     changePlayerType: function(player) {
         const playerObj = (player === 1) ? this.player1 : this.player2;
-        const typesList = ["Human", "AI (Dumb)", "AI (Loser)", "AI (Smart)", "Human"];
+        const typesList = ["Human", "AI (Loser)", "AI (Easy)", "AI (Medium)", "AI (Hard)", "Human"];
         playerObj.type = typesList[typesList.indexOf(playerObj.type) + 1];
     },
     setMarker: function(position) {
@@ -307,7 +307,8 @@ const playSuggestors = (()=>{
                 newEmptyCells.splice(i, 1); // Remove element at i
                 newGameBoard.setMarker(cellIndex, currPlayer);
                 const result = minimax(newGameBoard, newEmptyCells, asPlayer, (currPlayer * -1), !doMaximize);
-                if ((doMaximize && (result.score > ret.score)) || (!doMaximize && (result.score < ret.score))) {
+                if ((doMaximize && (result.score >= ret.score)) || (!doMaximize && (result.score <= ret.score))) {
+                    if ((result.score === ret.score) && (Math.random() > 0.33)) continue; // Adds some stochastic behaviour
                     ret.suggestedMove = cellIndex;
                     ret.score = result.score;
                 }
@@ -317,23 +318,30 @@ const playSuggestors = (()=>{
         }
         return ret;
     }
+    function suggestPlayWithMinimax(gameBoard, asPlayer, doMaximize) {
+        const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
+        console.assert(emptyCells.length > 0);
+        return minimax(gameBoard, emptyCells, asPlayer, asPlayer, doMaximize).suggestedMove;
+    }
+    function suggestPlayRandomly(gameBoard) {
+        const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0));
+        console.assert(emptyCells.length > 0);
+        return randomElement(emptyCells)[0];
+    }
+
+    function suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, difficulty) {
+        if (Math.random() > 0.4) {
+            return suggestPlayWithMinimax(gameBoard, asPlayer, true);
+        } else {
+            return suggestPlayRandomly(gameBoard);
+        }
+    }
 
     return {
-        "AI (Smart)": (gameBoard, asPlayer) => {
-            const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
-            console.assert(emptyCells.length > 0);
-            return minimax(gameBoard, emptyCells, asPlayer, asPlayer, true).suggestedMove;
-        },
-        "AI (Loser)": (gameBoard, asPlayer) => {
-            const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
-            console.assert(emptyCells.length > 0);
-            return minimax(gameBoard, emptyCells, asPlayer, asPlayer, false).suggestedMove;
-        },
-        "AI (Dumb)": (gameBoard, asPlayer) => {
-            const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0));
-            console.assert(emptyCells.length > 0);
-            return randomElement(emptyCells)[0];
-        },
+        "AI (Hard)":   (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
+        "AI (Medium)": (gameBoard, asPlayer) => suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, 0.5),
+        "AI (Easy)":   (gameBoard, _       ) => suggestPlayRandomly(gameBoard),
+        "AI (Loser)":  (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, false),
     };
 })();
 

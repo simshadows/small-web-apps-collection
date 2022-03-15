@@ -148,23 +148,19 @@ div.button:active {
     height: 1.5em;
     font-weight: bold;
 }
-.side.is-turn > span {
-    color: #ffd966;
-}
-.side.is-winner > span {
-    color: #93c47d;
-}
 .side > div > span.name {
     font-size: 0.6em;
     font-weight: bold;
 }
-.side > div> span.symbol {
+.side > div > span.symbol {
     font-size: 2em;
 }
-.side.is-turn > div {
-    background: #ffd966;
-}
-.side.is-winner > div {
-    background: #93c47d;
-}
+.side.is-turn   > span { color:      #9fc5e8; }
+.side.is-turn   > div  { background: #9fc5e8; }
+.side.is-winner > span { color:      #93c47d; }
+.side.is-winner > div  { background: #93c47d; }
+.side.is-loser  > span { color:      #e06666; }
+.side.is-loser  > div  { background: #e06666; }
+.side.is-draw   > span { color:      #ffd966; }
+.side.is-draw   > div  { background: #ffd966; }
 

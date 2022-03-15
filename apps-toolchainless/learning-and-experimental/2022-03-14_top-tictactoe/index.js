@@ -126,8 +126,15 @@ function GameBoard() {
                     for (const cellIndex of cellIndices) winningCells.add(cellIndex);
                 }
             }
+
+            // If we have no winner, we check if it's a draw.
+            if (winner === 0) {
+                for (const gridValue of this.grid) {
+                    if (gridValue === 0) return null; // Not a draw, so we return null to indicate the game hasn't ended yet.
+                }
+            }
             return {
-                player: winner,
+                player: winner, // This is 0 if it's a draw, 1 if player 1 won, -1 if player 2 won.
                 winningLines: winningLines,
                 winningCells: winningCells,
             };
@@ -139,15 +146,28 @@ const render = (()=>{
     const playAreaElement = document.querySelector("#play-area");
     const bottomBarElement = document.querySelector("#bottom-bar");
 
-    function makeSideElement(playerData, isTurn, isWinner) {
+    function makeSideElement(playerData, messageType) {
         const elem = element("div", {class: ["side", "clipsafe"]});
         let message = "";
-        if (isTurn) {
-            elem.classList.add("is-turn");
-            message = "Your turn!";
-        } else if (isWinner) {
-            elem.classList.add("is-winner");
-            message = "Winner!";
+
+        switch (messageType) {
+            case "turn":
+                elem.classList.add("is-turn");
+                message = "Your turn!";
+                break;
+            case "draw":
+                elem.classList.add("is-draw");
+                message = "Draw!";
+                break;
+            case "winner":
+                elem.classList.add("is-winner");
+                message = "Winner!";
+                break;
+            case "loser":
+                elem.classList.add("is-loser");
+                message = "Loser!"; // bit harsh lmao
+                break;
+            default:
         }
 
         const msgElem = elem.appendChild(element("span"));
@@ -166,7 +186,7 @@ const render = (()=>{
         const elem = element("div", {id: "board"});
         for (const [i, cellValue] of state.getBoard().entries()) {
             const cellElem = elem.appendChild(element("div"));
-            if ((cellValue === 0) && (winState.player === 0)) {
+            if ((winState === null) && (cellValue === 0)) {
                 cellElem.classList.add("unmarked-cell");
                 cellElem.classList.add("button");
                 cellElem.addEventListener("click", () => state.setMarker(i));
@@ -174,7 +194,7 @@ const render = (()=>{
                 contentElem.appendChild(txt(currPlayer.symbol))
             } else {
                 cellElem.classList.add("marked-cell");
-                if (winState.winningCells.has(i)) cellElem.classList.add("winning-cell");
+                if (winState?.winningCells.has(i)) cellElem.classList.add("winning-cell");
                 const symbol = (()=>{
                     if (cellValue === 0) return "";
                     return (cellValue === 1) ? state.player1.symbol : state.player2.symbol;
@@ -190,11 +210,22 @@ const render = (()=>{
         const winState = state.calculateWinner();
         const currPlayer = state.player1turn ? state.player1 : state.player2;
 
+        const [p1messageType, p2messageType] = (()=>{
+            if (winState === null) { // Check if game is continuing
+                return (state.player1turn) ? ["turn", ""] : ["", "turn"];
+            } else if (winState.player === 0) { // Check if game is drawn
+                return ["draw", "draw"];
+            } else { // We have a winner
+                console.assert((winState.player === 1) || (winState.player === -1));
+                return (winState.player === 1) ? ["winner", "loser"] : ["loser", "winner"];
+            }
+        })();
+
         /*** Play Area ***/
         playAreaElement.classList.add("playing");
-        playAreaElement.appendChild(makeSideElement(state.player1, (state.player1turn && !winState.player), (winState.player === 1)))
+        playAreaElement.appendChild(makeSideElement(state.player1, p1messageType));
         playAreaElement.appendChild(makeBoardElement(currPlayer, winState))
-        playAreaElement.appendChild(makeSideElement(state.player2, (!state.player1turn && !winState.player), (winState.player === -1)))
+        playAreaElement.appendChild(makeSideElement(state.player2, p2messageType));
 
         /*** Bottom Bar ***/
         const restartButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));

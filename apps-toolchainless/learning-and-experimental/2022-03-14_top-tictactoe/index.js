@@ -77,7 +77,7 @@ const state = {
     },
     changePlayerType: function(playerID) {
         const playerObj = this._getPlayer(playerID);
-        const typesList = ["Human", "AI (Loser)", "AI (Easy)", "AI (Medium)", "AI (Hard)", "Human"];
+        const typesList = ["Human", "AI (Easy)", "AI (Medium)", "AI (Hard)", "AI (Loser)", "Human"];
         playerObj.type = typesList[typesList.indexOf(playerObj.type) + 1];
     },
     setMarker: function(position) {
@@ -89,7 +89,10 @@ const state = {
     _tryExecuteComputerMove: function() {
         const playerObj = this._getPlayer(this.whoseTurn);
         if ((playerObj.type === "Human") || (this._gameBoard.calculateWinner() !== null)) return;
-        this.setMarker(playSuggestors[playerObj.type](this._gameBoard, this.whoseTurn));
+        setTimeout(() => {
+            this.setMarker(playSuggestors[playerObj.type](this._gameBoard, this.whoseTurn));
+            render();
+        }, 300);
     },
 };
 
@@ -155,6 +158,7 @@ const render = (()=>{
 
     const messageMap = {
         "turn": "Your turn!",
+        "thinking": "Thinking...",
         "draw": "Draw!",
         "winner": "Winner!",
         "loser": "Loser!",
@@ -180,9 +184,8 @@ const render = (()=>{
         const elem = element("div", {id: "board"});
         for (const [i, cellValue] of state.getGameBoard().grid.entries()) {
             const cellElem = elem.appendChild(element("div"));
-            if ((winState === null) && (cellValue === 0)) {
-                cellElem.classList.add("unmarked-cell");
-                cellElem.classList.add("button");
+            if ((currPlayer.type === "Human") && (winState === null) && (cellValue === 0)) {
+                cellElem.classList.add("unmarked-cell", "button");
                 cellElem.addEventListener("click", () => state.setMarker(i));
                 const contentElem = cellElem.appendChild(element("span"));
                 contentElem.appendChild(txt(currPlayer.symbol))
@@ -198,15 +201,17 @@ const render = (()=>{
 
     function renderPlaying() {
         const winState = state.getGameBoard().calculateWinner();
+        const currPlayer = state.getPlayer(state.whoseTurn);
         const [p1messageType, p2messageType] = (()=>{
-            if (winState === null) return (state.whoseTurn === 1) ? ["turn", "none"] : ["none", "turn"];
+            const turnType = (currPlayer.type === "Human") ? "turn" : "thinking";
+            if (winState === null) return (state.whoseTurn === 1) ? [turnType, "none"] : ["none", turnType];
             if (winState.player === 0) return ["draw", "draw"];
             return (winState.player === 1) ? ["winner", "loser"] : ["loser", "winner"];
         })();
 
         playAreaElement.classList.add("playing");
         playAreaElement.appendChild(makeSideElement(state.getPlayer(1), p1messageType));
-        playAreaElement.appendChild(makeBoardElement(state.getPlayer(state.whoseTurn), winState))
+        playAreaElement.appendChild(makeBoardElement(currPlayer, winState))
         playAreaElement.appendChild(makeSideElement(state.getPlayer(-1), p2messageType));
 
         const restartButtonElem = bottomBarElement.appendChild(element("div", {class: "button"}));
@@ -290,7 +295,7 @@ const playSuggestors = (()=>{
     }
 
     function suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, difficulty) {
-        if (Math.random() > 0.4) {
+        if (Math.random() > difficulty) {
             return suggestPlayWithMinimax(gameBoard, asPlayer, true);
         } else {
             return suggestPlayRandomly(gameBoard);
@@ -299,7 +304,7 @@ const playSuggestors = (()=>{
 
     return {
         "AI (Hard)":   (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
-        "AI (Medium)": (gameBoard, asPlayer) => suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, 0.5),
+        "AI (Medium)": (gameBoard, asPlayer) => suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, 0.4),
         "AI (Easy)":   (gameBoard, _       ) => suggestPlayRandomly(gameBoard),
         "AI (Loser)":  (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, false),
     };

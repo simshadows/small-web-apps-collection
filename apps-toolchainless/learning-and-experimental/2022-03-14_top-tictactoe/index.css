@@ -90,6 +90,13 @@ div.button:active {
 
     height: 3em;
 }
+#bottom-bar > div.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 1.8em;
+}
 
 #board {
     display: grid;
@@ -157,12 +164,14 @@ div.button:active {
 .side > div > span.symbol {
     font-size: 2em;
 }
-.side.is-turn   > span { color:      #9fc5e8; }
-.side.is-turn   > div  { background: #9fc5e8; }
-.side.is-winner > span { color:      #93c47d; }
-.side.is-winner > div  { background: #93c47d; }
-.side.is-loser  > span { color:      #e06666; }
-.side.is-loser  > div  { background: #e06666; }
-.side.is-draw   > span { color:      #ffd966; }
-.side.is-draw   > div  { background: #ffd966; }
+.side.is-turn     > span { color:      #9fc5e8; }
+.side.is-turn     > div  { background: #9fc5e8; }
+.side.is-thinking > span { color:      #9fc5e8; }
+.side.is-thinking > div  { background: #9fc5e8; }
+.side.is-winner   > span { color:      #93c47d; }
+.side.is-winner   > div  { background: #93c47d; }
+.side.is-loser    > span { color:      #e06666; }
+.side.is-loser    > div  { background: #e06666; }
+.side.is-draw     > span { color:      #ffd966; }
+.side.is-draw     > div  { background: #ffd966; }
 

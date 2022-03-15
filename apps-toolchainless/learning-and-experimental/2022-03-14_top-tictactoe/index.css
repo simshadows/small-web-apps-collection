@@ -16,14 +16,26 @@
     white-space: nowrap;
     overflow: hidden;
 }
+div.button {
+    background: #fff;
+    padding: 0.2em 0.6em 0.2em 0.6em;
+
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+}
+div.button:hover {
+    background: #aaa;
+}
+div.button:active {
+    background: #aaf;
+}
 
 #app {
     display: flex;
     flex-direction: column;
 
-    margin: auto;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin: 1em auto 1em auto;
     padding: 0.5em;
     background: #666;
     width: 26em;
@@ -77,21 +89,6 @@
     justify-content: center;
 
     height: 3em;
-}
-
-div.button {
-    background: #fff;
-    padding: 0.2em 0.6em 0.2em 0.6em;
-
-    cursor: pointer;
-    user-select: none;
-    touch-action: manipulation;
-}
-div.button:hover {
-    background: #aaa;
-}
-div.button:active {
-    background: #aaf;
 }
 
 #board {

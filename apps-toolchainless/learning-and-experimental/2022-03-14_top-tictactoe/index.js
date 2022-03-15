@@ -8,12 +8,10 @@ const txt = document.createTextNode.bind(document);
 function element(tagName, attributes={}) {
     const elem = document.createElement(tagName);
     for (const [k, v] of Object.entries(attributes)) {
-        switch (k) {
-            case "class":
-                elem.classList.add(...((v instanceof Array) ? v : [v]));
-                break;
-            default:
-                elem.setAttribute(k, v);
+        if (k === "class") {
+            elem.classList.add(...((v instanceof Array) ? v : [v]));
+        } else {
+            elem.setAttribute(k, v);
         }
     }
     return elem;
@@ -37,7 +35,7 @@ const state = {
         this._gameBoard = new GameBoard();
 
         /*** Player Data ***/
-        // Note for Odin Project: Player data is too simple to necessitate a factory right now.
+        // Note for Odin Project: Player data is too simple to necessitate a factory here.
         this.player1 = {
             name: "Player 1",
             symbol: "X", // "X" | "O"
@@ -104,12 +102,14 @@ function GameBoard() {
     //      1 = player 1's marker
     //      -1 = player 2's marker
     this.grid = new Array(9).fill(0);
+
     this.setMarker = function(position, player) {
         console.assert((position >= 0) && (position < 9));
         console.assert(this.grid[position] === 0);
         console.assert((player === -1) || (player === 1));
         this.grid[position] = player;
     };
+
     // calculateWinner returns line indices in the following scheme:
     //      0    1  2  3    4
     //           _______
@@ -152,6 +152,7 @@ function GameBoard() {
             winningCells: winningCells,
         };
     };
+
     this.clone = function() {
         const obj = new (Object.getPrototypeOf(this).constructor)();
         obj.grid = [...this.grid];
@@ -163,32 +164,19 @@ const render = (()=>{
     const playAreaElement = document.querySelector("#play-area");
     const bottomBarElement = document.querySelector("#bottom-bar");
 
-    function makeSideElement(playerData, messageType) {
-        const elem = element("div", {class: ["side", "clipsafe"]});
-        let message = "";
+    const messageMap = {
+        "turn": "Your turn!",
+        "draw": "Draw!",
+        "winner": "Winner!",
+        "loser": "Loser!",
+        "none": "",
+    };
 
-        switch (messageType) {
-            case "turn":
-                elem.classList.add("is-turn");
-                message = "Your turn!";
-                break;
-            case "draw":
-                elem.classList.add("is-draw");
-                message = "Draw!";
-                break;
-            case "winner":
-                elem.classList.add("is-winner");
-                message = "Winner!";
-                break;
-            case "loser":
-                elem.classList.add("is-loser");
-                message = "Loser!"; // bit harsh lmao
-                break;
-            default:
-        }
+    function makeSideElement(playerData, messageType) {
+        const elem = element("div", {class: ["side", "clipsafe", `is-${messageType}`]});
 
         const msgElem = elem.appendChild(element("span"));
-        msgElem.appendChild(txt(message))
+        msgElem.appendChild(txt(messageMap[messageType]))
 
         const playerCardElem = elem.appendChild(element("div", {class: "clipsafe"}));
         const symbolElem = playerCardElem.appendChild(element("span", {class: "symbol"}));
@@ -229,7 +217,7 @@ const render = (()=>{
 
         const [p1messageType, p2messageType] = (()=>{
             if (winState === null) { // Check if game is continuing
-                return (state.player1turn) ? ["turn", ""] : ["", "turn"];
+                return (state.player1turn) ? ["turn", "none"] : ["none", "turn"];
             } else if (winState.player === 0) { // Check if game is drawn
                 return ["draw", "draw"];
             } else { // We have a winner
@@ -260,13 +248,9 @@ const render = (()=>{
             symbolBoxElem.appendChild(txt(playerData.symbol));
             symbolBoxElem.addEventListener("click", () => state.swapSymbols());
 
-            const nameBoxElem = sectionElem.appendChild(element("input"));
-            nameBoxElem.addEventListener("click", (e) => e.stopPropagation()); // Don't rerender
-            nameBoxElem.addEventListener("change", (e) => {
-                const newName = e.target.value;
-                state.setName(i, newName);
-            });
-            nameBoxElem.value = playerData.name;
+            const nameBoxElem = sectionElem.appendChild(element("input", {value: playerData.name}));
+            nameBoxElem.addEventListener("click", (e) => e.stopPropagation()); // Avoid rerender
+            nameBoxElem.addEventListener("change", (e) => state.setName(i, e.target.value));
 
             const typeElem = sectionElem.appendChild(element("div", {class: ["button", "player-type"]}));
             typeElem.appendChild(txt(playerData.type));

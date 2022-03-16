@@ -8,10 +8,9 @@ const txt = document.createTextNode.bind(document);
 function element(tagName, attributes={}) {
     const elem = document.createElement(tagName);
     for (const [k, v] of Object.entries(attributes)) {
-        if (k === "class") {
-            elem.classList.add(...((v instanceof Array) ? v : [v]));
-        } else {
-            elem.setAttribute(k, v);
+        switch (k) {
+            case "class": elem.classList.add(...((v instanceof Array) ? v : [v])); break;
+            default: elem.setAttribute(k, v);
         }
     }
     return elem;
@@ -44,7 +43,7 @@ const state = {
         this._player2 = {
             name: "Player 2",
             symbol: "O",
-            type: "AI (Hard)",
+            type: "AI (Medium S)",
         };
     },
     startGame: function() {
@@ -77,7 +76,7 @@ const state = {
     },
     changePlayerType: function(playerID) {
         const playerObj = this._getPlayer(playerID);
-        const typesList = ["Human", "AI (Easy)", "AI (Medium)", "AI (Hard)", "AI (Loser)", "Human"];
+        const typesList = ["Human", "AI (Loser)", "AI (Easy)", "AI (Medium R)", "AI (Medium S)", "AI (Hard)", "Human"];
         playerObj.type = typesList[typesList.indexOf(playerObj.type) + 1];
     },
     setMarker: function(position) {
@@ -89,10 +88,11 @@ const state = {
     _tryExecuteComputerMove: function() {
         const playerObj = this._getPlayer(this.whoseTurn);
         if ((playerObj.type === "Human") || (this._gameBoard.calculateWinner() !== null)) return;
+        const timeout = ((this._player1.type !== "Human") && (this._player2.type !== "Human")) ? 200 : 500; // AI vs. AI is faster
         setTimeout(() => {
             this.setMarker(playSuggestors[playerObj.type](this._gameBoard, this.whoseTurn));
             render();
-        }, 300);
+        }, timeout);
     },
 };
 
@@ -109,6 +109,18 @@ function GameBoard() {
     //      -1 = player 2's marker
     this.grid = new Array(9).fill(0);
 
+    // This is a useful static field for algorithms that checks lines.
+    this.lineIndices = [
+        [0, 4, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [2, 4, 6],
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+    ];
+
     this.setMarker = function(position, player) {
         console.assert((position >= 0) && (position < 9) && (this.grid[position] === 0));
         console.assert((player === -1) || (player === 1));
@@ -116,19 +128,9 @@ function GameBoard() {
     };
 
     this.calculateWinner = function() {
-        const winningLinesTests = [
-            [0, 4, 8],
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8],
-            [2, 4, 6],
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8],
-        ];
         const winningCells = new Set();
         let winner = 0;
-        for (const [lineIndex, cellIndices] of winningLinesTests.entries()) {
+        for (const [lineIndex, cellIndices] of this.lineIndices.entries()) {
             const sum = arraySum(cellIndices.map((e) => this.grid[e]));
             if ((sum === 3) || (sum === -3)) {
                 console.assert((winner === 0) || (winner === (sum / 3)));
@@ -273,7 +275,7 @@ const playSuggestors = (()=>{
                 newGameBoard.setMarker(cellIndex, currPlayer);
                 const result = minimax(newGameBoard, newEmptyCells, asPlayer, (currPlayer * -1), !doMaximize);
                 if ((doMaximize && (result.score >= ret.score)) || (!doMaximize && (result.score <= ret.score))) {
-                    if ((result.score === ret.score) && (Math.random() > 0.33)) continue; // Adds some stochastic behaviour
+                    if ((result.score === ret.score) && (Math.random() > 0.33)) continue; // Randomization
                     ret.suggestedMove = cellIndex;
                     ret.score = result.score;
                 }
@@ -283,19 +285,66 @@ const playSuggestors = (()=>{
         }
         return ret;
     }
+
+    // Plays perfectly (tries to win if doMaximize is true, tries to lose if doMaximize is false)
     function suggestPlayWithMinimax(gameBoard, asPlayer, doMaximize) {
         const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
         console.assert(emptyCells.length > 0);
         return minimax(gameBoard, emptyCells, asPlayer, asPlayer, doMaximize).suggestedMove;
     }
+
+    // Very dumb
     function suggestPlayRandomly(gameBoard) {
         const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0));
         console.assert(emptyCells.length > 0);
         return randomElement(emptyCells)[0];
     }
 
+    // Intelligent, but only cares about the next move, so it has weaknesses
+    function suggestPlayWithShallowAlgorithm(gameBoard, asPlayer) {
+        const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
+        console.assert(emptyCells.length > 0);
+        // Step 1: We calculate the move with the shortest line to victory.
+        let bestNumberOfRoundsToWin = 4;
+        let bestCellIndices = [];
+        for (const cellIndices of gameBoard.lineIndices) {
+            const lineContents = cellIndices.map((e) => gameBoard.grid[e]);
+            if (lineContents.includes(asPlayer * -1)) continue; // Skip this line if we're blocked
+            const emptyMarkerCount = 3 - Math.abs(arraySum(lineContents));
+            if (emptyMarkerCount <= bestNumberOfRoundsToWin) { // Check if it's better
+                if ((emptyMarkerCount === bestNumberOfRoundsToWin) && (Math.random() > 0.5)) continue; // Randomization
+                bestNumberOfRoundsToWin = emptyMarkerCount;
+                bestCellIndices = cellIndices;
+            }
+        }
+        // Step 2: Can we win next turn? If so, we take it.
+        if (bestNumberOfRoundsToWin === 1) {
+            console.log("Shallow AI wins!");
+            return bestCellIndices.filter((cellIndex) => (gameBoard.grid[cellIndex] === 0))[0];
+        }
+        // Step 3: We check if we must block. (If defeat is inevitable, this step will still attempt to block!)
+        for (const [i, cellIndex] of emptyCells.entries()) {
+            const newGameBoard = gameBoard.clone();
+            newGameBoard.setMarker(cellIndex, asPlayer * -1); // Place opposite player's marker
+            const winState = newGameBoard.calculateWinner();
+            if ((winState !== null) && (winState.player === asPlayer * -1)) {
+                console.log("Shallow AI blocked a line.");
+                return cellIndex; // We must block!
+            }
+        }
+        // Step 4: If there's no possible path to victory, we pick a random cell.
+        if (bestNumberOfRoundsToWin === 4) {
+            console.log("Shallow AI found no possible path to victory. A random move will be selected.");
+            return suggestPlayRandomly(gameBoard);
+        }
+        // Step 5: There's a possible path to victory, we take the best one we found.
+        console.log(`Shallow AI's fastest path to victory is ${bestNumberOfRoundsToWin} turns.`);
+        console.assert((bestNumberOfRoundsToWin >= 0) && (bestNumberOfRoundsToWin < 4));
+        return randomElement(bestCellIndices.filter((cellIndex) => (gameBoard.grid[cellIndex] === 0)));
+    }
+
     function suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, difficulty) {
-        if (Math.random() > difficulty) {
+        if (Math.random() <= difficulty) {
             return suggestPlayWithMinimax(gameBoard, asPlayer, true);
         } else {
             return suggestPlayRandomly(gameBoard);
@@ -303,10 +352,11 @@ const playSuggestors = (()=>{
     }
 
     return {
-        "AI (Hard)":   (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
-        "AI (Medium)": (gameBoard, asPlayer) => suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, 0.4),
-        "AI (Easy)":   (gameBoard, _       ) => suggestPlayRandomly(gameBoard),
-        "AI (Loser)":  (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, false),
+        "AI (Hard)":     (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
+        "AI (Medium S)": (gameBoard, asPlayer) => suggestPlayWithShallowAlgorithm(gameBoard, asPlayer),
+        "AI (Medium R)": (gameBoard, asPlayer) => suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, 0.7),
+        "AI (Easy)":     (gameBoard, _       ) => suggestPlayRandomly(gameBoard),
+        "AI (Loser)":    (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, false),
     };
 })();
 

@@ -14,6 +14,7 @@ See the root page for a link to the source code.
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1">
     <link rel="stylesheet" type="text/css" href="./index.css">
+    <script defer src="./index.js"></script>
 </head>
 
 <body>
@@ -30,19 +31,31 @@ See the root page for a link to the source code.
     This app wasn't designed with mobile in mind.
 </p>
 <p>
-    Four different AI players are implemented:
+    Five different AI players are implemented:
     <ul>
-        <li><b>Hard:</b> Plays perfectly by taking advantage of openings for guaranteed wins, or forcing a draw if there isn't one. Implemented using the Minimax algorithm.</li>
+        <li><b>Hard:</b> Takes advantage of guaranteed wins, or forces a draw if there isn't one. Cannot lose.</li>
         <ul>
+            <li>Implemented using the minimax algorithm.</li>
             <li><i>This AI may sometimes choose not to take a win on the next turn, but (I believe) it will only do so if it can guarantee a win in subsequent turns anyway.</i></li>
         </ul>
-        <li><b>Medium:</b> During each turn, there's a 60% chance of playing like Hard mode, and a 40% chance of playing like Easy mode.</li>
-        <li><b>Easy:</b> Picks any square at random. All empty squares have equal probabilities of being chosen.</li>
-        <li><b>Loser:</b> Tries to lose. Similar to Hard mode, it will take advantage of openings for guaranteed losses, or forcing a draw if there isn't one. Also implemented using the Minimax algorithm.</li>
+        <li><b>Medium (Shallow):</b> An intelligent but flawed AI whose weakness is that it only looks one step ahead.</li>
+        <ul>
+            <li>The AI first checks if it can win on the current turn. If so, it takes the win.</li>
+            <li>The AI then checks if its opponent can win on the current turn. If so, it blocks at least one of its opponent's possible winning moves, meaning if there are multiple possible winning moves, its opponent can still win.</li>
+            <li>The AI then checks if there's any possible path to victory. If so, then it will try to "win as fast as possible", favouring lines that already contain its own marker.</li>
+            <li>As a last resort, the AI picks any random empty square.</li>
+        </ul>
+        <li><b>Medium (Random):</b> A sabotaged version of <em>Hard</em> that has a chance of playing poorly on each turn.</li>
+        <ul>
+            <li>During each turn, there's a 70% chance of playing like <em>Hard</em>, and a 30% chance of playing like <em>Easy</em>.</li>
+        </ul>
+        <li><b>Easy:</b> Picks any empty square at random. All empty squares have equal probabilities of being chosen.</li>
+        <li><b>Loser:</b> Tries to lose. Also implemented using the minimax algorithm, so it behaves like <em>Hard</em>, but for a different goal.</li>
     </ul>
 </p>
-
-<script src="./index.js"></script>
+<p>
+    Although the <em>Hard</em> and <em>Loser</em> AIs' minimax algorithm is very good, there's still room for improvement. Currently, if the algorithm cannot guarantee a win, it will randomly pick between moves that can guarantee a draw, rather than trying to pick the "best" move between them. <i>(I might look into better algorithms to do this!)</i>
+</p>
 
 </body>
 </html>

@@ -1,0 +1,221 @@
+/*
+ * Filename: index.css
+ * Author:   simshadows <contact@simshadows.com>
+ * License:  GNU Affero General Public License v3 (AGPL-3.0)
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+#app {
+    background: #ccc;
+    overflow-y: auto;
+
+    margin: 0.8em;
+    height: 90vh;
+    min-height: 18em;
+    min-width: 1em;
+}
+@media (max-width: 29em) {
+    body, html, #app {
+        padding: 0;
+        margin: 0;
+    }
+}
+
+#app-head {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+
+    background: #aaa;
+    width: 100%;
+    height: 2.2em;
+}
+
+#app-body {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    padding: 2em;
+    width: 100%;
+}
+div.collections-overview-body {
+    row-gap: 0.8em;
+}
+div.collection-detail-body {
+    row-gap: 0.4em;
+}
+
+#head-title {
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.head-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: white;
+    border: solid 2px;
+    height: 100%;
+    width: 8em;
+    cursor: pointer;
+}
+div.head-button:hover {
+    background: #ddf;
+}
+
+div.add-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: solid 1px;
+    background: #fff;
+    height: 1em;
+    width: 1em;
+    cursor: pointer;
+    font-size: 2em;
+}
+div.add-button:hover {
+    background: #ddf;
+}
+
+div.delete-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: solid 1px;
+    background: #faa;
+    height: 1em;
+    width: 1em;
+    cursor: pointer;
+}
+div.delete-button:hover {
+    background: #f33;
+}
+
+div.edit-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: solid 1px;
+    background: #cfc;
+    height: 1em;
+    width: 1em;
+    cursor: pointer;
+}
+div.edit-button:hover {
+    background: #0f0;
+}
+
+div.collection-summary-box {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    border: solid 1px;
+    background: #fff;
+
+    min-height: 5em;
+    width: 24em;
+    padding: 0.5em;
+
+    cursor: pointer;
+}
+div.collection-summary-box:hover {
+    background: #ddf;
+}
+span.collection-summary-name {
+    flex: 1;
+    font-weight: bold;
+}
+
+div.collection-summary-box-inner-upper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    width: 100%;
+    column-gap: 0.4em;
+}
+div.collection-summary-box-inner-lower {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    padding: 0.8em 0 0 0;
+    width: 100%;
+    font-size: 0.8em;
+}
+
+div.todo-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    background: #fff;
+    width: 24em;
+    min-height: 1.8em;
+    padding: 0 0.4em 0 0.4em;
+}
+div.todo-box-inner-upper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    width: 100%;
+    column-gap: 0.4em;
+}
+div.todo-box-inner-lower {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+
+    width: 100%;
+    padding: 0 0.4em 0.8em 0.4em;
+    column-gap: 0.4em;
+}
+
+span.todo-title {
+    flex: 1;
+    padding: 0.4em 0 0.4em 0;
+}
+span.todo-title-done {
+    text-decoration: line-through;
+    color: #bbb;
+}
+input.todo-title-textbox {
+    width: 100%;
+}
+
+span.todo-time-due {
+    font-size: 85%;
+    color: #999;
+}
+span.todo-time-due-overdue {
+    color: #f00;
+}
+
+span.todo-header {
+    margin: 1em 0 0.2em 0;
+}
+
+textarea.todo-notes {
+    width: 100%;
+    height: 6em;
+    resize: vertical;
+}
+

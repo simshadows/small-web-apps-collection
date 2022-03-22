@@ -55,20 +55,15 @@ See the root page for a link to the source code.
                 <li>Rule 8: The AI will attempt to place its marker at an empty side.</li>
             </ul>
         </ul>
-        <li><b>Medium (Shallow):</b> An intelligent but flawed AI whose weakness is that it only looks one step ahead.</li>
+        <li><b>Medium:</b> An intelligent but flawed AI whose weakness is that it only looks one step ahead.</li>
         <ul>
-            <li>Also implemented using an expert system algorithm that goes through a simple priority rule list.</li>
-            <li>The algorithm follows a priority rule list:</li>
+            <li>Also implemented using an expert system algorithm that goes through a simple priority rule list:</li>
             <ul>
                 <li>Rule 1: The AI checks if it can win on the current turn. If so, it takes the win. If not, it tries the next rule.</li>
                 <li>Rule 2: The AI checks if its opponent can win on the current turn. If so, it blocks at least one of its opponent's possible winning moves (even if it's a <em>fork</em>). If not, it tries the next rule.</li>
                 <li>Rule 3: The AI checks if there's any possible path to victory. If so, then it will try to "win as fast as possible", favouring lines that already contain its own marker. If there are no possible lines to victory, then it moves to the final rule.</li>
                 <li>Rule 4: The AI picks any random empty square.</li>
             </ul>
-        </ul>
-        <li><b>Medium (Random):</b> A sabotaged version of <em>Hard</em> that has a chance of playing poorly on each turn.</li>
-        <ul>
-            <li>During each turn, there's a 70% chance of playing like <em>Hard</em>, and a 30% chance of playing like <em>Easy</em>.</li>
         </ul>
         <li><b>Easy:</b> Picks any empty square at random. All empty squares have equal probabilities of being chosen.</li>
         <li><b>Minimax:</b> Cannot lose. Takes advantage of guaranteed wins, or forces a draw if it can't.</li>
@@ -78,6 +73,10 @@ See the root page for a link to the source code.
             <li>Although the AI plays very well, this implementation still has room for improvement. Currently, if it can't guarantee a win, it will randomly pick between moves that can guarantee a draw, rather than trying to pick the "best" move between them like the <em>Hard</em> AI does.</li>
         </ul>
         <li><b>Loser:</b> Tries to lose. Also implemented using the minimax algorithm, so it behaves like <em>Hard</em>, but for a different goal.</li>
+        <li><b>Sabotaged:</b> A sabotaged version of <em>Hard</em> that has a chance of playing poorly on each turn.</li>
+        <ul>
+            <li>During each turn, there's a 60% chance of playing like <em>Hard</em>, and a 40% chance of playing like <em>Easy</em>.</li>
+        </ul>
     </ul>
 </p>
 <p>

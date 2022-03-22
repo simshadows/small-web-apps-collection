@@ -76,7 +76,16 @@ const state = {
     },
     changePlayerType: function(playerID) {
         const playerObj = this._getPlayer(playerID);
-        const typesList = ["Human", "AI (Loser)", "AI (Easy)", "AI (Medium R)", "AI (Medium S)", "AI (Hard)", "Human"];
+        const typesList = [
+            "Human",
+            "AI (Minimax)",
+            "AI (Loser)",
+            "AI (Easy)",
+            "AI (Medium R)",
+            "AI (Medium S)",
+            "AI (Hard)",
+            "Human",
+        ];
         playerObj.type = typesList[typesList.indexOf(playerObj.type) + 1];
     },
     setMarker: function(position) {
@@ -88,7 +97,7 @@ const state = {
     _tryExecuteComputerMove: function() {
         const playerObj = this._getPlayer(this.whoseTurn);
         if ((playerObj.type === "Human") || (this._gameBoard.calculateWinner() !== null)) return;
-        const timeout = ((this._player1.type !== "Human") && (this._player2.type !== "Human")) ? 200 : 500; // AI vs. AI is faster
+        const timeout = ((this._player1.type !== "Human") && (this._player2.type !== "Human")) ? 20 : 500; // AI vs. AI is faster
         setTimeout(() => {
             this.setMarker(playSuggestors[playerObj.type](this._gameBoard, this.whoseTurn));
             render();
@@ -261,6 +270,31 @@ const render = (()=>{
 })();
 
 const playSuggestors = (()=>{
+    function minimaxFor(gameBoard, emptyCells, asPlayer, currPlayer, doMaximize) {
+        const ret = {
+            suggestedMove: null,
+            score: doMaximize ? -2 : 2,
+        };
+        const winState = gameBoard.calculateWinner();
+        if (winState === null) {
+            for (const [i, cellIndex] of emptyCells.entries()) {
+                const newEmptyCells = [...emptyCells];
+                const newGameBoard = gameBoard.clone();
+                newEmptyCells.splice(i, 1); // Remove element at i
+                newGameBoard.setMarker(cellIndex, currPlayer);
+                const result = minimax(newGameBoard, newEmptyCells, asPlayer, (currPlayer * -1), !doMaximize);
+                if ((doMaximize && (result.score >= ret.score)) || (!doMaximize && (result.score <= ret.score))) {
+                    if ((result.score === ret.score) && (Math.random() > 0.33)) continue; // Randomization
+                    ret.suggestedMove = cellIndex;
+                    ret.score = result.score;
+                }
+            }
+        } else {
+            ret.score = asPlayer * winState.player; // 1 if asPlayer matches winner, 0 if winner is 0 (i.e. it's a draw)
+        }
+        return ret;
+    }
+
     function minimax(gameBoard, emptyCells, asPlayer, currPlayer, doMaximize) {
         const ret = {
             suggestedMove: null,
@@ -286,7 +320,7 @@ const playSuggestors = (()=>{
         return ret;
     }
 
-    // Plays perfectly (tries to win if doMaximize is true, tries to lose if doMaximize is false)
+    // Cannot lose (Or, cannot win if doMaximize is false)
     function suggestPlayWithMinimax(gameBoard, asPlayer, doMaximize) {
         const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
         console.assert(emptyCells.length > 0);
@@ -298,6 +332,126 @@ const playSuggestors = (()=>{
         const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0));
         console.assert(emptyCells.length > 0);
         return randomElement(emptyCells)[0];
+    }
+
+    // Perfect expert system algorithm
+    function suggestPlayWithCrowleySieglerAlgorithm(gameBoard, asPlayer) {
+        const emptyCells = [...gameBoard.grid.entries()].filter(([_, v]) => (v === 0)).map(([i, _]) => i);
+        console.assert(emptyCells.length > 0);
+        // Step 0: Precalculate winning and losing lines
+        const emptyLines = []; // Shared array between winning and losing lines.
+        const winningLines = [emptyLines, [], []]; // winningLines[how many marks asPlayer has in the line] = array of lines
+        const losingLines = [emptyLines, [], []]; // similar
+        for (const cellIndices of gameBoard.lineIndices) {
+            const lineContents = cellIndices.map(e => gameBoard.grid[e]);
+
+            const hasOurMarks = lineContents.includes(asPlayer);
+            const hasOpponentMarks = lineContents.includes(asPlayer * -1);
+
+            if (hasOurMarks && hasOpponentMarks) continue; // Both players are blocked. We do nothing.
+            const markerCount = Math.abs(arraySum(lineContents));
+            console.assert(markerCount >= 0);
+            const linesArray = (hasOurMarks) ? winningLines : losingLines;
+            linesArray[markerCount].push(cellIndices);
+        }
+        // Step 1: Can we win next turn? If so, we take it.
+        if (winningLines[2].length > 0) {
+            console.log("Hard AI wins!");
+            const emptyIndices = randomElement(winningLines[2]).filter(i => (gameBoard.grid[i] === 0));
+            console.assert(emptyIndices.length === 1);
+            return emptyIndices[0];
+        }
+        // Step 2: We check if we must block.
+        if (losingLines[2].length > 0) {
+            console.log("Hard AI blocked a line.");
+            const emptyIndices = randomElement(losingLines[2]).filter((i) => (gameBoard.grid[i] === 0));
+            console.assert(emptyIndices.length === 1);
+            return emptyIndices[0];
+        }
+        // Step 3: Set up a fork.
+        function setUpFork(linesWithOneMark) {
+            const possibleMoves = [];
+            const possibleIntersectionCellIndices = new Set();
+            for (const cellIndices of linesWithOneMark) {
+                const emptyIndices = cellIndices.filter((i) => (gameBoard.grid[i] === 0));
+                console.assert(emptyIndices.length === 2);
+                for (const i of emptyIndices) {
+                    if (possibleIntersectionCellIndices.has(i)) possibleMoves.push(i);
+                    possibleIntersectionCellIndices.add(i);
+                }
+            }
+            return possibleMoves;
+        }
+        const movesToCreateFork = setUpFork(winningLines[1]);
+        if (movesToCreateFork.length > 0) {
+            console.log("Hard AI created a fork!");
+            return randomElement(movesToCreateFork);
+        }
+        // Step 4: Block fork.
+        const opponentPossibleForkMoves = setUpFork(losingLines[1]);
+        if (opponentPossibleForkMoves.length > 0) {
+            // There's one more part of this step, outlined by the paper!
+            // The paper has an if-statement for:
+            //      "If there is an empty location that creates a two-in-a-row for me
+            //      (thus forcing my opponent to block rather than fork),"
+            if (winningLines[1].length > 0) {
+                const possibleMoves = new Set();
+                for (const cellIndices of winningLines[1]) {
+                    // TODO: Somehow simplify this logic down?
+                    const [c1, c2] = cellIndices.filter(i => (gameBoard.grid[i] === 0));
+                    const [o1, o2] = [opponentPossibleForkMoves.includes(c1), opponentPossibleForkMoves.includes(c2)];
+                    if (o1 && !o2) {
+                        possibleMoves.add(c1);
+                    } else if (!o1 && o2) {
+                        possibleMoves.add(c2);
+                    } else if (!o1 && !o2) {
+                        possibleMoves.add(c1);
+                        possibleMoves.add(c2);
+                    }
+                }
+                console.log(possibleMoves);
+                if (possibleMoves.size > 0) {
+                    console.log("Hard AI blocked a fork by forcing the opponent to block next turn!");
+                    return randomElement(Array.from(possibleMoves));
+                }
+                console.log(opponentPossibleForkMoves);
+                console.log("FALLTHROUGH");
+                // Intentional fallthrough
+            }
+            console.log("Hard AI blocked a fork by blocking an intersecting line!");
+            return randomElement(opponentPossibleForkMoves);
+        }
+        // Step 5: Play center.
+        if (gameBoard.grid[4] === 0) {
+            console.log("Hard AI plays center.");
+            return 4;
+        }
+        // Step 6: Play opposite corner.
+        for (const [testCorner, placementCorner] of [[0,8], [8,0], [2,6], [6,2]]) {
+            const opponentHasMark = (gameBoard.grid[testCorner] === asPlayer * -1);
+            const oppositeIsEmpty = (gameBoard.grid[placementCorner] === 0);
+            if (opponentHasMark && oppositeIsEmpty) {
+                console.log("Hard AI plays the opposite corner.");
+                return placementCorner;
+            }
+        }
+        // Step 7: Play empty corner.
+        for (const candidateCellIndex of [0, 2, 6, 8]) {
+            if (gameBoard.grid[candidateCellIndex] === 0) {
+                console.log("Hard AI plays an empty corner.");
+                return candidateCellIndex;
+            }
+        }
+        // Step 8: Play empty side.
+        for (const candidateCellIndex of [1, 3, 5, 7]) {
+            if (gameBoard.grid[candidateCellIndex] === 0) {
+                console.log("Hard AI plays an empty side.");
+                return candidateCellIndex;
+            }
+        }
+        // Step 9: Last resort. (We should only reach this step if there's anything wrong with the algorithm.)
+        console.error("Hard AI should never reach the end of the decision tree without a choice.");
+        return suggestPlayRandomly(gameBoard);
     }
 
     // Intelligent, but only cares about the next move, so it has weaknesses
@@ -343,19 +497,20 @@ const playSuggestors = (()=>{
         return randomElement(bestCellIndices.filter((cellIndex) => (gameBoard.grid[cellIndex] === 0)));
     }
 
-    function suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, difficulty) {
+    function suggestPlayWithCrowleySieglerSometimes(gameBoard, asPlayer, difficulty) {
         if (Math.random() <= difficulty) {
-            return suggestPlayWithMinimax(gameBoard, asPlayer, true);
+            return suggestPlayWithCrowleySieglerAlgorithm(gameBoard, asPlayer);
         } else {
             return suggestPlayRandomly(gameBoard);
         }
     }
 
     return {
-        "AI (Hard)":     (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
+        "AI (Hard)":     (gameBoard, asPlayer) => suggestPlayWithCrowleySieglerAlgorithm(gameBoard, asPlayer),
         "AI (Medium S)": (gameBoard, asPlayer) => suggestPlayWithShallowAlgorithm(gameBoard, asPlayer),
-        "AI (Medium R)": (gameBoard, asPlayer) => suggestPlayWithMinimaxSometimes(gameBoard, asPlayer, 0.7),
+        "AI (Medium R)": (gameBoard, asPlayer) => suggestPlayWithCrowleySieglerSometimes(gameBoard, asPlayer, 0.7),
         "AI (Easy)":     (gameBoard, _       ) => suggestPlayRandomly(gameBoard),
+        "AI (Minimax)":  (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
         "AI (Loser)":    (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, false),
     };
 })();

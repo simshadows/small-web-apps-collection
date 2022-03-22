@@ -43,7 +43,7 @@ const state = {
         this._player2 = {
             name: "Player 2",
             symbol: "O",
-            type: "AI (Medium S)",
+            type: "AI (Medium)",
         };
     },
     startGame: function() {
@@ -80,9 +80,9 @@ const state = {
             "Human",
             "AI (Minimax)",
             "AI (Loser)",
+            "AI (Sabotaged)",
             "AI (Easy)",
-            "AI (Medium R)",
-            "AI (Medium S)",
+            "AI (Medium)",
             "AI (Hard)",
             "Human",
         ];
@@ -506,12 +506,12 @@ const playSuggestors = (()=>{
     }
 
     return {
-        "AI (Hard)":     (gameBoard, asPlayer) => suggestPlayWithCrowleySieglerAlgorithm(gameBoard, asPlayer),
-        "AI (Medium S)": (gameBoard, asPlayer) => suggestPlayWithShallowAlgorithm(gameBoard, asPlayer),
-        "AI (Medium R)": (gameBoard, asPlayer) => suggestPlayWithCrowleySieglerSometimes(gameBoard, asPlayer, 0.7),
-        "AI (Easy)":     (gameBoard, _       ) => suggestPlayRandomly(gameBoard),
-        "AI (Minimax)":  (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
-        "AI (Loser)":    (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, false),
+        "AI (Hard)":      (gameBoard, asPlayer) => suggestPlayWithCrowleySieglerAlgorithm(gameBoard, asPlayer),
+        "AI (Medium)":    (gameBoard, asPlayer) => suggestPlayWithShallowAlgorithm(gameBoard, asPlayer),
+        "AI (Easy)":      (gameBoard, _       ) => suggestPlayRandomly(gameBoard),
+        "AI (Minimax)":   (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, true),
+        "AI (Loser)":     (gameBoard, asPlayer) => suggestPlayWithMinimax(gameBoard, asPlayer, false),
+        "AI (Sabotaged)": (gameBoard, asPlayer) => suggestPlayWithCrowleySieglerSometimes(gameBoard, asPlayer, 0.6),
     };
 })();
 

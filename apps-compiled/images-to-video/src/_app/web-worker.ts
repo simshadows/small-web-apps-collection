@@ -4,8 +4,10 @@ import {
     fetchFile,
 } from "@ffmpeg/ffmpeg";
 
-self.onmessage = async ({data: {files, href}}) => {
+self.onmessage = async ({data: {files, href, options}}) => {
     console.log("Worker starting.");
+    console.log(`Framerate: ${options.framerate}`);
+    console.log(`CRF: ${options.crf}`);
 
     // TODO: The ffmpeg library should update their type declarations so we can fix this.
     const ffmpegOptions: CreateFFmpegOptions & {mainName: string} = {
@@ -31,12 +33,12 @@ self.onmessage = async ({data: {files, href}}) => {
         });
 
         await ffmpeg.run(
-            "-framerate", "10",
+            "-framerate", String(options.framerate),
             "-pattern_type", "glob",
             "-i", "*.jpg",
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
-            "-crf", "15", // Very poor quality, should change it later
+            "-crf", String(options.crf),
             "-preset", "ultrafast",
             "output.mp4",
         );

@@ -6,7 +6,10 @@
 
 import "./index.css";
 
-import {throwIfNull} from "./utils";
+import {throwIfNull, useDefaultIfNaN} from "./utils";
+
+const framerateInputElem: HTMLInputElement = throwIfNull(document.querySelector("#framerate input"));
+const crfInputElem: HTMLInputElement = throwIfNull(document.querySelector("#crf input"));
 
 const videoElem: HTMLVideoElement = throwIfNull(document.querySelector("#player"));
 const progressBarElem: HTMLProgressElement = throwIfNull(document.querySelector("#progress-bar"));
@@ -20,12 +23,18 @@ async function startEncode(event: Event) {
     const files = target.files;
     if (!files) throw new Error("Unexpected falsy.");
 
-    console.log(files);
+    // TODO: Implement input validation
+    const framerate: number = useDefaultIfNaN(parseInt(framerateInputElem.value), 10);
+    const crf: number = useDefaultIfNaN(parseInt(crfInputElem.value), 20);
 
     console.log("Sending data to worker.");
     worker.postMessage({
         files: files,
         href: document.location.href,
+        options: {
+            framerate,
+            crf,
+        },
     });
 }
 
@@ -36,6 +45,8 @@ worker.onmessage = ({data: {videoData, progress}}) => {
     }
     progressBarElem.value = progress * 100;
 };
+
+uploaderElem.addEventListener("change", startEncode);
 
 uploaderElem.addEventListener("change", startEncode);
 

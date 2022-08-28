@@ -40,6 +40,15 @@
     <p>Upload multiple ".jpg" files below. They will automatically be converted into a video, which should display shortly below. Depending on the browser you use, you should be able to download the file using the video player.</p>
     <p>This app *ONLY* accepts ".jpg" files. Everything else is ignored.</p>
     <div id="app-container">
+        <div id="framerate" class="input-wrapper">
+            <label>Framerate:</label>
+            <input type="number" value="10" min="1" max="600" />
+        </div>
+        <div id="crf" class="input-wrapper">
+            <label>CRF:</label>
+            <input type="number" value="20" min="0" max="51" />
+            <label>(lower is better)</label>
+        </div>
         <input id="uploader" type="file" multiple />
         <progress id="progress-bar" value="0" max="100" ></progress>
         <video id="player" controls autoplay muted />

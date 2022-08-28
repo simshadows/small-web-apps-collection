@@ -9,6 +9,7 @@ import "./index.css";
 import {throwIfNull} from "./utils";
 
 const videoElem: HTMLVideoElement = throwIfNull(document.querySelector("#player"));
+const progressBarElem: HTMLProgressElement = throwIfNull(document.querySelector("#progress-bar"));
 const uploaderElem: HTMLInputElement = throwIfNull(document.querySelector("#uploader"));
 
 const worker = new Worker(new URL('./web-worker.ts', import.meta.url));
@@ -19,6 +20,8 @@ async function startEncode(event: Event) {
     const files = target.files;
     if (!files) throw new Error("Unexpected falsy.");
 
+    console.log(files);
+
     console.log("Sending data to worker.");
     worker.postMessage({
         files: files,
@@ -26,9 +29,12 @@ async function startEncode(event: Event) {
     });
 }
 
-worker.onmessage = ({data: {videoData}}) => {
+worker.onmessage = ({data: {videoData, progress}}) => {
     console.log("Received data back from worker.");
-    videoElem.src = URL.createObjectURL(new Blob([videoData.buffer], {type: "video/mp4"}));
+    if (videoData) {
+        videoElem.src = URL.createObjectURL(new Blob([videoData.buffer], {type: "video/mp4"}));
+    }
+    progressBarElem.value = progress * 100;
 };
 
 uploaderElem.addEventListener("change", startEncode);

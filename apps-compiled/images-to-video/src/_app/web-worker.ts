@@ -14,25 +14,38 @@ self.onmessage = async ({data: {files, href}}) => {
         log: true,
     };
     const ffmpeg = createFFmpeg(ffmpegOptions);
-    await ffmpeg.load();
 
-    for (const file of files) {
-        console.log(`Worker will process file: ${file.name}`);
-        ffmpeg.FS("writeFile", file.name, await fetchFile(file));
+    try {
+        await ffmpeg.load();
+
+        for (const file of files) {
+            console.log(`Worker will process file: ${file.name}`);
+            ffmpeg.FS("writeFile", file.name, await fetchFile(file));
+        }
+
+        ffmpeg.setProgress(({ratio}) => {
+            self.postMessage({
+                videoData: null,
+                progress: ratio,
+            });
+        });
+
+        await ffmpeg.run(
+            "-framerate", "10",
+            "-pattern_type", "glob",
+            "-i", "*.jpg",
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-crf", "15", // Very poor quality, should change it later
+            "-preset", "ultrafast",
+            "output.mp4",
+        );
+        self.postMessage({
+            videoData: ffmpeg.FS("readFile", "output.mp4"),
+            progress: 1,
+        });
+    } finally {
+        await ffmpeg.exit();
     }
-
-    await ffmpeg.run(
-        "-framerate", "10",
-        "-pattern_type", "glob",
-        "-i", "*.jpg",
-        "-c:v", "libx264",
-        "-pix_fmt", "yuv420p",
-        "-crf", "15", // Very poor quality, should change it later
-        "-preset", "ultrafast",
-        "output.mp4",
-    );
-    self.postMessage({
-        videoData: ffmpeg.FS("readFile", "output.mp4"),
-    });
 };
 

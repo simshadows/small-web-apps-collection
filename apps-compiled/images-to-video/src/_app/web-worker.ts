@@ -22,7 +22,6 @@ self.onmessage = async ({data: {files, href, options}}) => {
         await ffmpeg.load();
 
         for (const file of files) {
-            console.log(`Worker will process file: ${file.name}`);
             ffmpeg.FS("writeFile", file.name, await fetchFile(file));
         }
 

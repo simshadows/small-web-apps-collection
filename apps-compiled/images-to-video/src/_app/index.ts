@@ -12,11 +12,14 @@ const framerateInputElem: HTMLInputElement = throwIfNull(document.querySelector(
 const qualityInputElem: HTMLSelectElement = throwIfNull(document.querySelector("#quality select"));
 const x264PresetInputElem: HTMLSelectElement = throwIfNull(document.querySelector("#x264-preset select"));
 
-const videoElem: HTMLVideoElement = throwIfNull(document.querySelector("#player"));
 const uploaderElem: HTMLInputElement = throwIfNull(document.querySelector("#uploader"));
 
 const progressBarElem: HTMLProgressElement = throwIfNull(document.querySelector("#progress progress"));
 const progressMessageElem: HTMLLabelElement = throwIfNull(document.querySelector("#progress label"));
+
+const restartButtonElem: HTMLButtonElement = throwIfNull(document.querySelector("#restart-button"));
+
+const videoElem: HTMLVideoElement = throwIfNull(document.querySelector("#player"));
 
 let worker: null | Worker = null;
 
@@ -26,6 +29,8 @@ function createWorker(): Worker {
         console.log("Received data back from worker.");
         if (videoData) {
             videoElem.src = URL.createObjectURL(new Blob([videoData.buffer], {type: "video/mp4"}));
+            videoElem.removeAttribute("style");
+            restartButtonElem.innerHTML = "Rerun";
         }
         setProgress(progress, videoData);
     };
@@ -38,7 +43,12 @@ function setProgress(v: number, done: boolean): void {
 }
 
 async function startEncode() {
+    const files = uploaderElem.files;
+    if (files?.length === 0) return;
+
     setProgress(0, false);
+    restartButtonElem.innerHTML = "Restart";
+    restartButtonElem.removeAttribute("style");
     worker?.terminate();
     worker = createWorker();
 
@@ -55,7 +65,7 @@ async function startEncode() {
 
     console.log("Sending data to worker.");
     worker.postMessage({
-        files: uploaderElem.files,
+        files,
         href: document.location.href,
         options: {
             framerate,
@@ -66,4 +76,5 @@ async function startEncode() {
 }
 
 uploaderElem.addEventListener("change", startEncode);
+restartButtonElem.addEventListener("click", startEncode);
 

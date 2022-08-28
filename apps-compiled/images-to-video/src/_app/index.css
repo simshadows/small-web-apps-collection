@@ -8,3 +8,12 @@
     row-gap: 1em;
 }
 
+#restart-button {
+    width: 6em;
+    height: 1.6em;
+}
+
+#player {
+    border-style: solid;
+}
+

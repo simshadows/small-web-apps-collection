@@ -5676,7 +5676,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["fork-ts-checker-webpack-plugin", "virtual:de8410af7cb1b136f3c6f22b2a808c16a865982f1e1c8f68a9e1a390d7ad55822b0c1afcbfdd4da90a91d5bc5a2fb0451ff1b11c80275afb551159ca8aef74b1#npm:7.2.1"],
             ["html-webpack-plugin", "virtual:de8410af7cb1b136f3c6f22b2a808c16a865982f1e1c8f68a9e1a390d7ad55822b0c1afcbfdd4da90a91d5bc5a2fb0451ff1b11c80275afb551159ca8aef74b1#npm:5.5.0"],
             ["mini-css-extract-plugin", "virtual:de8410af7cb1b136f3c6f22b2a808c16a865982f1e1c8f68a9e1a390d7ad55822b0c1afcbfdd4da90a91d5bc5a2fb0451ff1b11c80275afb551159ca8aef74b1#npm:2.5.3"],
-            ["regenerator-runtime", "npm:0.13.9"],
             ["terser-webpack-plugin", "virtual:de8410af7cb1b136f3c6f22b2a808c16a865982f1e1c8f68a9e1a390d7ad55822b0c1afcbfdd4da90a91d5bc5a2fb0451ff1b11c80275afb551159ca8aef74b1#npm:5.3.1"],
             ["typescript", "patch:typescript@npm%3A4.5.5#~builtin<compat/typescript>::version=4.5.5&hash=493e53"],
             ["webpack", "virtual:de8410af7cb1b136f3c6f22b2a808c16a865982f1e1c8f68a9e1a390d7ad55822b0c1afcbfdd4da90a91d5bc5a2fb0451ff1b11c80275afb551159ca8aef74b1#npm:5.69.1"],

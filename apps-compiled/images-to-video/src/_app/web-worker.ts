@@ -8,6 +8,7 @@ self.onmessage = async ({data: {files, href, options}}) => {
     console.log("Worker starting.");
     console.log(`Framerate: ${options.framerate}`);
     console.log(`CRF: ${options.crf}`);
+    console.log(`x264 Preset: ${options.x264Preset}`);
 
     // TODO: The ffmpeg library should update their type declarations so we can fix this.
     const ffmpegOptions: CreateFFmpegOptions & {mainName: string} = {
@@ -39,7 +40,7 @@ self.onmessage = async ({data: {files, href, options}}) => {
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-crf", String(options.crf),
-            "-preset", "ultrafast",
+            "-preset", options.x264Preset,
             "output.mp4",
         );
         self.postMessage({

@@ -9,7 +9,8 @@ import "./index.css";
 import {throwIfNull, useDefaultIfNaN} from "./utils";
 
 const framerateInputElem: HTMLInputElement = throwIfNull(document.querySelector("#framerate input"));
-const crfInputElem: HTMLInputElement = throwIfNull(document.querySelector("#crf input"));
+const qualityInputElem: HTMLSelectElement = throwIfNull(document.querySelector("#quality select"));
+const x264PresetInputElem: HTMLSelectElement = throwIfNull(document.querySelector("#x264-preset select"));
 
 const videoElem: HTMLVideoElement = throwIfNull(document.querySelector("#player"));
 const progressBarElem: HTMLProgressElement = throwIfNull(document.querySelector("#progress-bar"));
@@ -23,9 +24,16 @@ async function startEncode(event: Event) {
     const files = target.files;
     if (!files) throw new Error("Unexpected falsy.");
 
-    // TODO: Implement input validation
-    const framerate: number = useDefaultIfNaN(parseInt(framerateInputElem.value), 10);
-    const crf: number = useDefaultIfNaN(parseInt(crfInputElem.value), 20);
+    const framerate: number = Math.min(600, Math.max(1, useDefaultIfNaN(parseInt(framerateInputElem.value), 10)));
+    const crf: number = (()=>{
+        switch (qualityInputElem.value) {
+            case "worst-quality": return 51;
+            default: console.error("Invalid quality input."); // Intentional fallthrough
+            case "decent-quality": return 20;
+            case "best-quality":  return 0;
+        }
+    })();
+    const x264Preset: string = x264PresetInputElem.value;
 
     console.log("Sending data to worker.");
     worker.postMessage({
@@ -34,6 +42,7 @@ async function startEncode(event: Event) {
         options: {
             framerate,
             crf,
+            x264Preset,
         },
     });
 }
@@ -45,8 +54,6 @@ worker.onmessage = ({data: {videoData, progress}}) => {
     }
     progressBarElem.value = progress * 100;
 };
-
-uploaderElem.addEventListener("change", startEncode);
 
 uploaderElem.addEventListener("change", startEncode);
 

@@ -43,11 +43,31 @@
         <div id="framerate" class="input-wrapper">
             <label>Framerate:</label>
             <input type="number" value="10" min="1" max="600" />
+            <label>(1-600)</label>
         </div>
-        <div id="crf" class="input-wrapper">
-            <label>CRF:</label>
-            <input type="number" value="20" min="0" max="51" />
-            <label>(lower is better)</label>
+        <div id="quality" class="input-wrapper">
+            <label>Quality:</label>
+            <select>
+                <option value="best-quality">Best Quality</option>
+                <option value="decent-quality" selected="selected">Decent Quality</option>
+                <option value="worst-quality">Worst Quality</option>
+            </select>
+        </div>
+        <div id="x264-preset" class="input-wrapper">
+            <label>x264 Preset:</label>
+            <select>
+                <option value="ultrafast" selected="selected">ultrafast</option>
+                <option value="superfast">superfast</option>
+                <option value="veryfast">veryfast</option>
+                <option value="faster">faster</option>
+                <option value="fast">fast</option>
+                <option value="medium">medium</option>
+                <option value="slow">slow</option>
+                <option value="slower">slower</option>
+                <option value="veryslow">veryslow</option>
+                <option value="placebo">placebo</option>
+            </select>
+            <label>(slower presets may produce smaller files)</label>
         </div>
         <input id="uploader" type="file" multiple />
         <progress id="progress-bar" value="0" max="100" ></progress>

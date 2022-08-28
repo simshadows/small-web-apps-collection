@@ -13,51 +13,50 @@ import {
 
 import "./index.css";
 
-//import {element} from "./utils";
+import {throwIfNull} from "./utils";
 
-//const bodyElem = document.querySelector("body")!;
+const videoElem: HTMLVideoElement = throwIfNull(document.querySelector("#player"));
+const uploaderElem: HTMLInputElement = throwIfNull(document.querySelector("#uploader"));
 
-function initialRender() {
-    // Nothing for now
-}
+// TODO: The ffmpeg library should update their type declarations so we can fix this.
+const ffmpegOptions: CreateFFmpegOptions & {mainName: string} = {
+    corePath: new URL("ffmpeg-n4-3-1-wasm-single-threaded/ffmpeg-core.js", document.location.href).href,
+    mainName: "main",
+    log: true,
+};
+const ffmpeg = createFFmpeg(ffmpegOptions);
+const ffmpegLoadPromise = ffmpeg.load(); // Await this before running any ffmpeg commands
 
 function run() {
-    // TODO: The ffmpeg library should update their type declarations so we can fix this.
-    const ffmpegOptions: CreateFFmpegOptions & {mainName: string} = {
-        corePath: new URL("ffmpeg-n4-3-1-wasm-single-threaded/ffmpeg-core.js", document.location.href).href,
-        //corePath: 'static/js/ffmpeg-core.js',
-        mainName: "main",
-        log: true,
-    };
-    const ffmpeg = createFFmpeg(ffmpegOptions);
-
     const transcode = async (event: Event) => {
+        await ffmpegLoadPromise;
+
         const target = event?.target as undefined | HTMLInputElement; // TODO: Implement proper type narrowing!
         if (!target) throw new Error("Unexpected undefined.");
         const files = target.files;
         if (!files) throw new Error("Unexpected falsy.");
-        const file = files[0];
-        if (!file) throw new Error("Unexpected falsy.");
-        const name = file.name;
 
-        await ffmpeg.load();
-        ffmpeg.FS("writeFile", name, await fetchFile(file));
+        for (const file of files) {
+            console.log(file.name);
+            ffmpeg.FS("writeFile", file.name, await fetchFile(file));
+        }
+
         await ffmpeg.run(
-            "-i", name,
+            "-framerate", "10",
+            "-pattern_type", "glob",
+            "-i", "*.jpg",
             "-c:v", "libx264",
-            "-crf", "35", // Very poor quality, should change it later
-            "-preset", "ultrafast"
-            ,"output.mp4"
+            "-pix_fmt", "yuv420p",
+            "-crf", "15", // Very poor quality, should change it later
+            "-preset", "ultrafast",
+            "output.mp4",
         );
         const data = ffmpeg.FS("readFile", "output.mp4");
 
-        const video = document.getElementById("player") as undefined | HTMLVideoElement;
-        if (!video) throw new Error("Unexpected falsy.");
-        video.src = URL.createObjectURL(new Blob([data.buffer], {type: "video/mp4"}));
+        videoElem.src = URL.createObjectURL(new Blob([data.buffer], {type: "video/mp4"}));
     }
-    document.getElementById("uploader")!.addEventListener("change", transcode);
+    uploaderElem.addEventListener("change", transcode);
 }
 
-initialRender();
 run();
 

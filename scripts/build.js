@@ -47,17 +47,23 @@ console.log("");
 console.log(`buildOutputPath = ${buildOutputPath}`);
 console.log();
 
+
 /*** Build ***/
 
 let exitCode = 0;
+
+async function compileWorkspace(workspaceName, outputRelPath) {
+    const output3dLsystemsExplorer = resolve(buildOutputPath, outputRelPath);
+    exitCode ||= await execute(`yarn workspace ${workspaceName} build -o ${output3dLsystemsExplorer}`);
+}
+
 
 await execute(`rm -r ${buildOutputPath}`);
 exitCode ||= await execute(`mkdir ${buildOutputPath}`);
 exitCode ||= await execute(`cp -r ${tclContentsPath} ${buildOutputPath}`);
 
-const output3dLsystemsExplorer = resolve(buildOutputPath, "3d-lsystems-explorer");
-
-exitCode ||= await execute(`yarn workspace 3d-lsystems-explorer build -o ${output3dLsystemsExplorer}`);
+await compileWorkspace("3d-lsystems-explorer", "3d-lsystems-explorer");
+await compileWorkspace("images-to-video", "images-to-video");
 
 console.log();
 console.log(`Returning with exit code: ${exitCode}`);

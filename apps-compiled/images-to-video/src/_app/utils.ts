@@ -1,3 +1,8 @@
+export function throwIfNull<T>(obj: T | null): T {
+    if (obj === null) throw new Error("Unexpected null.");
+    return obj;
+}
+
 export const txt = document.createTextNode.bind(document);
 
 export function element(tagName: string, attributes: {[k: string]: any;} = {}) {

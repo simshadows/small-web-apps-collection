@@ -36,9 +36,7 @@
 <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <h1>Images-to-Video with WebAssembly</h1>
-    <p>This was a really quick-and-dirty experimental/prototype project, not necessarily intended for general-use. It's meant to demonstrate the feasibility of using an existing ffmpeg WebAssembly library on npm for converting a series of image files into a single video file.</p>
-    <p>Upload multiple ".jpg" files below. They will automatically be converted into a video, which should display shortly below. Depending on the browser you use, you should be able to download the file using the video player.</p>
-    <p>This app *ONLY* accepts ".jpg" files. Everything else is ignored.</p>
+    <p>Upload multiple image files below. They will automatically be converted into a video, which should display shortly below. Depending on the browser you use, you should be able to download the file using the video player.</p>
     <p>NOTE: There is a bug in either ffmpeg or the ffmpeg library which prevents us from receiving accurate progress data. If it says it's done but no video has appeared and no error has occurred, you may have to wait a little bit longer for the video to show up.</p>
     <hr>
     <div id="app-container">

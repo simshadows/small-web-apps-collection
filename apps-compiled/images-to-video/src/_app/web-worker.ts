@@ -4,6 +4,8 @@ import {
     fetchFile,
 } from "@ffmpeg/ffmpeg";
 
+const reExtension = /\.[a-z0-9]+$/;
+
 self.onmessage = async ({data: {files, href, options}}) => {
     console.log("Worker starting.");
     console.log(`Framerate: ${options.framerate}`);
@@ -21,9 +23,16 @@ self.onmessage = async ({data: {files, href, options}}) => {
     try {
         await ffmpeg.load();
 
+        // Fetch files while also counting extensions
+        let extensions: Map<string, number> = new Map();
         for (const file of files) {
+            const extension: string | undefined = file.name.toLowerCase().match(reExtension)?.[0];
+            if (extension) {
+                extensions.set(extension, (extensions.get(extension) || 0) + 1);
+            }
             ffmpeg.FS("writeFile", file.name, await fetchFile(file));
         }
+        const dominantExtension: string = [...extensions.entries()].sort((a,b) => b[1] - a[1])?.[0]?.[0] || ".jpg";
 
         ffmpeg.setProgress(({ratio}) => {
             self.postMessage({
@@ -35,7 +44,7 @@ self.onmessage = async ({data: {files, href, options}}) => {
         await ffmpeg.run(
             "-framerate", String(options.framerate),
             "-pattern_type", "glob",
-            "-i", "*.jpg",
+            "-i", `*${dominantExtension}`,
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-crf", String(options.crf),

@@ -13,16 +13,34 @@ const qualityInputElem: HTMLSelectElement = throwIfNull(document.querySelector("
 const x264PresetInputElem: HTMLSelectElement = throwIfNull(document.querySelector("#x264-preset select"));
 
 const videoElem: HTMLVideoElement = throwIfNull(document.querySelector("#player"));
-const progressBarElem: HTMLProgressElement = throwIfNull(document.querySelector("#progress-bar"));
 const uploaderElem: HTMLInputElement = throwIfNull(document.querySelector("#uploader"));
 
-const worker = new Worker(new URL('./web-worker.ts', import.meta.url));
+const progressBarElem: HTMLProgressElement = throwIfNull(document.querySelector("#progress progress"));
+const progressMessageElem: HTMLLabelElement = throwIfNull(document.querySelector("#progress label"));
 
-async function startEncode(event: Event) {
-    const target = event?.target as undefined | HTMLInputElement; // TODO: Implement proper type narrowing!
-    if (!target) throw new Error("Unexpected undefined.");
-    const files = target.files;
-    if (!files) throw new Error("Unexpected falsy.");
+let worker: null | Worker = null;
+
+function createWorker(): Worker {
+    const newWorker = new Worker(new URL('./web-worker.ts', import.meta.url));
+    newWorker.onmessage = ({data: {videoData, progress}}) => {
+        console.log("Received data back from worker.");
+        if (videoData) {
+            videoElem.src = URL.createObjectURL(new Blob([videoData.buffer], {type: "video/mp4"}));
+        }
+        setProgress(progress, videoData);
+    };
+    return newWorker;
+}
+
+function setProgress(v: number, done: boolean): void {
+    progressBarElem.value = v * 100;
+    progressMessageElem.innerHTML = done ? "Done!" : `Running... ${Math.trunc(v * 100)}%`;
+}
+
+async function startEncode() {
+    setProgress(0, false);
+    worker?.terminate();
+    worker = createWorker();
 
     const framerate: number = Math.min(600, Math.max(1, useDefaultIfNaN(parseInt(framerateInputElem.value), 10)));
     const crf: number = (()=>{
@@ -37,7 +55,7 @@ async function startEncode(event: Event) {
 
     console.log("Sending data to worker.");
     worker.postMessage({
-        files: files,
+        files: uploaderElem.files,
         href: document.location.href,
         options: {
             framerate,
@@ -46,14 +64,6 @@ async function startEncode(event: Event) {
         },
     });
 }
-
-worker.onmessage = ({data: {videoData, progress}}) => {
-    console.log("Received data back from worker.");
-    if (videoData) {
-        videoElem.src = URL.createObjectURL(new Blob([videoData.buffer], {type: "video/mp4"}));
-    }
-    progressBarElem.value = progress * 100;
-};
 
 uploaderElem.addEventListener("change", startEncode);
 

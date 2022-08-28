@@ -43,6 +43,7 @@ self.onmessage = async ({data: {files, href, options}}) => {
             "-preset", options.x264Preset,
             "output.mp4",
         );
+        console.log("Worker has finished encoding.");
         self.postMessage({
             videoData: ffmpeg.FS("readFile", "output.mp4"),
             progress: 1,

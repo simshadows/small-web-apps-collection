@@ -13,19 +13,12 @@ import {
 
 import "./index.css";
 
-import {element} from "./utils";
+//import {element} from "./utils";
 
-const bodyElem = document.querySelector("body")!;
+//const bodyElem = document.querySelector("body")!;
 
 function initialRender() {
-    bodyElem.appendChild(element("video", {
-        id:       "player",
-        controls: true,
-    }));
-    bodyElem.appendChild(element("input", {
-        id:   "uploader",
-        type: "file",
-    }));
+    // Nothing for now
 }
 
 function run() {
@@ -49,7 +42,13 @@ function run() {
 
         await ffmpeg.load();
         ffmpeg.FS("writeFile", name, await fetchFile(file));
-        await ffmpeg.run("-i", name,  "output.mp4");
+        await ffmpeg.run(
+            "-i", name,
+            "-c:v", "libx264",
+            "-crf", "35", // Very poor quality, should change it later
+            "-preset", "ultrafast"
+            ,"output.mp4"
+        );
         const data = ffmpeg.FS("readFile", "output.mp4");
 
         const video = document.getElementById("player") as undefined | HTMLVideoElement;

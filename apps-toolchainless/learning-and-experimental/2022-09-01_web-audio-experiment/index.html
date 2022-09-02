@@ -14,6 +14,7 @@ See the root page for a link to the source code.
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1">
     <link rel="stylesheet" type="text/css" href="./index.css">
+    <link rel="stylesheet" type="text/css" href="/common-dependencies/normalize-css-v8-0-11/normalize.css">
     <script defer src="./index.js" type="module"></script>
 </head>
 
@@ -28,9 +29,24 @@ See the root page for a link to the source code.
     <button id="start-button" style="display: none;">Start Analysis</button>
 </div>
 <div id="app">
-    <div id="live-visualizer" style="display: initial;">
-        <h2>Live Visualization</h2>
-        <canvas width="512" height="256"></canvas>
+    <div id="live-player">
+        <h2>Live Player</h2>
+        <div>
+            <!-- <input type="button" id="live-player-start" value="Start" /> -->
+            <input type="button" id="live-player-stop" value="Stop" />
+        </div>
+        <p>
+            <b>Context Time:</b>
+                <span id="live-player-context-time">uninitialized</span><br>
+            <b>Performance Time:</b>
+                <span id="live-player-performance-time">uninitialized</span><br>
+            <b>Loop Enabled/Start/End:</b>
+                <span id="live-player-loop-enabled">uninitialized</span>
+                / <span id="live-player-loop-start">...</span>
+                / <span id="live-player-loop-end">...</span>
+        </p>
+        <!-- <input id="live-player-time-slider" type="range" min="0" max="1" step="0.005" value="0" /> -->
+        <canvas id="live-player-simple-line-vis" width="512" height="256" />
     </div>
 </div>
 

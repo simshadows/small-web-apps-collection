@@ -16,3 +16,9 @@ export function element(tagName, attributes={}) {
     return elem;
 }
 
+export function secondsToHumanReadable(totalSeconds) {
+    const min = Math.floor(totalSeconds / 60);
+    const sec = Math.floor(totalSeconds % 60);
+    return `${min}:${String(sec).padStart(2, "0")}`;
+}
+

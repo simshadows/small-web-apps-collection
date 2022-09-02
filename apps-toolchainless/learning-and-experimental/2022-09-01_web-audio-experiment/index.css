@@ -7,6 +7,9 @@
 * {
     box-sizing: border-box;
 }
+body {
+    padding: 0.5em;
+}
 
 #bootstrap-box {
     display: flex;
@@ -19,7 +22,16 @@
     width: 8em;
 }
 
-#live-visualizer canvas {
+#live-player {
+    display: flex;
+    flex-direction: column;
+}
+#live-player input[type="range"] {
+    width: 30em;
+}
+#live-player canvas {
     background-color: black;
+    height: 15em;
+    width: 30em;
 }
 

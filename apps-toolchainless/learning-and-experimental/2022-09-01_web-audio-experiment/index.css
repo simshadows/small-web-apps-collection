@@ -1,0 +1,25 @@
+/*
+ * Filename: index.css
+ * Author:   simshadows <contact@simshadows.com>
+ * License:  Creative Commons Zero v1.0 Universal (CC0-1.0)
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+#bootstrap-box {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1em;
+
+    margin-bottom: 1.5em;
+}
+#start-button {
+    width: 8em;
+}
+
+#live-visualizer canvas {
+    background-color: black;
+}
+

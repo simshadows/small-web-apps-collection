@@ -55,5 +55,5 @@ $ python3 -m http.server --directory ./apps-toolchainless
 
 ## License
 
-All original source code is licensed under the [*GNU Affero General Public License v3.0 (AGPLv3)*](https://www.gnu.org/licenses/agpl-3.0.en.html).
+Unless stated otherwise, all original source code is licensed under the [*GNU Affero General Public License v3.0 (AGPLv3)*](https://www.gnu.org/licenses/agpl-3.0.en.html).
 

@@ -20,6 +20,7 @@ interface Props {
     keywords: string[];
     noRightSidebar?: boolean;
     fullWidthLayout?: boolean;
+    suppressDefaultViewport?: boolean;
 }
 
 const {
@@ -30,10 +31,16 @@ const {
     keywords,
     noRightSidebar,
     fullWidthLayout,
+    suppressDefaultViewport,
 } = Astro.props;
 ---
 
-<Layout title={title} description={description} keywords={keywords}>
+<Layout
+    title={title}
+    description={description}
+    keywords={keywords}
+    {...(suppressDefaultViewport ? {suppressDefaultViewport} : {})}
+>
     <slot name="head" slot="head"/>
     <div id="masthead" class="no-print"><div id="masthead__content" class="content-column">
         <div id="masthead__title-container">

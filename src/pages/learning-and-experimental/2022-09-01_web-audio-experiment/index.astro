@@ -1,0 +1,48 @@
+---
+import Layout from "@layouts/BaseLayout.astro";
+import "./_internal/index.css";
+---
+
+<Layout
+    title="Web Audio API Experimentation"
+    description="TODO"
+    keywords={["TODO"]}
+    suppressDefaultViewport
+>
+    <Fragment slot="head">
+        <meta name="viewport" content="initial-scale=1">
+    </Fragment>
+
+    <h1>Web Audio API Experimentation</h1>
+    <div id="bootstrap-box">
+        <input id="file-uploader" type="file" />
+        <button id="start-button" style="display: none;">Start Analysis</button>
+    </div>
+    <div id="app">
+        <div id="live-player">
+            <h2>Live Player</h2>
+            <div>
+                <!-- <input type="button" id="live-player-start" value="Start" /> -->
+                <input type="button" id="live-player-stop" value="Stop" />
+            </div>
+            <p>
+                <b>Context Time:</b>
+                    <span id="live-player-context-time">uninitialized</span><br>
+                <b>Performance Time:</b>
+                    <span id="live-player-performance-time">uninitialized</span><br>
+                <b>Loop Enabled/Start/End:</b>
+                    <span id="live-player-loop-enabled">uninitialized</span>
+                    / <span id="live-player-loop-start">...</span>
+                    / <span id="live-player-loop-end">...</span>
+            </p>
+            <!-- <input id="live-player-time-slider" type="range" min="0" max="1" step="0.005" value="0" /> -->
+            <canvas id="live-player-simple-line-vis" width="512" height="256" />
+        </div>
+    </div>
+
+    <script>
+        import "./_internal/index.js";
+    </script>
+
+</Layout>
+
